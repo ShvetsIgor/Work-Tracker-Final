@@ -114,6 +114,15 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
 }
 
+/* Fix date/time input width on iOS */
+input[type="date"],
+input[type="time"] {
+  min-width: 0;
+  max-width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
 /* RTL Support */
 [dir="rtl"] {
   text-align: right;

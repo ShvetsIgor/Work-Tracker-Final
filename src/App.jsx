@@ -20,6 +20,11 @@ const App = () => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [settings.theme]);
   
+  // Scroll to top when tab changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [activeTab]);
+  
   // Show loading while checking auth
   if (authLoading) {
     return <FullScreenLoader />;

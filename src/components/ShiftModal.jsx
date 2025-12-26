@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Car, Banknote, CreditCard, Gift, Receipt, Package, DollarSign, Clock } from 'lucide-react';
+import { Plus, Trash2, Car, Banknote, CreditCard, Gift, Receipt, Package, Clock } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import Modal from '@/components/ui/Modal';
 import { Button, Input, Select, Toggle, Card } from '@/components/ui';
@@ -16,11 +16,13 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
   
   // Form state
   const [date, setDate] = useState(getEffectiveDate());
+  const [timeMode, setTimeMode] = useState('manual'); // 'manual' or 'range'
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
   const [hours, setHours] = useState('');
   const [minutes, setMinutes] = useState('');
   const [hasBreak, setHasBreak] = useState(false);
-  const [breakStart, setBreakStart] = useState('');
-  const [breakEnd, setBreakEnd] = useState('');
+  const [breakMinutes, setBreakMinutes] = useState('');
   
   // Piece-work fields
   const [ordersCount, setOrdersCount] = useState('');
@@ -48,15 +50,50 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
   
   const [saving, setSaving] = useState(false);
   
+  // Calculate time from range
+  const calculateTimeFromRange = () => {
+    if (!startTime || !endTime) return { hours: 0, minutes: 0 };
+    
+    const [startH, startM] = startTime.split(':').map(Number);
+    const [endH, endM] = endTime.split(':').map(Number);
+    
+    let totalMinutes = (endH * 60 + endM) - (startH * 60 + startM);
+    
+    // Handle overnight shifts
+    if (totalMinutes < 0) {
+      totalMinutes += 24 * 60;
+    }
+    
+    // Subtract break
+    const breakMins = parseInt(breakMinutes) || 0;
+    totalMinutes = Math.max(0, totalMinutes - breakMins);
+    
+    return {
+      hours: Math.floor(totalMinutes / 60),
+      minutes: totalMinutes % 60
+    };
+  };
+  
+  // Get total minutes based on mode
+  const getTotalMinutes = () => {
+    if (timeMode === 'range') {
+      const { hours: h, minutes: m } = calculateTimeFromRange();
+      return h * 60 + m;
+    }
+    return (parseInt(hours) || 0) * 60 + (parseInt(minutes) || 0);
+  };
+  
   // Initialize form with shift data if editing
   useEffect(() => {
     if (shift) {
       setDate(shift.date || getEffectiveDate());
+      setTimeMode(shift.timeMode || 'manual');
+      setStartTime(shift.startTime || '');
+      setEndTime(shift.endTime || '');
       setHours(shift.hours?.toString() || '');
       setMinutes(shift.minutes?.toString() || '');
       setHasBreak(shift.hasBreak || false);
-      setBreakStart(shift.breakStart || '');
-      setBreakEnd(shift.breakEnd || '');
+      setBreakMinutes(shift.breakMinutes?.toString() || '');
       setOrdersCount(shift.ordersCount?.toString() || '');
       setEarnedAmount(shift.earnedAmount?.toString() || '');
       setMileageMode(shift.mileageMode || 'manual');
@@ -75,11 +112,13 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
   
   const resetForm = () => {
     setDate(getEffectiveDate());
+    setTimeMode('manual');
+    setStartTime('');
+    setEndTime('');
     setHours('');
     setMinutes('');
     setHasBreak(false);
-    setBreakStart('');
-    setBreakEnd('');
+    setBreakMinutes('');
     setOrdersCount('');
     setEarnedAmount('');
     setMileageMode('manual');
@@ -122,14 +161,19 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
   const handleSave = async () => {
     setSaving(true);
     
+    const totalMinutes = getTotalMinutes();
+    const calculatedTime = timeMode === 'range' ? calculateTimeFromRange() : null;
+    
     const shiftData = {
       date,
-      hours: parseInt(hours) || 0,
-      minutes: parseInt(minutes) || 0,
-      totalMinutes: (parseInt(hours) || 0) * 60 + (parseInt(minutes) || 0),
+      timeMode,
+      startTime,
+      endTime,
+      hours: timeMode === 'range' ? calculatedTime.hours : (parseInt(hours) || 0),
+      minutes: timeMode === 'range' ? calculatedTime.minutes : (parseInt(minutes) || 0),
+      totalMinutes,
       hasBreak,
-      breakStart,
-      breakEnd,
+      breakMinutes: parseInt(breakMinutes) || 0,
       ordersCount: parseInt(ordersCount) || 0,
       earnedAmount: parseFloat(earnedAmount) || 0,
       mileageMode,
@@ -165,6 +209,13 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
     label: `${type.icon} ${t[type.id] || type.id}`
   }));
   
+  // Format calculated time for display
+  const displayCalculatedTime = () => {
+    if (timeMode !== 'range' || !startTime || !endTime) return null;
+    const { hours: h, minutes: m } = calculateTimeFromRange();
+    return `${h}${t.hoursShort || 'ч'} ${m}${t.minutesShort || 'м'}`;
+  };
+  
   return (
     <Modal
       isOpen={isOpen}
@@ -183,40 +234,116 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
     >
       <div className="space-y-6">
         {/* Date */}
-        <Input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          label={t.date}
-        />
+        <div>
+          <label className="block theme-text-muted text-sm mb-2">{t.date}</label>
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="w-full theme-bg-input rounded-xl px-4 py-3 theme-text-primary focus:outline-none focus:ring-2 focus:ring-purple-500 box-border"
+          />
+        </div>
         
         {/* Work Time */}
-        <div>
-          <label className="block theme-text-muted text-sm mb-2 flex items-center gap-2">
-            <Clock className="w-4 h-4" />
-            {t.workTime}
-          </label>
-          <div className="grid grid-cols-2 gap-3">
-            <Input
-              type="number"
-              value={hours}
-              onChange={(e) => setHours(e.target.value)}
-              placeholder="0"
-              label={t.hours}
-              min="0"
-              max="24"
-            />
-            <Input
-              type="number"
-              value={minutes}
-              onChange={(e) => setMinutes(e.target.value)}
-              placeholder="0"
-              label={t.minutes}
-              min="0"
-              max="59"
-            />
+        <Card className={`p-4 ${isDark ? 'bg-slate-700/30' : 'bg-slate-100/80'}`}>
+          <div className="flex items-center gap-2 mb-4">
+            <Clock className="w-5 h-5 text-blue-400" />
+            <span className="theme-text-primary font-medium">{t.workTime}</span>
           </div>
-        </div>
+          
+          {/* Time mode toggle */}
+          <div className="flex gap-2 mb-4">
+            <Button
+              variant={timeMode === 'manual' ? 'primary' : 'secondary'}
+              size="sm"
+              onClick={() => setTimeMode('manual')}
+            >
+              {t.manualTime || 'Вручную'}
+            </Button>
+            <Button
+              variant={timeMode === 'range' ? 'primary' : 'secondary'}
+              size="sm"
+              onClick={() => setTimeMode('range')}
+            >
+              {t.timeRange || 'По времени'}
+            </Button>
+          </div>
+          
+          {timeMode === 'manual' ? (
+            <div className="grid grid-cols-2 gap-3">
+              <Input
+                type="number"
+                value={hours}
+                onChange={(e) => setHours(e.target.value)}
+                placeholder="0"
+                label={t.hours}
+                min="0"
+                max="24"
+              />
+              <Input
+                type="number"
+                value={minutes}
+                onChange={(e) => setMinutes(e.target.value)}
+                placeholder="0"
+                label={t.minutes}
+                min="0"
+                max="59"
+              />
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                <div>
+                  <label className="block theme-text-muted text-sm mb-2">{t.startTime || 'Начало'}</label>
+                  <input
+                    type="time"
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
+                    className="w-full theme-bg-input rounded-xl px-4 py-3 theme-text-primary focus:outline-none focus:ring-2 focus:ring-purple-500 box-border"
+                  />
+                </div>
+                <div>
+                  <label className="block theme-text-muted text-sm mb-2">{t.endTime || 'Конец'}</label>
+                  <input
+                    type="time"
+                    value={endTime}
+                    onChange={(e) => setEndTime(e.target.value)}
+                    className="w-full theme-bg-input rounded-xl px-4 py-3 theme-text-primary focus:outline-none focus:ring-2 focus:ring-purple-500 box-border"
+                  />
+                </div>
+              </div>
+              
+              {/* Break */}
+              <div className="mb-3">
+                <Toggle
+                  checked={hasBreak}
+                  onChange={setHasBreak}
+                  label={t.addBreak}
+                />
+                {hasBreak && (
+                  <div className="mt-2">
+                    <Input
+                      type="number"
+                      value={breakMinutes}
+                      onChange={(e) => setBreakMinutes(e.target.value)}
+                      placeholder="30"
+                      label={t.breakDuration || 'Перерыв (мин)'}
+                      min="0"
+                    />
+                  </div>
+                )}
+              </div>
+              
+              {/* Show calculated time */}
+              {displayCalculatedTime() && (
+                <div className="text-center p-2 rounded-lg bg-purple-500/20">
+                  <span className="theme-text-muted">{t.totalTime || 'Итого'}: </span>
+                  <span className="text-purple-400 font-bold">{displayCalculatedTime()}</span>
+                </div>
+              )}
+            </>
+          )}
+        </Card>
         
         {/* Piece-work specific fields */}
         {!isHourly && (
@@ -246,32 +373,6 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
             </div>
           </Card>
         )}
-        
-        {/* Break */}
-        <div>
-          <Toggle
-            checked={hasBreak}
-            onChange={setHasBreak}
-            label={t.addBreak}
-          />
-          
-          {hasBreak && (
-            <div className="grid grid-cols-2 gap-3 mt-3">
-              <Input
-                type="time"
-                value={breakStart}
-                onChange={(e) => setBreakStart(e.target.value)}
-                label={t.breakStart}
-              />
-              <Input
-                type="time"
-                value={breakEnd}
-                onChange={(e) => setBreakEnd(e.target.value)}
-                label={t.breakEnd}
-              />
-            </div>
-          )}
-        </div>
         
         {/* Mileage */}
         {enabledFields.mileage && (
@@ -390,7 +491,7 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
             {expenses.length > 0 && (
               <div className="space-y-2 mb-4">
                 {expenses.map((expense) => {
-                  const typeInfo = expenseTypes.find(t => t.id === expense.type);
+                  const typeInfo = expenseTypes.find(et => et.id === expense.type);
                   return (
                     <div 
                       key={expense.id} 

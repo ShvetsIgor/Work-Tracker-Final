@@ -1,11 +1,16 @@
 /**
  * Calculate earnings based on work time and settings
  * Supports overtime calculation according to Israeli labor law:
+ * Regular days (Sun-Thu):
  * - First 8 hours: 100% rate
  * - Next 2 hours (8-10): 125% rate
  * - After 10 hours: 150% rate
+ * Friday (short day):
+ * - First 4 hours: 100% rate
+ * - Next 2 hours (4-6): 125% rate
+ * - After 6 hours: 150% rate
  */
-export const calculateEarnings = (totalMinutes, settings) => {
+export const calculateEarnings = (totalMinutes, settings, shiftDate = null) => {
   const { hourlyRate, enableOvertime, unpaidLunch, lunchDuration } = settings;
   
   if (!hourlyRate || hourlyRate <= 0) return 0;
@@ -24,18 +29,34 @@ export const calculateEarnings = (totalMinutes, settings) => {
     return hours * hourlyRate;
   }
   
+  // Check if it's Friday (day 5)
+  let isFriday = false;
+  if (shiftDate) {
+    const date = new Date(shiftDate);
+    isFriday = date.getDay() === 5;
+  }
+  
   // Calculate with overtime rates
   let earnings = 0;
   
-  if (hours <= 8) {
-    // Regular hours only
-    earnings = hours * hourlyRate;
-  } else if (hours <= 10) {
-    // Regular + first overtime tier (125%)
-    earnings = 8 * hourlyRate + (hours - 8) * hourlyRate * 1.25;
+  if (isFriday) {
+    // Friday: 4h regular, 2h 125%, rest 150%
+    if (hours <= 4) {
+      earnings = hours * hourlyRate;
+    } else if (hours <= 6) {
+      earnings = 4 * hourlyRate + (hours - 4) * hourlyRate * 1.25;
+    } else {
+      earnings = 4 * hourlyRate + 2 * hourlyRate * 1.25 + (hours - 6) * hourlyRate * 1.5;
+    }
   } else {
-    // Regular + both overtime tiers
-    earnings = 8 * hourlyRate + 2 * hourlyRate * 1.25 + (hours - 10) * hourlyRate * 1.5;
+    // Regular days: 8h regular, 2h 125%, rest 150%
+    if (hours <= 8) {
+      earnings = hours * hourlyRate;
+    } else if (hours <= 10) {
+      earnings = 8 * hourlyRate + (hours - 8) * hourlyRate * 1.25;
+    } else {
+      earnings = 8 * hourlyRate + 2 * hourlyRate * 1.25 + (hours - 10) * hourlyRate * 1.5;
+    }
   }
   
   return earnings;
@@ -66,7 +87,7 @@ export const calculateShiftNetIncome = (shift, settings) => {
   
   // For piece-work, use earnedAmount instead of calculated earnings
   const earnings = isHourly 
-    ? calculateEarnings(shift.totalMinutes, settings)
+    ? calculateEarnings(shift.totalMinutes, settings, shift.date)
     : (shift.earnedAmount || 0);
   
   const tipsCash = shift.tipsCash || 0;
@@ -148,7 +169,7 @@ export const calculateStatistics = (shifts, settings) => {
     
     // Earnings (hourly or piece-work)
     if (isHourly) {
-      stats.totalEarnings += calculateEarnings(shift.totalMinutes, settings);
+      stats.totalEarnings += calculateEarnings(shift.totalMinutes, settings, shift.date);
     } else {
       stats.totalEarnings += shift.earnedAmount || 0;
     }

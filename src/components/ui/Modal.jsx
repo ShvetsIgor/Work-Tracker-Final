@@ -60,6 +60,7 @@ const Modal = ({
           rounded-2xl border
           max-h-[85vh] flex flex-col
           animate-slide-up
+          overflow-hidden
         `}
       >
         {/* Header */}

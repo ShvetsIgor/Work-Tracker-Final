@@ -29,17 +29,24 @@ export const translations = {
     workTime: 'Время работы',
     hours: 'Часы',
     minutes: 'Минуты',
-    addBreak: 'Добавить перерыв',
+    hoursShort: 'ч',
+    minutesShort: 'м',
+    manualTime: 'Вручную',
+    timeRange: 'По времени',
+    startTime: 'Начало',
+    endTime: 'Конец',
+    totalTime: 'Итого',
+    addBreak: 'Перерыв',
     breakStart: 'Начало перерыва',
     breakEnd: 'Конец перерыва',
-    breakDuration: 'Длительность перерыва',
+    breakDuration: 'Перерыв (мин)',
     
     // Mileage
     mileage: 'Пробег (км)',
     startOdometer: 'Одометр в начале',
     endOdometer: 'Одометр в конце',
     totalMileage: 'Итого пробег',
-    manualMileage: 'Ввести вручную',
+    manualMileage: 'Вручную',
     odometerMode: 'По одометру',
     
     // Tips
@@ -148,8 +155,6 @@ export const translations = {
     
     // Time
     yesterday: 'Вчера',
-    hoursShort: 'ч',
-    minutesShort: 'мин',
     km: 'км',
   },
   
@@ -183,17 +188,24 @@ export const translations = {
     workTime: 'Work Time',
     hours: 'Hours',
     minutes: 'Minutes',
-    addBreak: 'Add Break',
+    hoursShort: 'h',
+    minutesShort: 'm',
+    manualTime: 'Manual',
+    timeRange: 'By Time',
+    startTime: 'Start',
+    endTime: 'End',
+    totalTime: 'Total',
+    addBreak: 'Break',
     breakStart: 'Break Start',
     breakEnd: 'Break End',
-    breakDuration: 'Break Duration',
+    breakDuration: 'Break (min)',
     
     // Mileage
     mileage: 'Mileage (km)',
     startOdometer: 'Start Odometer',
     endOdometer: 'End Odometer',
     totalMileage: 'Total Mileage',
-    manualMileage: 'Enter Manually',
+    manualMileage: 'Manual',
     odometerMode: 'By Odometer',
     
     // Tips
@@ -302,8 +314,6 @@ export const translations = {
     
     // Time
     yesterday: 'Yesterday',
-    hoursShort: 'h',
-    minutesShort: 'min',
     km: 'km',
   },
   
@@ -337,17 +347,24 @@ export const translations = {
     workTime: 'שעות עבודה',
     hours: 'שעות',
     minutes: 'דקות',
-    addBreak: 'הוסף הפסקה',
+    hoursShort: 'ש',
+    minutesShort: 'ד',
+    manualTime: 'ידני',
+    timeRange: 'לפי שעות',
+    startTime: 'התחלה',
+    endTime: 'סיום',
+    totalTime: 'סה"כ',
+    addBreak: 'הפסקה',
     breakStart: 'תחילת הפסקה',
     breakEnd: 'סוף הפסקה',
-    breakDuration: 'משך ההפסקה',
+    breakDuration: 'הפסקה (דקות)',
     
     // Mileage
     mileage: 'קילומטראז\'',
     startOdometer: 'מד מרחק התחלה',
     endOdometer: 'מד מרחק סיום',
     totalMileage: 'סה"כ קילומטרים',
-    manualMileage: 'הזן ידנית',
+    manualMileage: 'ידני',
     odometerMode: 'לפי מד מרחק',
     
     // Tips
@@ -456,8 +473,6 @@ export const translations = {
     
     // Time
     yesterday: 'אתמול',
-    hoursShort: 'ש\'',
-    minutesShort: 'ד\'',
     km: 'ק"מ',
   }
 };
