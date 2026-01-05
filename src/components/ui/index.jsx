@@ -68,6 +68,9 @@ export const Input = ({
     }
   };
   
+  // Add inputMode for numeric keyboard on mobile
+  const inputMode = props.type === 'number' ? 'decimal' : undefined;
+  
   return (
     <div className={containerClassName}>
       {label && (
@@ -90,6 +93,7 @@ export const Input = ({
             ${className}
           `}
           onWheel={handleWheel}
+          inputMode={inputMode}
           {...props}
         />
       </div>
@@ -218,13 +222,36 @@ export const Loader = ({ size = 'md', className = '' }) => {
   );
 };
 
-// Full Screen Loader
+// Full Screen Loader - Beautiful animated loader
 export const FullScreenLoader = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
       <div className="text-center">
-        <Loader size="lg" />
-        <p className="mt-4 text-slate-400">Loading...</p>
+        {/* Animated clock icon */}
+        <div className="relative w-24 h-24 mx-auto mb-6">
+          {/* Outer ring */}
+          <div className="absolute inset-0 rounded-full border-4 border-purple-500/30"></div>
+          {/* Spinning ring */}
+          <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-purple-500 animate-spin"></div>
+          {/* Inner circle with icon */}
+          <div className="absolute inset-3 rounded-full bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center">
+            <svg className="w-10 h-10 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <circle cx="12" cy="12" r="9" strokeWidth="2" />
+              <path strokeLinecap="round" strokeWidth="2" d="M12 6v6l4 2" />
+            </svg>
+          </div>
+          {/* Pulsing dots */}
+          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+            <div className="w-2 h-2 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: '0ms' }}></div>
+            <div className="w-2 h-2 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: '150ms' }}></div>
+            <div className="w-2 h-2 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: '300ms' }}></div>
+          </div>
+        </div>
+        {/* App name */}
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent mb-2">
+          Shifts
+        </h1>
+        <p className="text-slate-500 text-sm">Загрузка...</p>
       </div>
     </div>
   );

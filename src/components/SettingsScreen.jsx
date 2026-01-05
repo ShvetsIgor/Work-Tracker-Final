@@ -1,5 +1,5 @@
 import React from 'react';
-import { Globe, Wallet, Utensils, CreditCard, Settings as SettingsIcon, Sun, Moon, Briefcase } from 'lucide-react';
+import { Globe, Wallet, Utensils, CreditCard, Settings as SettingsIcon, Sun, Moon, Briefcase, BarChart3 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { Card, Input, Select, Toggle } from '@/components/ui';
 import { currencies } from '@/config/currencies';
@@ -24,6 +24,15 @@ const SettingsScreen = () => {
     updateSettings({
       enabledFields: {
         ...settings.enabledFields,
+        [field]: value
+      }
+    });
+  };
+  
+  const handleStatisticsFieldToggle = (field, value) => {
+    updateSettings({
+      statisticsFields: {
+        ...(settings.statisticsFields || {}),
         [field]: value
       }
     });
@@ -148,6 +157,17 @@ const SettingsScreen = () => {
                 description={t.overtimeInfo}
               />
             </SettingRow>
+            
+            {settings.enableOvertime && (
+              <SettingRow>
+                <Toggle
+                  checked={settings.fridayOvertime}
+                  onChange={(v) => handleChange('fridayOvertime', v)}
+                  label={t.fridayOvertime}
+                  description={t.fridayOvertimeInfo}
+                />
+              </SettingRow>
+            )}
           </>
         )}
         
@@ -241,6 +261,94 @@ const SettingsScreen = () => {
             checked={settings.enabledFields.bonus}
             onChange={(v) => handleFieldToggle('bonus', v)}
             label={t.fieldBonus}
+          />
+        </SettingRow>
+      </Card>
+      
+      {/* Statistics Fields */}
+      <Card className="p-4 mb-4">
+        <h3 className="theme-text-primary font-semibold mb-4 flex items-center gap-2">
+          <BarChart3 className="w-5 h-5 text-purple-400" />
+          {t.statisticsFields}
+        </h3>
+        
+        <SettingRow>
+          <Toggle
+            checked={settings.statisticsFields?.totalHours !== false}
+            onChange={(v) => handleStatisticsFieldToggle('totalHours', v)}
+            label={t.fieldTotalHours}
+          />
+        </SettingRow>
+        
+        <SettingRow>
+          <Toggle
+            checked={settings.statisticsFields?.totalEarnings !== false}
+            onChange={(v) => handleStatisticsFieldToggle('totalEarnings', v)}
+            label={t.fieldTotalEarnings}
+          />
+        </SettingRow>
+        
+        <SettingRow>
+          <Toggle
+            checked={settings.statisticsFields?.avgPerHour !== false}
+            onChange={(v) => handleStatisticsFieldToggle('avgPerHour', v)}
+            label={t.fieldAvgPerHour}
+          />
+        </SettingRow>
+        
+        <SettingRow>
+          <Toggle
+            checked={settings.statisticsFields?.tipsCash !== false}
+            onChange={(v) => handleStatisticsFieldToggle('tipsCash', v)}
+            label={t.fieldTipsCash}
+          />
+        </SettingRow>
+        
+        <SettingRow>
+          <Toggle
+            checked={settings.statisticsFields?.tipsCard !== false}
+            onChange={(v) => handleStatisticsFieldToggle('tipsCard', v)}
+            label={t.fieldTipsCard}
+          />
+        </SettingRow>
+        
+        <SettingRow>
+          <Toggle
+            checked={settings.statisticsFields?.mileage !== false}
+            onChange={(v) => handleStatisticsFieldToggle('mileage', v)}
+            label={t.fieldMileage}
+          />
+        </SettingRow>
+        
+        <SettingRow>
+          <Toggle
+            checked={settings.statisticsFields?.expenses !== false}
+            onChange={(v) => handleStatisticsFieldToggle('expenses', v)}
+            label={t.fieldExpenses}
+          />
+        </SettingRow>
+        
+        <SettingRow>
+          <Toggle
+            checked={settings.statisticsFields?.avgHoursPerShift !== false}
+            onChange={(v) => handleStatisticsFieldToggle('avgHoursPerShift', v)}
+            label={t.fieldAvgHoursPerShift}
+          />
+        </SettingRow>
+        
+        <SettingRow>
+          <Toggle
+            checked={settings.statisticsFields?.avgIncomePerShift !== false}
+            onChange={(v) => handleStatisticsFieldToggle('avgIncomePerShift', v)}
+            label={t.fieldAvgIncomePerShift}
+          />
+        </SettingRow>
+        
+        <SettingRow noBorder>
+          <Toggle
+            checked={settings.statisticsFields?.expenseDetails !== false}
+            onChange={(v) => handleStatisticsFieldToggle('expenseDetails', v)}
+            label={t.fieldExpenseDetails}
           />
         </SettingRow>
       </Card>

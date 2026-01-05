@@ -4,7 +4,8 @@ import {
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword,
   signOut,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  signInWithPopup
 } from 'firebase/auth';
 import { 
   doc, 
@@ -18,7 +19,7 @@ import {
   addDoc,
   deleteDoc
 } from 'firebase/firestore';
-import { auth, db } from '@/config/firebase';
+import { auth, db, googleProvider } from '@/config/firebase';
 import { defaultSettings } from '@/config/defaults';
 import { getTranslation, isRTL } from '@/i18n/translations';
 
@@ -129,6 +130,16 @@ export const AppProvider = ({ children }) => {
         email: email,
         lastLogin: new Date().toISOString()
       }, { merge: true });
+      
+      // Re-read profile to get name (onAuthStateChanged might fire before setDoc completes)
+      const profileSnap = await getDoc(profileRef);
+      const profileData = profileSnap.exists() ? profileSnap.data() : {};
+      
+      setUser({
+        id: credential.user.uid,
+        email: credential.user.email,
+        name: profileData.name || null
+      });
     } catch (error) {
       setAuthError(getAuthErrorMessage(error.code, t));
       throw error;
@@ -158,6 +169,59 @@ export const AppProvider = ({ children }) => {
       await setDoc(settingsRef, defaultSettings);
     } catch (error) {
       setAuthError(getAuthErrorMessage(error.code, t));
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const loginWithGoogle = async () => {
+    setAuthError(null);
+    setLoading(true);
+    
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const firebaseUser = result.user;
+      
+      // Check if user profile exists
+      const profileRef = doc(db, 'users', firebaseUser.uid, 'profile', 'info');
+      let profileSnap = await getDoc(profileRef);
+      
+      if (!profileSnap.exists()) {
+        // New user - create profile
+        await setDoc(profileRef, {
+          name: firebaseUser.displayName || '',
+          email: firebaseUser.email,
+          photoURL: firebaseUser.photoURL || '',
+          createdAt: new Date().toISOString(),
+          lastLogin: new Date().toISOString()
+        });
+        
+        // Initialize settings
+        const settingsRef = doc(db, 'users', firebaseUser.uid, 'settings', 'preferences');
+        await setDoc(settingsRef, defaultSettings);
+        
+        // Re-read profile
+        profileSnap = await getDoc(profileRef);
+      } else {
+        // Existing user - update last login
+        await setDoc(profileRef, {
+          lastLogin: new Date().toISOString()
+        }, { merge: true });
+      }
+      
+      // Set user with profile data
+      const profileData = profileSnap.exists() ? profileSnap.data() : {};
+      setUser({
+        id: firebaseUser.uid,
+        email: firebaseUser.email,
+        name: profileData.name || firebaseUser.displayName || null
+      });
+    } catch (error) {
+      // Handle popup closed by user
+      if (error.code !== 'auth/popup-closed-by-user') {
+        setAuthError(getAuthErrorMessage(error.code, t));
+      }
       throw error;
     } finally {
       setLoading(false);
@@ -269,6 +333,7 @@ export const AppProvider = ({ children }) => {
     authError,
     setAuthError,
     login,
+    loginWithGoogle,
     register,
     logout,
     resetPassword,

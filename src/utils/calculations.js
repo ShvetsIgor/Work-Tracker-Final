@@ -5,13 +5,13 @@
  * - First 8 hours: 100% rate
  * - Next 2 hours (8-10): 125% rate
  * - After 10 hours: 150% rate
- * Friday (short day):
+ * Friday (short day, if fridayOvertime enabled):
  * - First 4 hours: 100% rate
  * - Next 2 hours (4-6): 125% rate
  * - After 6 hours: 150% rate
  */
 export const calculateEarnings = (totalMinutes, settings, shiftDate = null) => {
-  const { hourlyRate, enableOvertime, unpaidLunch, lunchDuration } = settings;
+  const { hourlyRate, enableOvertime, fridayOvertime, unpaidLunch, lunchDuration } = settings;
   
   if (!hourlyRate || hourlyRate <= 0) return 0;
   
@@ -29,17 +29,17 @@ export const calculateEarnings = (totalMinutes, settings, shiftDate = null) => {
     return hours * hourlyRate;
   }
   
-  // Check if it's Friday (day 5)
-  let isFriday = false;
-  if (shiftDate) {
+  // Check if it's Friday (day 5) and friday overtime is enabled
+  let useFridayRules = false;
+  if (shiftDate && fridayOvertime) {
     const date = new Date(shiftDate);
-    isFriday = date.getDay() === 5;
+    useFridayRules = date.getDay() === 5;
   }
   
   // Calculate with overtime rates
   let earnings = 0;
   
-  if (isFriday) {
+  if (useFridayRules) {
     // Friday: 4h regular, 2h 125%, rest 150%
     if (hours <= 4) {
       earnings = hours * hourlyRate;

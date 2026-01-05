@@ -2,9 +2,10 @@ export const defaultSettings = {
   language: 'ru',
   currency: 'ILS',
   theme: 'dark',
-  workType: 'hourly', // 'hourly' или 'ppienceWork'
+  workType: 'hourly', // 'hourly' или 'pieceWork'
   hourlyRate: 30,
   enableOvertime: true,
+  fridayOvertime: true,
   unpaidLunch: false,
   lunchDuration: 30,
   tipsCardPercent: 35,
@@ -14,6 +15,19 @@ export const defaultSettings = {
     tipsCard: true,
     expenses: true,
     bonus: true
+  },
+  statisticsFields: {
+    totalHours: true,
+    totalEarnings: true,
+    avgPerHour: true,
+    tipsCash: true,
+    tipsCard: true,
+    mileage: true,
+    expenses: true,
+    bonus: true,
+    avgHoursPerShift: true,
+    avgIncomePerShift: true,
+    expenseDetails: true
   }
 };
 

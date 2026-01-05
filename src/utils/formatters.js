@@ -11,7 +11,10 @@ export const formatCurrency = (amount, currencyCode = 'ILS') => {
     return `${value.toFixed(2)}`;
   }
   
-  return `${currency.symbol}${value.toFixed(2)}`;
+  // Round to whole number if no decimals needed
+  const formatted = value % 1 === 0 ? Math.round(value) : value.toFixed(2);
+  
+  return `${currency.symbol} ${formatted}`;
 };
 
 /**

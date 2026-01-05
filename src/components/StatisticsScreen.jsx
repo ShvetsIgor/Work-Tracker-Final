@@ -4,22 +4,22 @@ import {
   TrendingUp, Calendar, BarChart3, Package 
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
-import { Card, Input, EmptyState } from '@/components/ui';
+import { Card, EmptyState } from '@/components/ui';
 import { getDateRange, isDateInRange } from '@/utils/dateUtils';
 import { calculateStatistics } from '@/utils/calculations';
 import { formatCurrency, formatTime, formatTimeLabeled } from '@/utils/formatters';
 
 const StatCard = ({ icon: Icon, label, value, color = 'theme-text-primary', subValue }) => (
-  <Card className="p-4">
-    <div className="flex items-center gap-3 mb-2">
-      {Icon && <Icon className={`w-5 h-5 ${color}`} />}
-      <span className="theme-text-muted text-sm">{label}</span>
+  <Card className="p-3">
+    <div className="flex items-center gap-2 mb-1">
+      {Icon && <Icon className={`w-4 h-4 ${color}`} />}
+      <span className="theme-text-muted text-xs">{label}</span>
     </div>
-    <div className={`font-bold text-xl ${color}`}>
+    <div className={`font-bold text-lg ${color}`}>
       {value}
     </div>
     {subValue && (
-      <div className="theme-text-muted text-sm mt-1">{subValue}</div>
+      <div className="theme-text-muted text-xs mt-1">{subValue}</div>
     )}
   </Card>
 );
@@ -64,23 +64,55 @@ const ExpenseBreakdown = ({ expensesByType, currency, t, isDark }) => {
 
 const StatisticsScreen = () => {
   const { t, shifts, settings } = useApp();
-  const { enabledFields, currency } = settings;
+  const { enabledFields, currency, statisticsFields } = settings;
+  const sf = statisticsFields || {}; // Safe access
   const isHourly = settings.workType !== 'pieceWork';
   const isDark = settings.theme !== 'light';
   
-  const [period, setPeriod] = useState('thisMonth');
-  const [customFrom, setCustomFrom] = useState('');
-  const [customTo, setCustomTo] = useState('');
+  // Calculate previous FULL month (e.g., in January 2026 show December 1-31, 2025)
+  const getPrevMonthDates = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth(); // 0-indexed, so January = 0
+    
+    // Previous month
+    const prevMonth = month === 0 ? 11 : month - 1;
+    const prevYear = month === 0 ? year - 1 : year;
+    
+    // First day of previous month
+    const firstDay = new Date(prevYear, prevMonth, 1);
+    // Last day of previous month
+    const lastDay = new Date(prevYear, prevMonth + 1, 0);
+    
+    // Format as YYYY-MM-DD without timezone issues
+    const formatDate = (d) => {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    };
+    
+    return {
+      from: formatDate(firstDay),
+      to: formatDate(lastDay)
+    };
+  };
   
+  const prevMonth = getPrevMonthDates();
+  const [period, setPeriod] = useState('thisMonth');
+  const [customFrom, setCustomFrom] = useState(prevMonth.from);
+  const [customTo, setCustomTo] = useState(prevMonth.to);
+  
+  // Filter shifts based on selected period
   const filteredShifts = useMemo(() => {
     const { startDate, endDate } = getDateRange(period, customFrom, customTo);
     return shifts.filter(shift => isDateInRange(shift.date, startDate, endDate));
   }, [shifts, period, customFrom, customTo]);
   
-  const stats = useMemo(() => 
-    calculateStatistics(filteredShifts, settings),
-    [filteredShifts, settings]
-  );
+  // Calculate statistics - key includes period to force recalculation
+  const stats = useMemo(() => {
+    return calculateStatistics(filteredShifts, settings);
+  }, [filteredShifts, settings, period, customFrom, customTo]);
   
   const periodButtons = [
     { id: 'today', label: t.today },
@@ -110,7 +142,7 @@ const StatisticsScreen = () => {
             <button
               key={btn.id}
               onClick={() => setPeriod(btn.id)}
-              className={`py-2 rounded-xl text-sm font-medium transition-all ${
+              className={`py-2 px-1 rounded-xl text-xs font-medium transition-all ${
                 period === btn.id
                   ? 'bg-purple-500 text-white'
                   : isDark 
@@ -127,11 +159,21 @@ const StatisticsScreen = () => {
           <div className="flex gap-4">
             <div className="flex-1">
               <label className="block theme-text-muted text-xs mb-1">{t.from}</label>
-              <Input type="date" value={customFrom} onChange={(e) => setCustomFrom(e.target.value)} />
+              <input 
+                type="date" 
+                value={customFrom} 
+                onChange={(e) => setCustomFrom(e.target.value)}
+                className="w-full theme-bg-input rounded-xl px-3 py-2 theme-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+              />
             </div>
             <div className="flex-1">
               <label className="block theme-text-muted text-xs mb-1">{t.to}</label>
-              <Input type="date" value={customTo} onChange={(e) => setCustomTo(e.target.value)} />
+              <input 
+                type="date" 
+                value={customTo} 
+                onChange={(e) => setCustomTo(e.target.value)}
+                className="w-full theme-bg-input rounded-xl px-3 py-2 theme-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+              />
             </div>
           </div>
         )}
@@ -140,57 +182,123 @@ const StatisticsScreen = () => {
       {filteredShifts.length === 0 ? (
         <EmptyState icon={BarChart3} title={t.noData} />
       ) : (
-        <div className="space-y-4">
-          <div className="bg-gradient-to-br from-purple-500/20 to-blue-500/20 backdrop-blur border border-purple-500/30 rounded-2xl p-6">
+        <div className="space-y-4" key={`${period}-${customFrom}-${customTo}`}>
+          {/* Net income header */}
+          <div className="bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-purple-500/30 rounded-2xl p-6">
             <div className="flex items-center gap-3 mb-2">
               <TrendingUp className="w-6 h-6 text-purple-400" />
               <span className="theme-text-secondary">{t.netIncome}</span>
             </div>
-            <div className="text-4xl font-bold theme-text-primary mb-2">
+            <div className="text-4xl font-bold text-white mb-2">
               {formatCurrency(stats.netIncome, currency)}
             </div>
             <div className="theme-text-muted text-sm">
-              {stats.shiftsCount} {t.shiftsCount.toLowerCase()} • {formatTimeLabeled(stats.totalMinutes, t)}
+              {stats.shiftsCount} {t.shiftsCount} • {formatTimeLabeled(stats.totalMinutes, t)}
             </div>
           </div>
           
+          {/* Stats grid - filtered by settings */}
           <div className="grid grid-cols-2 gap-3">
-            <StatCard icon={Clock} label={t.totalHours} value={formatTime(stats.totalMinutes)} subValue={`${stats.shiftsCount} ${t.shiftsCount.toLowerCase()}`} />
+            {sf.totalHours !== false && (
+              <StatCard 
+                icon={Clock} 
+                label={t.totalHours} 
+                value={formatTime(stats.totalMinutes)} 
+                subValue={`${stats.shiftsCount} ${t.shiftsCount}`} 
+              />
+            )}
             
-            <StatCard icon={DollarSign} label={isHourly ? t.totalEarnings : t.earnedAmount} value={formatCurrency(stats.totalEarnings, currency)} color="text-green-400" />
+            {sf.totalEarnings !== false && (
+              <StatCard 
+                icon={DollarSign} 
+                label={isHourly ? t.totalEarnings : t.earnedAmount} 
+                value={formatCurrency(stats.totalEarnings, currency)} 
+                color="text-green-400" 
+              />
+            )}
             
-            <StatCard icon={TrendingUp} label={t.avgPerHour} value={formatCurrency(stats.avgPerHour, currency)} color="text-purple-400" />
+            {sf.avgPerHour !== false && (
+              <StatCard 
+                icon={TrendingUp} 
+                label={t.avgPerHour} 
+                value={formatCurrency(stats.avgPerHour, currency)} 
+                color="text-purple-400" 
+              />
+            )}
             
             {!isHourly && stats.totalOrders > 0 && (
-              <StatCard icon={Package} label={t.orders} value={stats.totalOrders} color="text-blue-400" />
+              <StatCard 
+                icon={Package} 
+                label={t.orders} 
+                value={stats.totalOrders} 
+                color="text-blue-400" 
+              />
             )}
             
-            {enabledFields.tipsCash && stats.totalTipsCash > 0 && (
-              <StatCard icon={Banknote} label={t.totalTipsCash} value={formatCurrency(stats.totalTipsCash, currency)} color="text-green-400" />
+            {sf.tipsCash !== false && enabledFields.tipsCash && stats.totalTipsCash > 0 && (
+              <StatCard 
+                icon={Banknote} 
+                label={t.totalTipsCash} 
+                value={formatCurrency(stats.totalTipsCash, currency)} 
+                color="text-green-400" 
+              />
             )}
             
-            {enabledFields.tipsCard && stats.totalTipsCard > 0 && (
-              <StatCard icon={CreditCard} label={t.totalTipsCard} value={formatTipsCardValue()} color="text-green-400" subValue={settings.tipsCardPercent > 0 ? `${t.tipsCardPercent}: -${settings.tipsCardPercent}%` : undefined} />
+            {sf.tipsCard !== false && enabledFields.tipsCard && stats.totalTipsCard > 0 && (
+              <StatCard 
+                icon={CreditCard} 
+                label={t.totalTipsCard} 
+                value={formatTipsCardValue()} 
+                color="text-green-400" 
+                subValue={settings.tipsCardPercent > 0 ? `${t.deduction}: ${settings.tipsCardPercent}%` : undefined} 
+              />
             )}
             
-            {enabledFields.mileage && stats.totalMileage > 0 && (
-              <StatCard icon={Car} label={t.totalMileageStats} value={`${stats.totalMileage} ${t.km}`} />
+            {sf.mileage !== false && enabledFields.mileage && stats.totalMileage > 0 && (
+              <StatCard 
+                icon={Car} 
+                label={t.totalMileageStats} 
+                value={`${stats.totalMileage} ${t.km}`} 
+              />
             )}
             
-            {enabledFields.expenses && stats.totalExpenses > 0 && (
-              <StatCard icon={Receipt} label={t.totalExpenses} value={formatCurrency(stats.totalExpenses, currency)} color="text-red-400" />
+            {sf.expenses !== false && enabledFields.expenses && stats.totalExpenses > 0 && (
+              <StatCard 
+                icon={Receipt} 
+                label={t.totalExpenses} 
+                value={formatCurrency(stats.totalExpenses, currency)} 
+                color="text-red-400" 
+              />
             )}
             
             {enabledFields.bonus && stats.totalBonus > 0 && (
-              <StatCard icon={Gift} label={t.totalBonus} value={formatCurrency(stats.totalBonus, currency)} color="text-yellow-400" />
+              <StatCard 
+                icon={Gift} 
+                label={t.totalBonus} 
+                value={formatCurrency(stats.totalBonus, currency)} 
+                color="text-yellow-400" 
+              />
             )}
             
-            <StatCard icon={Calendar} label={t.avgHoursPerShift} value={formatTime(stats.avgMinutesPerShift)} />
+            {sf.avgHoursPerShift !== false && (
+              <StatCard 
+                icon={Calendar} 
+                label={t.avgHoursPerShift} 
+                value={formatTime(stats.avgMinutesPerShift)} 
+              />
+            )}
             
-            <StatCard icon={TrendingUp} label={t.avgIncomePerShift} value={formatCurrency(stats.avgIncomePerShift, currency)} color="text-purple-400" />
+            {sf.avgIncomePerShift !== false && (
+              <StatCard 
+                icon={TrendingUp} 
+                label={t.avgIncomePerShift} 
+                value={formatCurrency(stats.avgIncomePerShift, currency)} 
+                color="text-purple-400" 
+              />
+            )}
           </div>
           
-          {enabledFields.expenses && (
+          {sf.expenseDetails !== false && enabledFields.expenses && (
             <ExpenseBreakdown expensesByType={stats.expensesByType} currency={currency} t={t} isDark={isDark} />
           )}
         </div>
