@@ -48,6 +48,8 @@
 
 html {
   scroll-behavior: smooth;
+  /* Safe area for iPhone notch */
+  background: var(--bg-primary);
 }
 
 body {
@@ -55,7 +57,13 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
+  min-height: -webkit-fill-available;
   transition: background 0.3s ease;
+  /* Safe area padding for iPhone */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
 /* Theme backgrounds */

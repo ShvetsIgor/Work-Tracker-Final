@@ -1,5 +1,5 @@
-import React from 'react';
-import { Globe, Wallet, Utensils, CreditCard, Settings as SettingsIcon, Sun, Moon, Briefcase, BarChart3 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Globe, Utensils, CreditCard, Settings as SettingsIcon, Sun, Moon, Briefcase, BarChart3, ChevronDown, ChevronUp } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { Card, Input, Select, Toggle } from '@/components/ui';
 import { currencies } from '@/config/currencies';
@@ -9,6 +9,40 @@ const SettingRow = ({ children, noBorder = false }) => (
     {children}
   </div>
 );
+
+// Collapsible section component
+const CollapsibleSection = ({ title, icon: Icon, iconColor, children, defaultOpen = false }) => {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+  const { settings } = useApp();
+  const isDark = settings.theme !== 'light';
+  
+  return (
+    <Card className="mb-4 overflow-hidden">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={`w-full p-4 flex items-center justify-between transition-colors ${
+          isDark ? 'hover:bg-slate-700/30' : 'hover:bg-slate-50'
+        }`}
+      >
+        <div className="flex items-center gap-2">
+          {Icon && <Icon className={`w-5 h-5 ${iconColor}`} />}
+          <span className="theme-text-primary font-semibold">{title}</span>
+        </div>
+        {isOpen ? (
+          <ChevronUp className="w-5 h-5 theme-text-muted" />
+        ) : (
+          <ChevronDown className="w-5 h-5 theme-text-muted" />
+        )}
+      </button>
+      
+      {isOpen && (
+        <div className="px-4 pb-4 animate-fade-in">
+          {children}
+        </div>
+      )}
+    </Card>
+  );
+};
 
 const SettingsScreen = () => {
   const { t, settings, updateSettings } = useApp();
@@ -217,16 +251,15 @@ const SettingsScreen = () => {
         </SettingRow>
       </Card>
       
-      {/* Enabled Fields */}
-      <Card className="p-4 mb-4">
-        <h3 className="theme-text-primary font-semibold mb-4 flex items-center gap-2">
-          <SettingsIcon className="w-5 h-5 text-blue-400" />
-          {t.enabledFields}
-        </h3>
-        
+      {/* Enabled Fields - Collapsible */}
+      <CollapsibleSection
+        title={t.enabledFields}
+        icon={SettingsIcon}
+        iconColor="text-blue-400"
+      >
         <SettingRow>
           <Toggle
-            checked={settings.enabledFields.mileage}
+            checked={settings.enabledFields?.mileage !== false}
             onChange={(v) => handleFieldToggle('mileage', v)}
             label={t.fieldMileage}
           />
@@ -234,7 +267,7 @@ const SettingsScreen = () => {
         
         <SettingRow>
           <Toggle
-            checked={settings.enabledFields.tipsCash}
+            checked={settings.enabledFields?.tipsCash !== false}
             onChange={(v) => handleFieldToggle('tipsCash', v)}
             label={t.fieldTipsCash}
           />
@@ -242,7 +275,7 @@ const SettingsScreen = () => {
         
         <SettingRow>
           <Toggle
-            checked={settings.enabledFields.tipsCard}
+            checked={settings.enabledFields?.tipsCard !== false}
             onChange={(v) => handleFieldToggle('tipsCard', v)}
             label={t.fieldTipsCard}
           />
@@ -250,7 +283,7 @@ const SettingsScreen = () => {
         
         <SettingRow>
           <Toggle
-            checked={settings.enabledFields.expenses}
+            checked={settings.enabledFields?.expenses !== false}
             onChange={(v) => handleFieldToggle('expenses', v)}
             label={t.fieldExpenses}
           />
@@ -258,20 +291,19 @@ const SettingsScreen = () => {
         
         <SettingRow noBorder>
           <Toggle
-            checked={settings.enabledFields.bonus}
+            checked={settings.enabledFields?.bonus !== false}
             onChange={(v) => handleFieldToggle('bonus', v)}
             label={t.fieldBonus}
           />
         </SettingRow>
-      </Card>
+      </CollapsibleSection>
       
-      {/* Statistics Fields */}
-      <Card className="p-4 mb-4">
-        <h3 className="theme-text-primary font-semibold mb-4 flex items-center gap-2">
-          <BarChart3 className="w-5 h-5 text-purple-400" />
-          {t.statisticsFields}
-        </h3>
-        
+      {/* Statistics Fields - Collapsible */}
+      <CollapsibleSection
+        title={t.statisticsFields}
+        icon={BarChart3}
+        iconColor="text-purple-400"
+      >
         <SettingRow>
           <Toggle
             checked={settings.statisticsFields?.totalHours !== false}
@@ -351,7 +383,7 @@ const SettingsScreen = () => {
             label={t.fieldExpenseDetails}
           />
         </SettingRow>
-      </Card>
+      </CollapsibleSection>
     </div>
   );
 };

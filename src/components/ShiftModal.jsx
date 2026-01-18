@@ -86,24 +86,27 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
   // Initialize form with shift data if editing
   useEffect(() => {
     if (shift) {
+      // Helper to convert value - show empty string for 0 or undefined
+      const toStr = (val) => (val && val !== 0) ? val.toString() : '';
+      
       setDate(shift.date || getEffectiveDate());
       setTimeMode(shift.timeMode || 'manual');
       setStartTime(shift.startTime || '');
       setEndTime(shift.endTime || '');
-      setHours(shift.hours?.toString() || '');
-      setMinutes(shift.minutes?.toString() || '');
+      setHours(toStr(shift.hours));
+      setMinutes(toStr(shift.minutes));
       setHasBreak(shift.hasBreak || false);
-      setBreakMinutes(shift.breakMinutes?.toString() || '');
-      setOrdersCount(shift.ordersCount?.toString() || '');
-      setEarnedAmount(shift.earnedAmount?.toString() || '');
+      setBreakMinutes(toStr(shift.breakMinutes));
+      setOrdersCount(toStr(shift.ordersCount));
+      setEarnedAmount(toStr(shift.earnedAmount));
       setMileageMode(shift.mileageMode || 'manual');
-      setStartOdometer(shift.startOdometer?.toString() || '');
-      setEndOdometer(shift.endOdometer?.toString() || '');
-      setMileage(shift.mileage?.toString() || '');
-      setTipsCash(shift.tipsCash?.toString() || '');
-      setTipsCard(shift.tipsCard?.toString() || '');
+      setStartOdometer(toStr(shift.startOdometer));
+      setEndOdometer(toStr(shift.endOdometer));
+      setMileage(toStr(shift.mileage));
+      setTipsCash(toStr(shift.tipsCash));
+      setTipsCard(toStr(shift.tipsCard));
       setExpenses(shift.expenses || []);
-      setBonus(shift.bonus?.toString() || '');
+      setBonus(toStr(shift.bonus));
       setBonusComment(shift.bonusComment || '');
     } else {
       resetForm();

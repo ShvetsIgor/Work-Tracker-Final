@@ -1,12 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import { 
   Clock, DollarSign, Banknote, CreditCard, Car, Receipt, Gift, 
-  TrendingUp, Calendar, BarChart3, Package 
+  TrendingUp, Calendar, BarChart3, Package, ChevronDown, ChevronUp, List
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { Card, EmptyState } from '@/components/ui';
-import { getDateRange, isDateInRange } from '@/utils/dateUtils';
-import { calculateStatistics } from '@/utils/calculations';
+import { getDateRange, isDateInRange, formatDate } from '@/utils/dateUtils';
+import { calculateStatistics, calculateEarnings } from '@/utils/calculations';
 import { formatCurrency, formatTime, formatTimeLabeled } from '@/utils/formatters';
 
 const StatCard = ({ icon: Icon, label, value, color = 'theme-text-primary', subValue }) => (
@@ -301,9 +301,75 @@ const StatisticsScreen = () => {
           {sf.expenseDetails !== false && enabledFields.expenses && (
             <ExpenseBreakdown expensesByType={stats.expensesByType} currency={currency} t={t} isDark={isDark} />
           )}
+          
+          {/* Shifts list for selected period */}
+          <ShiftsList shifts={filteredShifts} settings={settings} t={t} isDark={isDark} />
         </div>
       )}
     </div>
+  );
+};
+
+// Collapsible shifts list
+const ShiftsList = ({ shifts, settings, t, isDark }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const { currency } = settings;
+  
+  if (shifts.length === 0) return null;
+  
+  // Sort by date descending
+  const sortedShifts = [...shifts].sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  return (
+    <Card className="overflow-hidden">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={`w-full p-4 flex items-center justify-between transition-colors ${
+          isDark ? 'hover:bg-slate-700/30' : 'hover:bg-slate-50'
+        }`}
+      >
+        <div className="flex items-center gap-2">
+          <List className="w-5 h-5 text-blue-400" />
+          <span className="theme-text-primary font-semibold">
+            {isOpen ? t.hideShiftsList || 'Скрыть смены' : t.showShiftsList || 'Список смен'}
+          </span>
+          <span className="theme-text-muted text-sm">({shifts.length})</span>
+        </div>
+        {isOpen ? (
+          <ChevronUp className="w-5 h-5 theme-text-muted" />
+        ) : (
+          <ChevronDown className="w-5 h-5 theme-text-muted" />
+        )}
+      </button>
+      
+      {isOpen && (
+        <div className="border-t border-slate-700/30">
+          {sortedShifts.map((shift) => {
+            const baseEarnings = calculateEarnings(shift.totalMinutes, settings, shift.date);
+            return (
+              <div 
+                key={shift.id}
+                className={`px-4 py-3 flex items-center justify-between border-b last:border-b-0 ${
+                  isDark ? 'border-slate-700/30' : 'border-slate-200'
+                }`}
+              >
+                <div className="flex items-center gap-4">
+                  <span className="theme-text-secondary text-sm min-w-[90px]">
+                    {formatDate(shift.date, settings.language)}
+                  </span>
+                  <span className="theme-text-muted text-sm">
+                    {formatTime(shift.totalMinutes)}
+                  </span>
+                </div>
+                <span className="text-green-400 font-medium">
+                  {formatCurrency(baseEarnings, currency)}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </Card>
   );
 };
 

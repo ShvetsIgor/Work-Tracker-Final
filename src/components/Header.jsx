@@ -3,7 +3,7 @@ import { Clock, ChevronDown, User, LogOut } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 
 const Header = ({ onOpenAccount }) => {
-  const { t, user, logout, settings } = useApp();
+  const { t, user, logout, settings, rtl } = useApp();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
   
@@ -69,7 +69,9 @@ const Header = ({ onOpenAccount }) => {
             
             {/* Dropdown menu */}
             {isMenuOpen && (
-              <div className={`absolute right-0 mt-2 w-48 rounded-xl shadow-xl overflow-hidden animate-fade-in z-50 ${
+              <div className={`absolute mt-2 w-48 rounded-xl shadow-xl overflow-hidden animate-fade-in z-50 ${
+                rtl ? 'left-0' : 'right-0'
+              } ${
                 isDark 
                   ? 'bg-slate-800 border border-slate-700' 
                   : 'bg-white border border-slate-200'

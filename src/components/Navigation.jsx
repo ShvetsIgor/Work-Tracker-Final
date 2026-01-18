@@ -14,11 +14,13 @@ const Navigation = ({ activeTab, setActiveTab }) => {
   ];
 
   return (
-    <nav className={`fixed bottom-0 left-0 right-0 backdrop-blur-xl px-4 py-2 z-50 safe-area-bottom transition-colors duration-300 ${
+    <nav className={`fixed bottom-0 left-0 right-0 backdrop-blur-xl px-4 py-2 z-50 transition-colors duration-300 ${
       isDark 
         ? 'bg-slate-800/95 border-t border-slate-700/50' 
         : 'bg-white/95 border-t border-slate-200'
-    }`}>
+    }`}
+    style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
+    >
       <div className="flex justify-around items-center max-w-lg mx-auto">
         {tabs.map((tab) => {
           const Icon = tab.icon;
@@ -29,7 +31,8 @@ const Navigation = ({ activeTab, setActiveTab }) => {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`
-                flex flex-col items-center py-2 px-4 rounded-xl transition-all duration-200
+                flex flex-col items-center justify-center
+                min-w-[80px] py-2 px-4 rounded-xl transition-all duration-200
                 ${isActive 
                   ? 'bg-purple-500/20 text-purple-500' 
                   : isDark 
@@ -39,7 +42,7 @@ const Navigation = ({ activeTab, setActiveTab }) => {
               `}
             >
               <Icon className={`w-5 h-5 mb-1 ${isActive ? 'scale-110' : ''} transition-transform`} />
-              <span className="text-xs font-medium">{tab.label}</span>
+              <span className="text-xs font-medium whitespace-nowrap">{tab.label}</span>
             </button>
           );
         })}

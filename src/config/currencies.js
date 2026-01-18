@@ -11,6 +11,12 @@ export const currencies = {
     code: 'USD',
     locale: 'en-US'
   },
+  CAD: { 
+    symbol: 'C$', 
+    name: 'Canadian Dollar',
+    code: 'CAD',
+    locale: 'en-CA'
+  },
   EUR: { 
     symbol: '€', 
     name: 'Euro',
@@ -22,18 +28,6 @@ export const currencies = {
     name: 'Russian Ruble',
     code: 'RUB',
     locale: 'ru-RU'
-  },
-  GBP: {
-    symbol: '£',
-    name: 'British Pound',
-    code: 'GBP',
-    locale: 'en-GB'
-  },
-  UAH: {
-    symbol: '₴',
-    name: 'Ukrainian Hryvnia',
-    code: 'UAH',
-    locale: 'uk-UA'
   }
 };
 
