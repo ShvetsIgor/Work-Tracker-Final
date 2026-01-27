@@ -138,7 +138,9 @@ export const calculateStatistics = (shifts, settings) => {
     totalOrders: 0,
     totalEarnedAmount: 0,
     netIncome: 0,
-    expensesByType: {}
+    expensesByType: {},
+    bonusComments: [],
+    expenseComments: []
   };
   
   shifts.forEach(shift => {
@@ -155,6 +157,13 @@ export const calculateStatistics = (shifts, settings) => {
     
     // Bonus
     stats.totalBonus += shift.bonus || 0;
+    if (shift.bonus && shift.bonusComment) {
+      stats.bonusComments.push({
+        date: shift.date,
+        amount: shift.bonus,
+        comment: shift.bonusComment
+      });
+    }
     
     // Orders and earned (for piece-work)
     stats.totalOrders += shift.ordersCount || 0;
@@ -165,6 +174,14 @@ export const calculateStatistics = (shifts, settings) => {
     shiftExpenses.forEach(exp => {
       stats.totalExpenses += exp.amount || 0;
       stats.expensesByType[exp.type] = (stats.expensesByType[exp.type] || 0) + (exp.amount || 0);
+      if (exp.comment) {
+        stats.expenseComments.push({
+          date: shift.date,
+          amount: exp.amount,
+          comment: exp.comment,
+          type: exp.type
+        });
+      }
     });
     
     // Earnings (hourly or piece-work)

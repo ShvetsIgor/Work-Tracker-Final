@@ -149,6 +149,11 @@ export const translations = {
     avgIncomePerShift: 'Доход/смена',
     expenseDetails: 'Детализация затрат',
     deduction: 'Вычет',
+    bonusComments: 'Комментарии к бонусам',
+    expenseComments: 'Комментарии к затратам',
+    selectColumns: 'Выбрать колонки',
+    earnings: 'Доход',
+    km: 'км',
     
     // Messages
     noData: 'Нет данных за выбранный период',
@@ -172,7 +177,6 @@ export const translations = {
     
     // Time
     yesterday: 'Вчера',
-    km: 'км',
   },
   
   en: {
@@ -323,6 +327,11 @@ export const translations = {
     expenseDetails: 'Expense Details',
     showShiftsList: 'Shifts List',
     hideShiftsList: 'Hide Shifts',
+    bonusComments: 'Bonus Comments',
+    expenseComments: 'Expense Comments',
+    selectColumns: 'Select Columns',
+    earnings: 'Earnings',
+    km: 'km',
     
     // Messages
     noData: 'No data for selected period',
@@ -346,7 +355,6 @@ export const translations = {
     
     // Time
     yesterday: 'Yesterday',
-    km: 'km',
   },
   
   he: {
@@ -497,6 +505,11 @@ export const translations = {
     expenseDetails: 'פירוט הוצאות',
     showShiftsList: 'רשימת משמרות',
     hideShiftsList: 'הסתר משמרות',
+    bonusComments: 'הערות לבונוסים',
+    expenseComments: 'הערות להוצאות',
+    selectColumns: 'בחר עמודות',
+    earnings: 'הכנסות',
+    km: 'ק"מ',
     
     // Messages
     noData: 'אין נתונים לתקופה הנבחרת',
@@ -520,7 +533,6 @@ export const translations = {
     
     // Time
     yesterday: 'אתמול',
-    km: 'ק"מ',
   }
 };
 

@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { 
   Clock, DollarSign, Banknote, CreditCard, Car, Receipt, Gift, 
-  TrendingUp, Calendar, BarChart3, Package, ChevronDown, ChevronUp, List
+  TrendingUp, Calendar, BarChart3, Package, ChevronDown, ChevronUp, List, Settings
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { Card, EmptyState } from '@/components/ui';
@@ -302,6 +302,32 @@ const StatisticsScreen = () => {
             <ExpenseBreakdown expensesByType={stats.expensesByType} currency={currency} t={t} isDark={isDark} />
           )}
           
+          {/* Bonus comments */}
+          {enabledFields.bonus && stats.bonusComments && stats.bonusComments.length > 0 && (
+            <CommentsSection 
+              title={t.bonusComments || 'Комментарии к бонусам'} 
+              comments={stats.bonusComments} 
+              icon="gift"
+              color="text-yellow-400"
+              isDark={isDark} 
+              t={t}
+              currency={currency}
+            />
+          )}
+          
+          {/* Expense comments */}
+          {enabledFields.expenses && stats.expenseComments && stats.expenseComments.length > 0 && (
+            <CommentsSection 
+              title={t.expenseComments || 'Комментарии к затратам'} 
+              comments={stats.expenseComments} 
+              icon="receipt"
+              color="text-red-400"
+              isDark={isDark} 
+              t={t}
+              currency={currency}
+            />
+          )}
+          
           {/* Shifts list for selected period */}
           <ShiftsList shifts={filteredShifts} settings={settings} t={t} isDark={isDark} />
         </div>
@@ -310,15 +336,11 @@ const StatisticsScreen = () => {
   );
 };
 
-// Collapsible shifts list
-const ShiftsList = ({ shifts, settings, t, isDark }) => {
+// Comments section (for bonus and expenses)
+const CommentsSection = ({ title, comments, icon, color, isDark, t, currency }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { currency } = settings;
   
-  if (shifts.length === 0) return null;
-  
-  // Sort by date descending
-  const sortedShifts = [...shifts].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const IconComponent = icon === 'gift' ? Gift : Receipt;
   
   return (
     <Card className="overflow-hidden">
@@ -329,9 +351,126 @@ const ShiftsList = ({ shifts, settings, t, isDark }) => {
         }`}
       >
         <div className="flex items-center gap-2">
+          <IconComponent className={`w-5 h-5 ${color}`} />
+          <span className="theme-text-primary font-semibold">{title}</span>
+          <span className="theme-text-muted text-sm">({comments.length})</span>
+        </div>
+        {isOpen ? (
+          <ChevronUp className="w-5 h-5 theme-text-muted" />
+        ) : (
+          <ChevronDown className="w-5 h-5 theme-text-muted" />
+        )}
+      </button>
+      
+      {isOpen && (
+        <div className="border-t border-slate-700/30 px-4 py-2">
+          {comments.map((item, idx) => (
+            <div 
+              key={idx}
+              className={`py-2 flex justify-between items-start border-b last:border-b-0 ${
+                isDark ? 'border-slate-700/30' : 'border-slate-200'
+              }`}
+            >
+              <div className="flex-1">
+                <div className="theme-text-muted text-xs">{formatDate(item.date, 'ru')}</div>
+                <div className="theme-text-secondary text-sm">{item.comment}</div>
+              </div>
+              <span className={`${color} font-medium text-sm ml-2`}>
+                {formatCurrency(item.amount, currency)}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </Card>
+  );
+};
+
+// Available columns for shifts list
+const SHIFT_COLUMNS = [
+  { id: 'hours', label: 'hours', icon: Clock },
+  { id: 'earnings', label: 'earnings', icon: DollarSign },
+  { id: 'tipsCash', label: 'tipsCash', icon: Banknote },
+  { id: 'tipsCard', label: 'tipsCard', icon: CreditCard },
+  { id: 'mileage', label: 'mileage', icon: Car },
+  { id: 'expenses', label: 'expenses', icon: Receipt },
+  { id: 'bonus', label: 'bonus', icon: Gift },
+  { id: 'orders', label: 'orders', icon: Package },
+];
+
+// Collapsible shifts list with column selector
+const ShiftsList = ({ shifts, settings, t, isDark }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedColumns, setSelectedColumns] = useState(['hours', 'earnings']);
+  const [showColumnSelector, setShowColumnSelector] = useState(false);
+  const { currency, enabledFields, workType } = settings;
+  const isHourly = workType !== 'pieceWork';
+  
+  if (shifts.length === 0) return null;
+  
+  // Filter available columns based on enabled fields
+  const availableColumns = SHIFT_COLUMNS.filter(col => {
+    if (col.id === 'tipsCash') return enabledFields?.tipsCash !== false;
+    if (col.id === 'tipsCard') return enabledFields?.tipsCard !== false;
+    if (col.id === 'mileage') return enabledFields?.mileage !== false;
+    if (col.id === 'expenses') return enabledFields?.expenses !== false;
+    if (col.id === 'bonus') return enabledFields?.bonus !== false;
+    if (col.id === 'orders') return !isHourly;
+    return true;
+  });
+  
+  // Sort by date descending
+  const sortedShifts = [...shifts].sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  const toggleColumn = (colId) => {
+    setSelectedColumns(prev => 
+      prev.includes(colId) 
+        ? prev.filter(c => c !== colId)
+        : [...prev, colId]
+    );
+  };
+  
+  const getColumnValue = (shift, colId) => {
+    const baseEarnings = calculateEarnings(shift.totalMinutes, settings, shift.date);
+    const totalExpenses = shift.expenses?.reduce((sum, e) => sum + (e.amount || 0), 0) || 0;
+    
+    switch (colId) {
+      case 'hours': return formatTime(shift.totalMinutes);
+      case 'earnings': return formatCurrency(baseEarnings, currency);
+      case 'tipsCash': return shift.tipsCash ? formatCurrency(shift.tipsCash, currency) : '-';
+      case 'tipsCard': return shift.tipsCard ? formatCurrency(shift.tipsCard, currency) : '-';
+      case 'mileage': return shift.mileage ? `${shift.mileage} ${t.km || 'км'}` : '-';
+      case 'expenses': return totalExpenses > 0 ? formatCurrency(totalExpenses, currency) : '-';
+      case 'bonus': return shift.bonus ? formatCurrency(shift.bonus, currency) : '-';
+      case 'orders': return shift.ordersCount || '-';
+      default: return '-';
+    }
+  };
+  
+  const getColumnColor = (colId) => {
+    switch (colId) {
+      case 'earnings': return 'text-green-400';
+      case 'tipsCash': return 'text-emerald-400';
+      case 'tipsCard': return 'text-blue-400';
+      case 'expenses': return 'text-red-400';
+      case 'bonus': return 'text-yellow-400';
+      default: return 'theme-text-secondary';
+    }
+  };
+  
+  return (
+    <Card className="overflow-hidden">
+      {/* Header */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={`w-full p-4 flex items-center justify-between transition-colors ${
+          isDark ? 'hover:bg-slate-700/30' : 'hover:bg-slate-50'
+        }`}
+      >
+        <div className="flex items-center gap-2">
           <List className="w-5 h-5 text-blue-400" />
           <span className="theme-text-primary font-semibold">
-            {isOpen ? t.hideShiftsList || 'Скрыть смены' : t.showShiftsList || 'Список смен'}
+            {t.showShiftsList || 'Список смен'}
           </span>
           <span className="theme-text-muted text-sm">({shifts.length})</span>
         </div>
@@ -344,29 +483,106 @@ const ShiftsList = ({ shifts, settings, t, isDark }) => {
       
       {isOpen && (
         <div className="border-t border-slate-700/30">
-          {sortedShifts.map((shift) => {
-            const baseEarnings = calculateEarnings(shift.totalMinutes, settings, shift.date);
-            return (
-              <div 
-                key={shift.id}
-                className={`px-4 py-3 flex items-center justify-between border-b last:border-b-0 ${
-                  isDark ? 'border-slate-700/30' : 'border-slate-200'
-                }`}
-              >
-                <div className="flex items-center gap-4">
-                  <span className="theme-text-secondary text-sm min-w-[90px]">
-                    {formatDate(shift.date, settings.language)}
-                  </span>
-                  <span className="theme-text-muted text-sm">
-                    {formatTime(shift.totalMinutes)}
-                  </span>
-                </div>
-                <span className="text-green-400 font-medium">
-                  {formatCurrency(baseEarnings, currency)}
-                </span>
+          {/* Column selector toggle */}
+          <div className={`px-4 py-2 border-b ${isDark ? 'border-slate-700/30' : 'border-slate-200'}`}>
+            <button
+              onClick={() => setShowColumnSelector(!showColumnSelector)}
+              className="flex items-center gap-2 text-sm text-purple-400 hover:text-purple-300"
+            >
+              <Settings className="w-4 h-4" />
+              {t.selectColumns || 'Выбрать колонки'}
+              {showColumnSelector ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </button>
+            
+            {showColumnSelector && (
+              <div className="flex flex-wrap gap-2 mt-3">
+                {availableColumns.map(col => {
+                  const Icon = col.icon;
+                  const isSelected = selectedColumns.includes(col.id);
+                  return (
+                    <button
+                      key={col.id}
+                      onClick={() => toggleColumn(col.id)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                        isSelected
+                          ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                          : isDark 
+                            ? 'bg-slate-700/50 text-slate-400 border border-slate-600/30 hover:bg-slate-700'
+                            : 'bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200'
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                      {t[col.label] || col.label}
+                    </button>
+                  );
+                })}
               </div>
-            );
-          })}
+            )}
+          </div>
+          
+          {/* Scrollable table container */}
+          <div className="flex">
+            {/* Fixed date column */}
+            <div className={`flex-shrink-0 w-[100px] z-30 ${
+              isDark ? 'bg-[#0f172a]' : 'bg-white'
+            }`} style={{ boxShadow: '4px 0 12px rgba(0,0,0,0.4)' }}>
+              {/* Date header */}
+              <div className={`px-4 py-2 text-xs font-medium theme-text-muted border-b ${
+                isDark ? 'border-slate-700/30' : 'border-slate-200'
+              }`}>
+                {t.date || 'Дата'}
+              </div>
+              {/* Date cells */}
+              {sortedShifts.map((shift) => (
+                <div 
+                  key={shift.id}
+                  className={`px-4 py-3 theme-text-secondary text-sm border-b last:border-b-0 ${
+                    isDark ? 'border-slate-700/30' : 'border-slate-200'
+                  }`}
+                >
+                  {formatDate(shift.date, settings.language)}
+                </div>
+              ))}
+            </div>
+            
+            {/* Scrollable data columns */}
+            <div className="overflow-x-auto flex-1">
+              <div className="min-w-max">
+                {/* Column headers */}
+                <div className={`flex text-xs font-medium theme-text-muted border-b ${
+                  isDark ? 'border-slate-700/30' : 'border-slate-200'
+                }`}>
+                  {selectedColumns.map(colId => {
+                    const col = SHIFT_COLUMNS.find(c => c.id === colId);
+                    return (
+                      <span key={colId} className="min-w-[80px] px-3 py-2 text-right">
+                        {t[col?.label] || col?.label}
+                      </span>
+                    );
+                  })}
+                </div>
+                
+                {/* Data rows */}
+                {sortedShifts.map((shift) => (
+                  <div 
+                    key={shift.id}
+                    className={`flex border-b last:border-b-0 ${
+                      isDark ? 'border-slate-700/30' : 'border-slate-200'
+                    }`}
+                  >
+                    {selectedColumns.map(colId => (
+                      <span 
+                        key={colId} 
+                        className={`text-sm font-medium min-w-[80px] px-3 py-3 text-right ${getColumnColor(colId)}`}
+                      >
+                        {getColumnValue(shift, colId)}
+                      </span>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </Card>

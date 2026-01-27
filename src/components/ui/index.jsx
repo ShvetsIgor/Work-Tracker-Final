@@ -226,32 +226,79 @@ export const Loader = ({ size = 'md', className = '' }) => {
 export const FullScreenLoader = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-      <div className="text-center">
-        {/* Animated clock icon */}
-        <div className="relative w-24 h-24 mx-auto mb-6">
-          {/* Outer ring */}
-          <div className="absolute inset-0 rounded-full border-4 border-purple-500/30"></div>
-          {/* Spinning ring */}
-          <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-purple-500 animate-spin"></div>
-          {/* Inner circle with icon */}
-          <div className="absolute inset-3 rounded-full bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center">
-            <svg className="w-10 h-10 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <circle cx="12" cy="12" r="9" strokeWidth="2" />
-              <path strokeLinecap="round" strokeWidth="2" d="M12 6v6l4 2" />
-            </svg>
+      {/* Background glow effects */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/3 left-1/4 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/3 right-1/4 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+      </div>
+      
+      <div className="relative text-center">
+        {/* Main loader container */}
+        <div className="relative w-32 h-32 mx-auto mb-10">
+          {/* Outer rotating ring */}
+          <div className="absolute inset-0 rounded-full border-4 border-purple-500/20"></div>
+          <div 
+            className="absolute inset-0 rounded-full border-4 border-transparent border-t-purple-500 border-r-purple-400/50"
+            style={{ animation: 'spin 1.5s linear infinite' }}
+          ></div>
+          
+          {/* Middle pulsing ring */}
+          <div 
+            className="absolute inset-3 rounded-full border-2 border-blue-400/30"
+            style={{ animation: 'pulse 2s ease-in-out infinite' }}
+          ></div>
+          
+          {/* Inner gradient circle */}
+          <div className="absolute inset-5 rounded-full bg-gradient-to-br from-purple-500/30 to-blue-500/30 backdrop-blur-sm flex items-center justify-center shadow-lg shadow-purple-500/20">
+            {/* Clock icon with animated hands */}
+            <div className="relative">
+              <svg className="w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <circle cx="12" cy="12" r="9" strokeWidth="1.5" className="text-purple-300" />
+                {/* Hour hand */}
+                <line 
+                  x1="12" y1="12" x2="12" y2="8" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  className="text-white origin-center"
+                  style={{ transformOrigin: '12px 12px', animation: 'spin 8s linear infinite' }}
+                />
+                {/* Minute hand */}
+                <line 
+                  x1="12" y1="12" x2="16" y2="12" 
+                  strokeWidth="1.5" 
+                  strokeLinecap="round" 
+                  className="text-purple-300 origin-center"
+                  style={{ transformOrigin: '12px 12px', animation: 'spin 2s linear infinite' }}
+                />
+                {/* Center dot */}
+                <circle cx="12" cy="12" r="1.5" fill="currentColor" className="text-purple-400" />
+              </svg>
+            </div>
           </div>
-          {/* Pulsing dots */}
-          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
-            <div className="w-2 h-2 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: '0ms' }}></div>
-            <div className="w-2 h-2 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: '150ms' }}></div>
-            <div className="w-2 h-2 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: '300ms' }}></div>
+          
+          {/* Orbiting dots */}
+          <div className="absolute inset-0" style={{ animation: 'spin 3s linear infinite' }}>
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 w-2 h-2 rounded-full bg-purple-400 shadow-lg shadow-purple-400/50"></div>
+          </div>
+          <div className="absolute inset-0" style={{ animation: 'spin 3s linear infinite reverse' }}>
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1 w-1.5 h-1.5 rounded-full bg-blue-400 shadow-lg shadow-blue-400/50"></div>
           </div>
         </div>
-        {/* App name */}
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent mb-2">
+        
+        {/* App name with gradient */}
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent mb-4">
           Shifts
         </h1>
-        <p className="text-slate-500 text-sm">Загрузка...</p>
+        
+        {/* Loading dots */}
+        <div className="flex items-center justify-center gap-1.5">
+          <span className="text-slate-400 text-sm">Загрузка</span>
+          <div className="flex gap-1">
+            <div className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: '0ms' }}></div>
+            <div className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: '150ms' }}></div>
+            <div className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: '300ms' }}></div>
+          </div>
+        </div>
       </div>
     </div>
   );
