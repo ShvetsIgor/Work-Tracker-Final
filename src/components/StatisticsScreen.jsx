@@ -521,67 +521,49 @@ const ShiftsList = ({ shifts, settings, t, isDark }) => {
           </div>
           
           {/* Scrollable table container */}
-          <div className="flex">
-            {/* Fixed date column */}
-            <div className={`flex-shrink-0 w-[100px] z-30 ${
-              isDark ? 'bg-[#0f172a]' : 'bg-white'
-            }`} style={{ boxShadow: '4px 0 12px rgba(0,0,0,0.4)' }}>
-              {/* Date header */}
-              <div className={`px-4 py-2 text-xs font-medium theme-text-muted border-b ${
-                isDark ? 'border-slate-700/30' : 'border-slate-200'
-              }`}>
+          <div className="overflow-x-auto">
+            {/* Header row */}
+            <div className={`flex text-xs font-medium theme-text-muted border-b sticky top-0 ${
+              isDark ? 'border-slate-700/30 bg-[#0f172a]' : 'border-slate-200 bg-white'
+            }`}>
+              <div className={`flex-shrink-0 w-[100px] px-4 py-2 sticky left-0 z-10 ${
+                isDark ? 'bg-[#0f172a]' : 'bg-white'
+              }`} style={{ boxShadow: '4px 0 8px rgba(0,0,0,0.3)' }}>
                 {t.date || 'Дата'}
               </div>
-              {/* Date cells */}
-              {sortedShifts.map((shift) => (
-                <div 
-                  key={shift.id}
-                  className={`px-4 py-3 theme-text-secondary text-sm border-b last:border-b-0 ${
-                    isDark ? 'border-slate-700/30' : 'border-slate-200'
-                  }`}
-                >
-                  {formatDate(shift.date, settings.language)}
-                </div>
-              ))}
+              {selectedColumns.map(colId => {
+                const col = SHIFT_COLUMNS.find(c => c.id === colId);
+                return (
+                  <span key={colId} className="min-w-[80px] px-3 py-2 text-right flex-shrink-0">
+                    {t[col?.label] || col?.label}
+                  </span>
+                );
+              })}
             </div>
             
-            {/* Scrollable data columns */}
-            <div className="overflow-x-auto flex-1">
-              <div className="min-w-max">
-                {/* Column headers */}
-                <div className={`flex text-xs font-medium theme-text-muted border-b ${
+            {/* Data rows */}
+            {sortedShifts.map((shift) => (
+              <div 
+                key={shift.id}
+                className={`flex border-b last:border-b-0 ${
                   isDark ? 'border-slate-700/30' : 'border-slate-200'
-                }`}>
-                  {selectedColumns.map(colId => {
-                    const col = SHIFT_COLUMNS.find(c => c.id === colId);
-                    return (
-                      <span key={colId} className="min-w-[80px] px-3 py-2 text-right">
-                        {t[col?.label] || col?.label}
-                      </span>
-                    );
-                  })}
+                }`}
+              >
+                <div className={`flex-shrink-0 w-[100px] px-4 py-3 theme-text-secondary text-sm sticky left-0 z-10 ${
+                  isDark ? 'bg-[#0f172a]' : 'bg-white'
+                }`} style={{ boxShadow: '4px 0 8px rgba(0,0,0,0.3)' }}>
+                  {formatDate(shift.date, settings.language)}
                 </div>
-                
-                {/* Data rows */}
-                {sortedShifts.map((shift) => (
-                  <div 
-                    key={shift.id}
-                    className={`flex border-b last:border-b-0 ${
-                      isDark ? 'border-slate-700/30' : 'border-slate-200'
-                    }`}
+                {selectedColumns.map(colId => (
+                  <span 
+                    key={colId} 
+                    className={`text-sm font-medium min-w-[80px] px-3 py-3 text-right flex-shrink-0 ${getColumnColor(colId)}`}
                   >
-                    {selectedColumns.map(colId => (
-                      <span 
-                        key={colId} 
-                        className={`text-sm font-medium min-w-[80px] px-3 py-3 text-right ${getColumnColor(colId)}`}
-                      >
-                        {getColumnValue(shift, colId)}
-                      </span>
-                    ))}
-                  </div>
+                    {getColumnValue(shift, colId)}
+                  </span>
                 ))}
               </div>
-            </div>
+            ))}
           </div>
         </div>
       )}
