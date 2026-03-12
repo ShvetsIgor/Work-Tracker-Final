@@ -56,6 +56,9 @@ export const Button = ({
 export const Input = ({
   label,
   error,
+  hideErrorText = false,
+  floatingError = false,
+  errorClassName = '',
   icon: Icon,
   className = '',
   containerClassName = '',
@@ -77,6 +80,14 @@ export const Input = ({
         <label className="block theme-text-muted text-sm mb-2">{label}</label>
       )}
       <div className="relative">
+        {error && floatingError && (
+          <div className={`absolute bottom-full left-3 z-20 mb-2 rounded-lg border border-red-500/30 bg-slate-950 px-2.5 py-1.5 text-xs text-red-300 shadow-lg shadow-black/30 ${errorClassName}`}>
+            <div className="relative">
+              {error}
+              <span className="absolute left-3 top-full h-2 w-2 -translate-y-1 rotate-45 border-b border-r border-red-500/30 bg-slate-950" />
+            </div>
+          </div>
+        )}
         {Icon && (
           <div className="absolute left-3 top-1/2 -translate-y-1/2 theme-text-muted">
             <Icon className="w-5 h-5" />
@@ -97,7 +108,7 @@ export const Input = ({
           {...props}
         />
       </div>
-      {error && (
+      {error && !hideErrorText && (
         <p className="mt-1 text-red-400 text-sm">{error}</p>
       )}
     </div>
