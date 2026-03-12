@@ -154,6 +154,11 @@ export const translations = {
     selectColumns: 'Выбрать колонки',
     earnings: 'Доход',
     km: 'км',
+    exportToExcel: 'Выгрузить в Excel',
+    selectFieldsToExport: 'Выберите поля для выгрузки',
+    selectAll: 'Выбрать все',
+    clearSelection: 'Очистить',
+    export: 'Выгрузить',
     
     // Messages
     noData: 'Нет данных за выбранный период',
@@ -332,6 +337,11 @@ export const translations = {
     selectColumns: 'Select Columns',
     earnings: 'Earnings',
     km: 'km',
+    exportToExcel: 'Export to Excel',
+    selectFieldsToExport: 'Select fields to export',
+    selectAll: 'Select all',
+    clearSelection: 'Clear',
+    export: 'Export',
     
     // Messages
     noData: 'No data for selected period',
@@ -510,6 +520,11 @@ export const translations = {
     selectColumns: 'בחר עמודות',
     earnings: 'הכנסות',
     km: 'ק"מ',
+    exportToExcel: 'ייצוא לאקסל',
+    selectFieldsToExport: 'בחר שדות לייצוא',
+    selectAll: 'בחר הכל',
+    clearSelection: 'נקה',
+    export: 'ייצוא',
     
     // Messages
     noData: 'אין נתונים לתקופה הנבחרת',

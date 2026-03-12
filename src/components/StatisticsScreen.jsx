@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { 
   Clock, DollarSign, Banknote, CreditCard, Car, Receipt, Gift, 
-  TrendingUp, Calendar, BarChart3, Package, ChevronDown, ChevronUp, List, Settings
+  TrendingUp, Calendar, BarChart3, Package, ChevronDown, ChevronUp, List, Settings,
+  Download, FileSpreadsheet, X, Check
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { Card, EmptyState } from '@/components/ui';
@@ -330,9 +331,233 @@ const StatisticsScreen = () => {
           
           {/* Shifts list for selected period */}
           <ShiftsList shifts={filteredShifts} settings={settings} t={t} isDark={isDark} />
+          
+          {/* Export button */}
+          <ExportButton 
+            shifts={filteredShifts} 
+            settings={settings} 
+            t={t} 
+            isDark={isDark}
+            dateFrom={customFrom}
+            dateTo={customTo}
+          />
         </div>
       )}
     </div>
+  );
+};
+
+// Export to Excel modal and button
+const EXPORT_COLUMNS = [
+  { id: 'date', label: 'date', required: true },
+  { id: 'hours', label: 'hours' },
+  { id: 'earnings', label: 'earnings' },
+  { id: 'tipsCash', label: 'tipsCash' },
+  { id: 'tipsCard', label: 'tipsCard' },
+  { id: 'mileage', label: 'mileage' },
+  { id: 'expenses', label: 'expenses' },
+  { id: 'bonus', label: 'bonus' },
+  { id: 'bonusComment', label: 'bonusComment' },
+  { id: 'orders', label: 'orders' },
+  { id: 'earnedAmount', label: 'earnedAmount' },
+];
+
+const ExportButton = ({ shifts, settings, t, isDark, dateFrom, dateTo }) => {
+  const [showModal, setShowModal] = useState(false);
+  const [selectedFields, setSelectedFields] = useState(['date', 'hours', 'earnings', 'tipsCash', 'tipsCard']);
+  const { enabledFields, workType, currency } = settings;
+  const isHourly = workType !== 'pieceWork';
+  
+  // Filter available columns based on settings
+  const availableColumns = EXPORT_COLUMNS.filter(col => {
+    if (col.id === 'tipsCash') return enabledFields?.tipsCash !== false;
+    if (col.id === 'tipsCard') return enabledFields?.tipsCard !== false;
+    if (col.id === 'mileage') return enabledFields?.mileage !== false;
+    if (col.id === 'expenses') return enabledFields?.expenses !== false;
+    if (col.id === 'bonus' || col.id === 'bonusComment') return enabledFields?.bonus !== false;
+    if (col.id === 'orders' || col.id === 'earnedAmount') return !isHourly;
+    return true;
+  });
+  
+  const toggleField = (fieldId) => {
+    if (fieldId === 'date') return; // Date is required
+    setSelectedFields(prev => 
+      prev.includes(fieldId) 
+        ? prev.filter(f => f !== fieldId)
+        : [...prev, fieldId]
+    );
+  };
+  
+  const selectAll = () => {
+    setSelectedFields(availableColumns.map(c => c.id));
+  };
+  
+  const selectNone = () => {
+    setSelectedFields(['date']);
+  };
+  
+  const exportToExcel = async () => {
+    if (shifts.length === 0) return;
+    
+    // Dynamic import of xlsx
+    const XLSX = await import('xlsx');
+    
+    // Prepare data
+    const data = shifts
+      .sort((a, b) => new Date(a.date) - new Date(b.date))
+      .map(shift => {
+        const row = {};
+        const baseEarnings = calculateEarnings(shift.totalMinutes, settings, shift.date);
+        const totalExpenses = shift.expenses?.reduce((sum, e) => sum + (e.amount || 0), 0) || 0;
+        
+        selectedFields.forEach(fieldId => {
+          const label = t[fieldId] || fieldId;
+          switch (fieldId) {
+            case 'date':
+              row[label] = shift.date;
+              break;
+            case 'hours':
+              row[label] = shift.totalMinutes ? (shift.totalMinutes / 60).toFixed(2) : 0;
+              break;
+            case 'earnings':
+              row[label] = baseEarnings;
+              break;
+            case 'tipsCash':
+              row[label] = shift.tipsCash || 0;
+              break;
+            case 'tipsCard':
+              row[label] = shift.tipsCard || 0;
+              break;
+            case 'mileage':
+              row[label] = shift.mileage || 0;
+              break;
+            case 'expenses':
+              row[label] = totalExpenses;
+              break;
+            case 'bonus':
+              row[label] = shift.bonus || 0;
+              break;
+            case 'bonusComment':
+              row[label] = shift.bonusComment || '';
+              break;
+            case 'orders':
+              row[label] = shift.ordersCount || 0;
+              break;
+            case 'earnedAmount':
+              row[label] = shift.earnedAmount || 0;
+              break;
+          }
+        });
+        return row;
+      });
+    
+    // Create workbook
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(data);
+    
+    // Auto-width columns
+    const colWidths = selectedFields.map(fieldId => {
+      const label = t[fieldId] || fieldId;
+      return { wch: Math.max(label.length + 2, 12) };
+    });
+    ws['!cols'] = colWidths;
+    
+    XLSX.utils.book_append_sheet(wb, ws, 'Shifts');
+    
+    // Generate filename
+    const fromStr = dateFrom || 'start';
+    const toStr = dateTo || 'end';
+    const filename = `shifts_${fromStr}_${toStr}.xlsx`;
+    
+    // Download
+    XLSX.writeFile(wb, filename);
+    setShowModal(false);
+  };
+  
+  if (shifts.length === 0) return null;
+  
+  return (
+    <>
+      <Card className="p-4">
+        <button
+          onClick={() => setShowModal(true)}
+          className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 text-white font-medium hover:from-green-600 hover:to-emerald-700 transition-all"
+        >
+          <Download className="w-5 h-5" />
+          {t.exportToExcel || 'Выгрузить в Excel'}
+        </button>
+      </Card>
+      
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className={`w-full max-w-md rounded-2xl p-6 ${isDark ? 'bg-slate-800' : 'bg-white'}`}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="theme-text-primary font-semibold text-lg flex items-center gap-2">
+                <FileSpreadsheet className="w-5 h-5 text-green-500" />
+                {t.exportToExcel || 'Выгрузить в Excel'}
+              </h3>
+              <button onClick={() => setShowModal(false)} className="theme-text-muted hover:theme-text-primary">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <p className="theme-text-muted text-sm mb-4">
+              {t.selectFieldsToExport || 'Выберите поля для выгрузки'}
+            </p>
+            
+            {/* Quick actions */}
+            <div className="flex gap-2 mb-4">
+              <button
+                onClick={selectAll}
+                className="text-xs px-3 py-1 rounded-lg bg-purple-500/20 text-purple-400 hover:bg-purple-500/30"
+              >
+                {t.selectAll || 'Выбрать все'}
+              </button>
+              <button
+                onClick={selectNone}
+                className="text-xs px-3 py-1 rounded-lg bg-slate-500/20 text-slate-400 hover:bg-slate-500/30"
+              >
+                {t.clearSelection || 'Очистить'}
+              </button>
+            </div>
+            
+            {/* Field selection */}
+            <div className="space-y-2 max-h-[300px] overflow-y-auto mb-6">
+              {availableColumns.map(col => {
+                const isSelected = selectedFields.includes(col.id);
+                const isRequired = col.required;
+                return (
+                  <button
+                    key={col.id}
+                    onClick={() => toggleField(col.id)}
+                    disabled={isRequired}
+                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-colors ${
+                      isSelected
+                        ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                        : isDark 
+                          ? 'bg-slate-700/50 text-slate-400 border border-slate-600/30 hover:bg-slate-700'
+                          : 'bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200'
+                    } ${isRequired ? 'opacity-70 cursor-not-allowed' : ''}`}
+                  >
+                    <span>{t[col.label] || col.label}</span>
+                    {isSelected && <Check className="w-4 h-4" />}
+                  </button>
+                );
+              })}
+            </div>
+            
+            {/* Export button */}
+            <button
+              onClick={exportToExcel}
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 text-white font-medium hover:from-green-600 hover:to-emerald-700 transition-all"
+            >
+              <Download className="w-5 h-5" />
+              {t.export || 'Выгрузить'} ({shifts.length} {t.shiftsCount || 'смен'})
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
