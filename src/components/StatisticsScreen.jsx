@@ -334,6 +334,7 @@ const StatisticsScreen = () => {
               isDark={isDark} 
               t={t}
               currency={currency}
+              language={settings.language}
             />
           )}
           
@@ -347,6 +348,7 @@ const StatisticsScreen = () => {
               isDark={isDark} 
               t={t}
               currency={currency}
+              language={settings.language}
             />
           )}
           
@@ -596,7 +598,7 @@ const ExportButton = ({ shifts, settings, t, isDark, dateFrom, dateTo }) => {
 };
 
 // Comments section (for bonus and expenses)
-const CommentsSection = ({ title, comments, icon, color, isDark, t, currency }) => {
+const CommentsSection = ({ title, comments, icon, color, isDark, t, currency, language }) => {
   const [isOpen, setIsOpen] = useState(false);
   
   const IconComponent = icon === 'gift' ? Gift : Receipt;
@@ -631,7 +633,7 @@ const CommentsSection = ({ title, comments, icon, color, isDark, t, currency }) 
               }`}
             >
               <div className="flex-1">
-                <div className="theme-text-muted text-xs">{formatDate(item.date, t.language || 'ru')}</div>
+                <div className="theme-text-muted text-xs">{formatDate(item.date, language || 'ru')}</div>
                 <div className="theme-text-secondary text-sm">{item.comment}</div>
               </div>
               <span className={`${color} font-medium text-sm ml-2`}>

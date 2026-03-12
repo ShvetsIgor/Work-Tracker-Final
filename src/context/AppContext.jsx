@@ -38,6 +38,7 @@ export const useApp = () => {
 // Provider component
 export const AppProvider = ({ children }) => {
   const shiftsUnsubscribeRef = useRef(null);
+  const settingsRequestIdRef = useRef(0);
 
   // Auth state
   const [user, setUser] = useState(null);
@@ -275,8 +276,13 @@ export const AppProvider = ({ children }) => {
   const updateSettings = useCallback(async (newSettings) => {
     if (!user) return;
 
-    const previousSettings = settings;
+    const requestId = settingsRequestIdRef.current + 1;
+    const previousValues = Object.keys(newSettings).reduce((acc, key) => {
+      acc[key] = settings[key];
+      return acc;
+    }, {});
     const mergedSettings = { ...settings, ...newSettings };
+    settingsRequestIdRef.current = requestId;
     setSettingsSaving(true);
     setSettingsSaveError('');
     setSettings(mergedSettings);
@@ -284,14 +290,32 @@ export const AppProvider = ({ children }) => {
     try {
       const settingsRef = doc(db, 'users', user.id, 'settings', 'preferences');
       await updateDoc(settingsRef, newSettings);
-      setSettingsLastSavedAt(Date.now());
+      if (settingsRequestIdRef.current === requestId) {
+        setSettingsLastSavedAt(Date.now());
+      }
     } catch (error) {
-      setSettings(previousSettings);
-      setSettingsSaveError(t.errorSettingsSave || t.errorGeneric || 'Could not save settings');
+      setSettings((currentSettings) => {
+        const nextSettings = { ...currentSettings };
+
+        Object.entries(newSettings).forEach(([key, value]) => {
+          if (nextSettings[key] === value) {
+            nextSettings[key] = previousValues[key];
+          }
+        });
+
+        return nextSettings;
+      });
+
+      if (settingsRequestIdRef.current === requestId) {
+        setSettingsSaveError(t.errorSettingsSave || t.errorGeneric || 'Could not save settings');
+      }
+
       console.error('Error updating settings:', error);
       throw error;
     } finally {
-      setSettingsSaving(false);
+      if (settingsRequestIdRef.current === requestId) {
+        setSettingsSaving(false);
+      }
     }
   }, [user, settings, t]);
   
