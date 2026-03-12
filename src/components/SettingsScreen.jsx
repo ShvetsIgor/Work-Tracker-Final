@@ -17,7 +17,7 @@ const CollapsibleSection = ({ title, icon: Icon, iconColor, children, defaultOpe
   const isDark = settings.theme !== 'light';
   
   return (
-    <Card className="mb-4 overflow-hidden">
+    <Card className="mb-3 overflow-hidden">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`w-full p-4 flex items-center justify-between transition-colors ${
@@ -143,7 +143,7 @@ const SettingsScreen = () => {
   
   return (
     <div className="pb-24">
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold theme-text-primary">{t.settings}</h1>
         </div>
@@ -156,7 +156,7 @@ const SettingsScreen = () => {
       </div>
       
       {/* Language, Currency & Theme */}
-      <Card className="p-4 mb-4">
+      <Card className="p-4 mb-3">
         <h3 className="theme-text-primary text-base font-bold mb-3 flex items-center gap-2">
           <Globe className="w-5 h-5 text-sky-400" />
           {t.language} & {t.currency}
@@ -203,7 +203,7 @@ const SettingsScreen = () => {
       </Card>
       
       {/* Work Type & Payment Settings */}
-      <Card className="p-4 mb-4">
+      <Card className="p-4 mb-3">
         <h3 className="theme-text-primary text-base font-bold mb-3 flex items-center gap-2">
           <Briefcase className="w-5 h-5 text-emerald-400" />
           {t.workType}

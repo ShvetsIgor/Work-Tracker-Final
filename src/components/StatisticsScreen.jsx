@@ -153,11 +153,11 @@ const StatisticsScreen = () => {
   
   return (
     <div className="pb-24">
-      <div className="mb-6">
+      <div className="mb-4">
         <h1 className="text-2xl font-bold theme-text-primary">{t.statistics}</h1>
       </div>
       
-      <Card className="p-4 mb-5">
+      <Card className="p-4 mb-3">
         <div className="flex items-center justify-between gap-3 mb-3">
           <label className="block theme-text-muted text-[11px] uppercase tracking-[0.18em]">{t.selectPeriod}</label>
           <div className={`h-9 w-9 rounded-xl flex items-center justify-center ${isDark ? 'bg-sky-500/10 text-sky-300' : 'bg-sky-100 text-sky-700'}`}>
@@ -165,7 +165,7 @@ const StatisticsScreen = () => {
           </div>
         </div>
         
-        <div className="grid grid-cols-4 gap-2 mb-3">
+        <div className="grid grid-cols-4 gap-2 mb-2.5">
           {periodButtons.map((btn) => (
             <button
               key={btn.id}
@@ -206,32 +206,22 @@ const StatisticsScreen = () => {
           </div>
         )}
 
-        <div className={`mt-4 flex flex-col gap-2 rounded-xl border px-4 py-3 ${isDark ? 'border-slate-700/50 bg-slate-900/55' : 'border-slate-200 bg-slate-50/90'}`}>
-          <div className="flex items-center justify-between gap-3">
-            <span className="theme-text-muted text-[11px] uppercase tracking-[0.16em]">
-              {settings.language === 'ru' && 'Активный диапазон'}
-              {settings.language === 'en' && 'Active range'}
-              {settings.language === 'he' && 'טווח פעיל'}
-            </span>
-            <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${isDark ? 'bg-sky-500/10 text-sky-300' : 'bg-sky-100 text-sky-700'}`}>
-              {periodButtons.find(btn => btn.id === period)?.label}
-            </span>
-          </div>
-          <div className="theme-text-primary text-sm font-semibold">
+        <div className={`mt-3 flex items-center justify-between gap-3 rounded-xl border px-3 py-2 ${isDark ? 'border-slate-700/50 bg-slate-900/45' : 'border-slate-200 bg-slate-50/90'}`}>
+          <div className="min-w-0 theme-text-primary text-base font-semibold truncate">
             {activeRangeLabel}
           </div>
-          <div className="theme-text-muted text-sm">
-            {periodHelperText}
-          </div>
+          <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${isDark ? 'bg-sky-500/10 text-sky-300' : 'bg-sky-100 text-sky-700'}`}>
+            {periodButtons.find(btn => btn.id === period)?.label}
+          </span>
         </div>
       </Card>
       
       {filteredShifts.length === 0 ? (
         <EmptyState icon={BarChart3} title={t.noData} />
       ) : (
-        <div className="space-y-4" key={`${period}-${customFrom}-${customTo}`}>
+        <div className="space-y-2.5" key={`${period}-${customFrom}-${customTo}`}>
           {/* Net income header */}
-          <div className={`rounded-[26px] p-5 border overflow-hidden relative ${
+          <div className={`rounded-[26px] p-4 border overflow-hidden relative ${
             isDark
               ? 'bg-[linear-gradient(145deg,rgba(8,23,39,0.94),rgba(18,42,72,0.92))] border-sky-400/20'
               : 'bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(235,244,252,0.92))] border-sky-200/80'
