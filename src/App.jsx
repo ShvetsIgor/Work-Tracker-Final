@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { lazy, Suspense, useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { FullScreenLoader } from '@/components/ui';
-import AuthScreen from '@/components/AuthScreen';
 import Header from '@/components/Header';
 import Navigation from '@/components/Navigation';
 import ShiftsScreen from '@/components/ShiftsScreen';
-import StatisticsScreen from '@/components/StatisticsScreen';
-import SettingsScreen from '@/components/SettingsScreen';
-import AccountModal from '@/components/AccountModal';
+
+const AuthScreen = lazy(() => import('@/components/AuthScreen'));
+const StatisticsScreen = lazy(() => import('@/components/StatisticsScreen'));
+const SettingsScreen = lazy(() => import('@/components/SettingsScreen'));
+const AccountModal = lazy(() => import('@/components/AccountModal'));
 
 const App = () => {
   const { user, authLoading, rtl, settings } = useApp();
@@ -32,10 +33,19 @@ const App = () => {
   
   // Show auth screen if not logged in
   if (!user) {
-    return <AuthScreen />;
+    return (
+      <Suspense fallback={<FullScreenLoader />}>
+        <AuthScreen />
+      </Suspense>
+    );
   }
   
   const isDark = settings.theme !== 'light';
+  const secondaryScreenFallback = (
+    <div className="py-24">
+      <FullScreenLoader />
+    </div>
+  );
   
   // Main app
   return (
@@ -62,16 +72,28 @@ const App = () => {
       
       <main className="relative max-w-lg mx-auto px-4 py-6">
         {activeTab === 'shifts' && <ShiftsScreen />}
-        {activeTab === 'statistics' && <StatisticsScreen />}
-        {activeTab === 'settings' && <SettingsScreen />}
+        {activeTab === 'statistics' && (
+          <Suspense fallback={secondaryScreenFallback}>
+            <StatisticsScreen />
+          </Suspense>
+        )}
+        {activeTab === 'settings' && (
+          <Suspense fallback={secondaryScreenFallback}>
+            <SettingsScreen />
+          </Suspense>
+        )}
       </main>
       
       <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />
       
-      <AccountModal 
-        isOpen={showAccountModal} 
-        onClose={() => setShowAccountModal(false)} 
-      />
+      {showAccountModal && (
+        <Suspense fallback={null}>
+          <AccountModal 
+            isOpen={showAccountModal} 
+            onClose={() => setShowAccountModal(false)} 
+          />
+        </Suspense>
+      )}
     </div>
   );
 };

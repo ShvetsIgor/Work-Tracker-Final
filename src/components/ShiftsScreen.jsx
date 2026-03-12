@@ -1,11 +1,12 @@
-import React, { useState, useMemo } from 'react';
+import React, { lazy, Suspense, useState, useMemo } from 'react';
 import { Plus, Clock, Car, Banknote, CreditCard, Gift, Receipt, Trash2, Edit3, ClipboardList, Package, DollarSign, ChevronDown, ChevronUp, CalendarRange, BarChart3 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
-import ShiftModal from '@/components/ShiftModal';
 import { Button, Card, EmptyState } from '@/components/ui';
 import { formatDate, isToday, isYesterday } from '@/utils/dateUtils';
 import { calculateShiftBaseEarnings, calculateNetTipsCard, calculateTotalExpenses, calculateShiftNetIncome } from '@/utils/calculations';
 import { formatCurrency, formatTime } from '@/utils/formatters';
+
+const ShiftModal = lazy(() => import('@/components/ShiftModal'));
 
 // Compact shift row
 const ShiftRow = ({ shift, onExpand, isExpanded, settings, t }) => {
@@ -262,11 +263,15 @@ const ShiftsScreen = () => {
       )}
       
       {/* Modal */}
-      <ShiftModal
-        isOpen={showModal}
-        onClose={handleCloseModal}
-        shift={editingShift}
-      />
+      {showModal && (
+        <Suspense fallback={null}>
+          <ShiftModal
+            isOpen={showModal}
+            onClose={handleCloseModal}
+            shift={editingShift}
+          />
+        </Suspense>
+      )}
     </div>
   );
 };
