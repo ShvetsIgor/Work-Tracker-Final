@@ -8,6 +8,7 @@ const Header = ({ onOpenAccount }) => {
   const menuRef = useRef(null);
   
   const isDark = settings.theme !== 'light';
+  const mobileSafeTop = 'calc(env(safe-area-inset-top, 0px) + 0.75rem)';
   
   // Close menu when clicking outside
   useEffect(() => {
@@ -35,7 +36,10 @@ const Header = ({ onOpenAccount }) => {
   const displayName = user?.name || user?.email?.split('@')[0] || 'User';
   
   return (
-    <header className="sticky top-0 z-40 px-4 pt-4 lg:px-8 lg:pt-6">
+    <header
+      className="sticky top-0 z-40 px-4 lg:px-8 lg:pt-6"
+      style={{ paddingTop: mobileSafeTop }}
+    >
       <div className="mx-auto flex max-w-7xl justify-between items-center lg:pl-[18rem]">
         {/* Logo */}
         <div className={`w-full flex items-center justify-between gap-3 rounded-[24px] border px-4 py-3 transition-colors duration-300 ${
