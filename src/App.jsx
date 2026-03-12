@@ -136,7 +136,7 @@ const App = () => {
       
       <Header onOpenAccount={() => setShowAccountModal(true)} />
       
-      <main className="relative max-w-lg mx-auto px-4 py-5 pb-32">
+      <main className="relative mx-auto max-w-7xl px-4 py-5 pb-32 lg:px-8 lg:pl-[20rem] lg:pr-8 lg:py-6">
         {activeTab === 'shifts' && <ShiftsScreen />}
         {activeTab === 'statistics' && (
           <Suspense fallback={secondaryScreenFallback}>

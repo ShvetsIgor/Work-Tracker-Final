@@ -35,8 +35,8 @@ const Header = ({ onOpenAccount }) => {
   const displayName = user?.name || user?.email?.split('@')[0] || 'User';
   
   return (
-    <header className="sticky top-0 px-4 pt-4 z-40">
-      <div className="max-w-lg mx-auto flex justify-between items-center">
+    <header className="sticky top-0 z-40 px-4 pt-4 lg:px-8 lg:pt-6">
+      <div className="mx-auto flex max-w-7xl justify-between items-center lg:pl-[18rem]">
         {/* Logo */}
         <div className={`w-full flex items-center justify-between gap-3 rounded-[24px] border px-4 py-3 transition-colors duration-300 ${
           isDark
