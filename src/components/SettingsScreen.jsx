@@ -59,7 +59,7 @@ const CollapsibleSection = ({ title, icon: Icon, iconColor, children, defaultOpe
   );
 };
 
-const SettingsScreen = () => {
+const SettingsScreen = ({ embedded = false }) => {
   const { t, settings, updateSettings, settingsSaving, settingsSaveError, settingsLastSavedAt } = useApp();
   const [showSavedState, setShowSavedState] = useState(false);
 
@@ -158,18 +158,27 @@ const SettingsScreen = () => {
   ];
 
   return (
-    <div className="pb-24">
-      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold theme-text-primary">{t.settings}</h1>
-        </div>
-        {saveStatus && (
-          <div className={`inline-flex items-center gap-2 self-start rounded-full border px-3 py-1.5 text-sm font-medium shadow-sm ${saveStatus.className}`}>
-            <SaveStatusIcon className={`h-4 w-4 ${settingsSaving ? 'animate-spin' : ''}`} />
-            <span>{saveStatus.text}</span>
+    <div className={embedded ? '' : 'pb-24'}>
+      {!embedded && (
+        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold theme-text-primary">{t.settings}</h1>
           </div>
-        )}
-      </div>
+          {saveStatus && (
+            <div className={`inline-flex items-center gap-2 self-start rounded-full border px-3 py-1.5 text-sm font-medium shadow-sm ${saveStatus.className}`}>
+              <SaveStatusIcon className={`h-4 w-4 ${settingsSaving ? 'animate-spin' : ''}`} />
+              <span>{saveStatus.text}</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {embedded && saveStatus && (
+        <div className={`mb-4 inline-flex items-center gap-2 self-start rounded-full border px-3 py-1.5 text-sm font-medium shadow-sm ${saveStatus.className}`}>
+          <SaveStatusIcon className={`h-4 w-4 ${settingsSaving ? 'animate-spin' : ''}`} />
+          <span>{saveStatus.text}</span>
+        </div>
+      )}
 
       <div className="lg:grid lg:grid-cols-2 lg:gap-4 lg:items-start">
       <Card className="p-4 mb-3 lg:mb-0">

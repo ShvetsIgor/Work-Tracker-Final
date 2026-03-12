@@ -8,13 +8,11 @@ import { colorPalettes } from '@/config/colorPalettes';
 
 const AuthScreen = lazy(() => import('@/components/AuthScreen'));
 const StatisticsScreen = lazy(() => import('@/components/StatisticsScreen'));
-const SettingsScreen = lazy(() => import('@/components/SettingsScreen'));
-const AccountModal = lazy(() => import('@/components/AccountModal'));
+const AccountScreen = lazy(() => import('@/components/AccountScreen'));
 
 const App = () => {
   const { user, authLoading, rtl, settings } = useApp();
   const [activeTab, setActiveTab] = useState('shifts');
-  const [showAccountModal, setShowAccountModal] = useState(false);
   
   // Apply theme to document
   useEffect(() => {
@@ -83,8 +81,7 @@ const App = () => {
       }
     });
   }, [settings.theme, settings.colorPalette]);
-  
-  // Scroll to top when tab changes
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [activeTab]);
@@ -134,7 +131,7 @@ const App = () => {
         }`} />
       </div>
       
-      <Header onOpenAccount={() => setShowAccountModal(true)} />
+      <Header onOpenAccount={() => setActiveTab('account')} />
       
       <main className="relative mx-auto max-w-7xl px-4 py-5 pb-32 lg:px-8 lg:pl-[20rem] lg:pr-8 lg:py-6">
         {activeTab === 'shifts' && <ShiftsScreen />}
@@ -143,23 +140,14 @@ const App = () => {
             <StatisticsScreen />
           </Suspense>
         )}
-        {activeTab === 'settings' && (
+        {activeTab === 'account' && (
           <Suspense fallback={secondaryScreenFallback}>
-            <SettingsScreen />
+            <AccountScreen />
           </Suspense>
         )}
       </main>
       
       <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />
-      
-      {showAccountModal && (
-        <Suspense fallback={null}>
-          <AccountModal 
-            isOpen={showAccountModal} 
-            onClose={() => setShowAccountModal(false)} 
-          />
-        </Suspense>
-      )}
     </div>
   );
 };

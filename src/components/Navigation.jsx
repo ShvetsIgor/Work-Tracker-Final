@@ -1,5 +1,5 @@
 import React from 'react';
-import { ClipboardList, BarChart3, Settings } from 'lucide-react';
+import { ClipboardList, BarChart3 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 
 const Navigation = ({ activeTab, setActiveTab }) => {
@@ -10,7 +10,6 @@ const Navigation = ({ activeTab, setActiveTab }) => {
   const tabs = [
     { id: 'shifts', icon: ClipboardList, label: t.shifts },
     { id: 'statistics', icon: BarChart3, label: t.statistics },
-    { id: 'settings', icon: Settings, label: t.settings },
   ];
 
   return (
