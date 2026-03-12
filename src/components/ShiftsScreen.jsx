@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Plus, Clock, Car, Banknote, CreditCard, Gift, Receipt, Trash2, Edit3, ClipboardList, Package, DollarSign, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Clock, Car, Banknote, CreditCard, Gift, Receipt, Trash2, Edit3, ClipboardList, Package, DollarSign, ChevronDown, ChevronUp, CalendarRange, BarChart3 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import ShiftModal from '@/components/ShiftModal';
 import { Button, Card, EmptyState } from '@/components/ui';
@@ -167,6 +167,11 @@ const ShiftsScreen = () => {
     setShowModal(false);
     setEditingShift(null);
   };
+
+  const currentMonthLabel = useMemo(() => {
+    const now = new Date();
+    return formatDate(now, settings.language, 'LLLL yyyy');
+  }, [settings.language]);
   
   // Filter to current month only and sort by date
   const currentMonthShifts = useMemo(() => {
@@ -191,6 +196,33 @@ const ShiftsScreen = () => {
           {t.addShift}
         </Button>
       </div>
+
+      <Card className={`mb-5 overflow-hidden ${settings.theme !== 'light' ? 'bg-slate-800/60' : 'bg-white/85 border border-slate-200'}`}>
+        <div className="relative p-4">
+          <div className={`absolute inset-0 ${settings.theme !== 'light' ? 'bg-gradient-to-r from-purple-500/10 via-blue-500/5 to-transparent' : 'bg-gradient-to-r from-purple-100/80 via-blue-50/70 to-transparent'}`} />
+          <div className="relative flex items-start gap-3">
+            <div className={`mt-0.5 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ${settings.theme !== 'light' ? 'bg-purple-500/15 text-purple-300' : 'bg-purple-100 text-purple-700'}`}>
+              <CalendarRange className="h-5 w-5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="mb-1 flex items-center gap-2">
+                <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${settings.theme !== 'light' ? 'bg-slate-700/70 text-slate-200' : 'bg-slate-100 text-slate-700'}`}>
+                  {t.thisMonth}
+                </span>
+                <span className="theme-text-primary text-sm font-semibold capitalize">{currentMonthLabel}</span>
+              </div>
+              <p className="theme-text-secondary text-sm leading-relaxed">
+                {settings.language === 'ru' && `Здесь собраны смены за текущий месяц. История и гибкий список смен доступны во вкладке ${t.statistics.toLowerCase()}.`}
+                {settings.language === 'en' && `This screen shows your current month shifts. Full history and the flexible shift list are available in ${t.statistics}.`}
+                {settings.language === 'he' && `כאן מוצגות המשמרות של החודש הנוכחי. היסטוריה מלאה ורשימת משמרות גמישה זמינות בלשונית ${t.statistics}.`}
+              </p>
+            </div>
+            <div className={`hidden sm:flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg ${settings.theme !== 'light' ? 'bg-blue-500/10 text-blue-300' : 'bg-blue-100 text-blue-700'}`}>
+              <BarChart3 className="h-4 w-4" />
+            </div>
+          </div>
+        </div>
+      </Card>
       
       {/* Shifts List */}
       {currentMonthShifts.length === 0 ? (
