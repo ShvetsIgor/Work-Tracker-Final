@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Mail, Lock, Eye, EyeOff, ArrowLeft, User } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { Button, Input } from '@/components/ui';
@@ -29,16 +29,47 @@ const AuthScreen = () => {
   
   const t = getTranslation(lang);
   const isRTL = lang === 'he';
+  const trimmedName = name.trim();
+  const normalizedEmail = email.trim();
+  const canSubmit = useMemo(() => {
+    if (!normalizedEmail) {
+      return false;
+    }
+
+    if (mode === 'reset') {
+      return true;
+    }
+
+    if (!password) {
+      return false;
+    }
+
+    if (mode === 'register') {
+      return Boolean(trimmedName) && Boolean(confirmPassword);
+    }
+
+    return true;
+  }, [confirmPassword, mode, normalizedEmail, password, trimmedName]);
+
+  useEffect(() => {
+    if (localError) {
+      setLocalError('');
+    }
+
+    if (authError) {
+      setAuthError(null);
+    }
+  }, [name, email, password, confirmPassword, localError, authError, setAuthError]);
   
   const validateForm = () => {
     setLocalError('');
     
-    if (mode === 'register' && !name.trim()) {
+    if (mode === 'register' && !trimmedName) {
       setLocalError(t.errorNameRequired);
       return false;
     }
     
-    if (!email) {
+    if (!normalizedEmail) {
       setLocalError(t.errorEmailRequired);
       return false;
     }
@@ -70,11 +101,11 @@ const AuthScreen = () => {
     
     try {
       if (mode === 'login') {
-        await login(email, password);
+        await login(normalizedEmail, password);
       } else if (mode === 'register') {
-        await register(email, password, name.trim());
+        await register(normalizedEmail, password, trimmedName);
       } else if (mode === 'reset') {
-        await resetPassword(email);
+        await resetPassword(normalizedEmail);
         setResetSent(true);
       }
     } catch (error) {
@@ -165,6 +196,7 @@ const AuthScreen = () => {
                 <Mail className="w-8 h-8 text-green-400" />
               </div>
               <p className="text-white mb-4">{t.success}</p>
+              <p className="text-slate-400 text-sm mb-6 break-all">{normalizedEmail}</p>
               <Button variant="secondary" onClick={() => switchMode('login')}>
                 {t.backToLogin}
               </Button>
@@ -263,7 +295,7 @@ const AuthScreen = () => {
                 )}
                 
                 {/* Submit button */}
-                <Button type="submit" fullWidth loading={loading}>
+                <Button type="submit" fullWidth loading={loading} disabled={loading || !canSubmit}>
                   {mode === 'login' && t.login}
                   {mode === 'register' && t.register}
                   {mode === 'reset' && t.sendResetEmail}
