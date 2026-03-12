@@ -171,7 +171,8 @@ const SettingsScreen = () => {
         )}
       </div>
 
-      <Card className="p-4 mb-3">
+      <div className="lg:grid lg:grid-cols-2 lg:gap-4 lg:items-start">
+      <Card className="p-4 mb-3 lg:mb-0">
         <h3 className="theme-text-primary text-base font-bold mb-3 flex items-center gap-2">
           <Globe className="w-5 h-5 theme-info-text" />
           {t.language} & {t.currency}
@@ -232,7 +233,7 @@ const SettingsScreen = () => {
         </SettingRow>
       </Card>
 
-      <Card className="p-4 mb-3">
+      <Card className="p-4 mb-3 lg:mb-0">
         <h3 className="theme-text-primary text-base font-bold mb-3 flex items-center gap-2">
           <Briefcase className="w-5 h-5 theme-income-soft-text" />
           {t.workType}
@@ -336,7 +337,9 @@ const SettingsScreen = () => {
           </div>
         </SettingRow>
       </Card>
+      </div>
 
+      <div className="lg:grid lg:grid-cols-2 lg:gap-4 lg:items-start">
       <CollapsibleSection
         title={t.enabledFields}
         icon={SettingsIcon}
@@ -468,6 +471,7 @@ const SettingsScreen = () => {
           />
         </SettingRow>
       </CollapsibleSection>
+      </div>
     </div>
   );
 };

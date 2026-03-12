@@ -281,84 +281,109 @@ const ShiftsScreen = () => {
   return (
     <div className="pb-24">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <h1 className="text-2xl font-bold theme-text-primary">{t.shifts}</h1>
         <Button onClick={() => setShowModal(true)} icon={Plus}>
           {t.addShift}
         </Button>
       </div>
-
-      <Card className={`mb-4 overflow-hidden ${settings.theme !== 'light' ? 'bg-[#1d1e22]/88' : 'bg-white/85 border border-slate-200'}`}>
-        <div className="p-4">
-          <div className="theme-text-primary text-sm font-semibold capitalize">{currentMonthLabel}</div>
-        </div>
-      </Card>
-
-      {currentMonthShifts.length > 0 && (
-        <div className="mb-4 grid grid-cols-3 gap-2">
-          <Card className="p-3">
-            <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
-              {t.shiftsCount}
-            </div>
-            <div className="theme-text-primary text-lg font-bold">
-              {currentMonthStats.shiftsCount}
-            </div>
-          </Card>
-          <Card className="p-3">
-            <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
-              {t.totalHours}
-            </div>
-            <div className="theme-text-primary text-lg font-bold">
-              {formatTime(currentMonthStats.totalMinutes)}
-            </div>
-          </Card>
-          <Card className="p-3">
-            <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
-              {settings.workType !== 'pieceWork' ? t.totalEarnings : t.earnedAmount}
-            </div>
-          <div className="theme-income-text text-lg font-bold">
-              {formatCurrency(currentMonthStats.totalEarnings, settings.currency)}
-            </div>
-          </Card>
-        </div>
-      )}
       
-      {/* Shifts List */}
-      {currentMonthShifts.length === 0 ? (
-        <EmptyState
-          icon={ClipboardList}
-          title={t.noShifts}
-          description={t.noData}
-          action={
-            <Button onClick={() => setShowModal(true)} icon={Plus}>
-              {t.addShift}
-            </Button>
-          }
-        />
-      ) : (
-        <div className="space-y-2">
-          {currentMonthShifts.map((shift) => (
-            <div key={shift.id}>
-              <ShiftRow
-                shift={shift}
-                settings={settings}
-                t={t}
-                isExpanded={expandedId === shift.id}
-                onExpand={() => setExpandedId(expandedId === shift.id ? null : shift.id)}
-              />
-              {expandedId === shift.id && (
-                <ShiftDetails
-                  shift={shift}
-                  settings={settings}
-                  t={t}
-                  onEdit={handleEdit}
-                  onDelete={() => handleDeleteRequest(shift)}
-                />
-              )}
-            </div>
-          ))}
+      <div className="lg:grid lg:grid-cols-[minmax(0,1.7fr)_minmax(320px,0.9fr)] lg:gap-6 lg:items-start">
+        <div className="min-w-0">
+          {currentMonthShifts.length === 0 ? (
+            <EmptyState
+              icon={ClipboardList}
+              title={t.noShifts}
+              description={t.noData}
+              action={
+                <Button onClick={() => setShowModal(true)} icon={Plus}>
+                  {t.addShift}
+                </Button>
+              }
+            />
+          ) : (
+            <Card className="p-3 lg:p-4">
+              <div className="mb-3 hidden items-center justify-between lg:flex">
+                <div>
+                  <div className="theme-text-muted text-[11px] uppercase tracking-[0.16em]">
+                    {t.thisMonth || 'This month'}
+                  </div>
+                  <div className="theme-text-primary mt-1 text-lg font-semibold capitalize">
+                    {currentMonthLabel}
+                  </div>
+                </div>
+                <div className="theme-text-muted text-sm">
+                  {currentMonthStats.shiftsCount} {t.shiftsCount}
+                </div>
+              </div>
+              <div className="space-y-2">
+                {currentMonthShifts.map((shift) => (
+                  <div key={shift.id}>
+                    <ShiftRow
+                      shift={shift}
+                      settings={settings}
+                      t={t}
+                      isExpanded={expandedId === shift.id}
+                      onExpand={() => setExpandedId(expandedId === shift.id ? null : shift.id)}
+                    />
+                    {expandedId === shift.id && (
+                      <ShiftDetails
+                        shift={shift}
+                        settings={settings}
+                        t={t}
+                        onEdit={handleEdit}
+                        onDelete={() => handleDeleteRequest(shift)}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
         </div>
-      )}
+
+        <div className="mt-4 space-y-4 lg:sticky lg:top-28 lg:mt-0">
+          <Card className={`overflow-hidden ${settings.theme !== 'light' ? 'bg-[#1d1e22]/88' : 'bg-white/85 border border-slate-200'}`}>
+            <div className="p-4 lg:p-5">
+              <div className="theme-text-muted text-[11px] uppercase tracking-[0.16em]">
+                {t.thisMonth || 'This month'}
+              </div>
+              <div className="theme-text-primary mt-2 text-base font-semibold capitalize lg:text-xl">
+                {currentMonthLabel}
+              </div>
+            </div>
+          </Card>
+
+          {currentMonthShifts.length > 0 && (
+            <div className="grid grid-cols-3 gap-2 lg:grid-cols-1">
+              <Card className="p-3.5 lg:p-4">
+                <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
+                  {t.shiftsCount}
+                </div>
+                <div className="theme-text-primary text-lg font-bold lg:text-2xl">
+                  {currentMonthStats.shiftsCount}
+                </div>
+              </Card>
+              <Card className="p-3.5 lg:p-4">
+                <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
+                  {t.totalHours}
+                </div>
+                <div className="theme-text-primary text-lg font-bold lg:text-2xl">
+                  {formatTime(currentMonthStats.totalMinutes)}
+                </div>
+              </Card>
+              <Card className="p-3.5 lg:p-4">
+                <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
+                  {settings.workType !== 'pieceWork' ? t.totalEarnings : t.earnedAmount}
+                </div>
+                <div className="theme-income-text text-lg font-bold lg:text-2xl">
+                  {formatCurrency(currentMonthStats.totalEarnings, settings.currency)}
+                </div>
+              </Card>
+            </div>
+          )}
+        </div>
+      </div>
       
       {/* Modal */}
       {showModal && (

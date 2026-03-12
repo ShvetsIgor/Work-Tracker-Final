@@ -160,7 +160,8 @@ const StatisticsScreen = () => {
         <h1 className="text-2xl font-bold theme-text-primary">{t.statistics}</h1>
       </div>
       
-      <Card className="p-4 mb-3">
+      <div className="lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] lg:gap-4 lg:items-stretch">
+      <Card className="p-4 mb-3 lg:mb-0">
         <div className="flex items-center justify-between gap-3 mb-3">
           <label className="block theme-text-muted text-[11px] uppercase tracking-[0.18em]">{t.selectPeriod}</label>
           <div className={`h-9 w-9 rounded-xl flex items-center justify-center ${isDark ? 'bg-white/[0.04] text-[#c9beaf]' : 'bg-sky-100 text-sky-700'}`}>
@@ -226,9 +227,9 @@ const StatisticsScreen = () => {
       {filteredShifts.length === 0 ? (
         <EmptyState icon={BarChart3} title={t.noData} />
       ) : (
-        <div className="space-y-2.5" key={`${period}-${customFrom}-${customTo}`}>
+        <div className="space-y-2.5 lg:contents" key={`${period}-${customFrom}-${customTo}`}>
           {/* Net income header */}
-          <div className={`rounded-[26px] p-4 border overflow-hidden relative ${
+          <div className={`rounded-[26px] p-4 border overflow-hidden relative mb-2.5 lg:mb-0 ${
             isDark
               ? 'bg-[#1f2024] border-white/[0.05]'
               : 'bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(235,244,252,0.92))] border-sky-200/80'
@@ -252,8 +253,9 @@ const StatisticsScreen = () => {
             </div>
           </div>
           
+          <div className="space-y-2.5 lg:col-span-2">
           {/* Stats grid - filtered by settings */}
-          <div className="grid grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-2 gap-2.5 xl:grid-cols-4">
             {sf.totalHours !== false && (
               <StatCard 
                 icon={Clock} 
@@ -397,8 +399,10 @@ const StatisticsScreen = () => {
             dateFrom={customFrom}
             dateTo={customTo}
           />
+          </div>
         </div>
       )}
+      </div>
     </div>
   );
 };
