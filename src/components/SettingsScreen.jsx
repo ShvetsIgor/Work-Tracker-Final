@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Globe, Utensils, CreditCard, Settings as SettingsIcon, Sun, Moon, Briefcase, BarChart3, ChevronDown, ChevronUp } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Globe, Utensils, CreditCard, Settings as SettingsIcon, Sun, Moon, Briefcase, BarChart3, ChevronDown, ChevronUp, CheckCircle2, AlertCircle, Loader } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { Card, Input, Select, Toggle } from '@/components/ui';
 import { currencies } from '@/config/currencies';
@@ -45,32 +45,80 @@ const CollapsibleSection = ({ title, icon: Icon, iconColor, children, defaultOpe
 };
 
 const SettingsScreen = () => {
-  const { t, settings, updateSettings } = useApp();
-  
+  const { t, settings, updateSettings, settingsSaving, settingsSaveError, settingsLastSavedAt } = useApp();
+  const [showSavedState, setShowSavedState] = useState(false);
+
   const isDark = settings.theme !== 'light';
   const isHourly = settings.workType !== 'pieceWork';
-  
-  const handleChange = (key, value) => {
-    updateSettings({ [key]: value });
+
+  useEffect(() => {
+    if (!settingsLastSavedAt || settingsSaveError) {
+      return;
+    }
+
+    setShowSavedState(true);
+    const timeoutId = setTimeout(() => {
+      setShowSavedState(false);
+    }, 2200);
+
+    return () => clearTimeout(timeoutId);
+  }, [settingsLastSavedAt, settingsSaveError]);
+
+  const handleChange = async (key, value) => {
+    try {
+      await updateSettings({ [key]: value });
+    } catch {
+      // Error state is reflected via save status badge.
+    }
   };
-  
-  const handleFieldToggle = (field, value) => {
-    updateSettings({
-      enabledFields: {
-        ...settings.enabledFields,
-        [field]: value
+
+  const handleFieldToggle = async (field, value) => {
+    try {
+      await updateSettings({
+        enabledFields: {
+          ...settings.enabledFields,
+          [field]: value
+        }
+      });
+    } catch {
+      // Error state is reflected via save status badge.
+    }
+  };
+
+  const handleStatisticsFieldToggle = async (field, value) => {
+    try {
+      await updateSettings({
+        statisticsFields: {
+          ...(settings.statisticsFields || {}),
+          [field]: value
+        }
+      });
+    } catch {
+      // Error state is reflected via save status badge.
+    }
+  };
+
+  const saveStatus = settingsSaveError
+    ? {
+        icon: AlertCircle,
+        text: settingsSaveError || t.errorSettingsSave || t.errorGeneric || 'Could not save settings',
+        className: 'border-red-500/30 bg-red-500/10 text-red-300'
       }
-    });
-  };
-  
-  const handleStatisticsFieldToggle = (field, value) => {
-    updateSettings({
-      statisticsFields: {
-        ...(settings.statisticsFields || {}),
-        [field]: value
-      }
-    });
-  };
+    : settingsSaving
+      ? {
+          icon: Loader,
+          text: t.settingsSaving || 'Saving settings...',
+          className: 'border-amber-500/30 bg-amber-500/10 text-amber-200'
+        }
+      : showSavedState
+        ? {
+            icon: CheckCircle2,
+            text: t.settingsSaved || 'Settings saved',
+            className: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200'
+          }
+        : null;
+
+  const SaveStatusIcon = saveStatus?.icon;
   
   const languageOptions = [
     { value: 'ru', label: 'Русский' },
@@ -95,7 +143,15 @@ const SettingsScreen = () => {
   
   return (
     <div className="pb-24">
-      <h1 className="text-2xl font-bold theme-text-primary mb-6">{t.settings}</h1>
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-2xl font-bold theme-text-primary">{t.settings}</h1>
+        {saveStatus && (
+          <div className={`inline-flex items-center gap-2 self-start rounded-full border px-3 py-1.5 text-sm font-medium shadow-sm ${saveStatus.className}`}>
+            <SaveStatusIcon className={`h-4 w-4 ${settingsSaving ? 'animate-spin' : ''}`} />
+            <span>{saveStatus.text}</span>
+          </div>
+        )}
+      </div>
       
       {/* Language, Currency & Theme */}
       <Card className="p-4 mb-4">

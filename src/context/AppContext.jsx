@@ -46,6 +46,9 @@ export const AppProvider = ({ children }) => {
   
   // App state
   const [settings, setSettings] = useState(defaultSettings);
+  const [settingsSaving, setSettingsSaving] = useState(false);
+  const [settingsSaveError, setSettingsSaveError] = useState('');
+  const [settingsLastSavedAt, setSettingsLastSavedAt] = useState(null);
   const [shifts, setShifts] = useState([]);
   const [loading, setLoading] = useState(false);
   
@@ -85,6 +88,9 @@ export const AppProvider = ({ children }) => {
       } else {
         setUser(null);
         setSettings(defaultSettings);
+        setSettingsSaving(false);
+        setSettingsSaveError('');
+        setSettingsLastSavedAt(null);
         setShifts([]);
       }
       setAuthLoading(false);
@@ -268,17 +274,26 @@ export const AppProvider = ({ children }) => {
   // Settings functions
   const updateSettings = useCallback(async (newSettings) => {
     if (!user) return;
-    
+
+    const previousSettings = settings;
     const mergedSettings = { ...settings, ...newSettings };
+    setSettingsSaving(true);
+    setSettingsSaveError('');
     setSettings(mergedSettings);
-    
+
     try {
       const settingsRef = doc(db, 'users', user.id, 'settings', 'preferences');
       await updateDoc(settingsRef, newSettings);
+      setSettingsLastSavedAt(Date.now());
     } catch (error) {
+      setSettings(previousSettings);
+      setSettingsSaveError(t.errorSettingsSave || t.errorGeneric || 'Could not save settings');
       console.error('Error updating settings:', error);
+      throw error;
+    } finally {
+      setSettingsSaving(false);
     }
-  }, [user, settings]);
+  }, [user, settings, t]);
   
   // Shift functions
   const addShift = async (shiftData) => {
@@ -357,6 +372,9 @@ export const AppProvider = ({ children }) => {
     // Settings
     settings,
     updateSettings,
+    settingsSaving,
+    settingsSaveError,
+    settingsLastSavedAt,
     
     // Shifts
     shifts,
