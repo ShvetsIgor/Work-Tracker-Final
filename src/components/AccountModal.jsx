@@ -8,28 +8,47 @@ const AccountModal = ({ isOpen, onClose }) => {
   const { t, user, updateProfile } = useApp();
   const [name, setName] = useState('');
   const [saving, setSaving] = useState(false);
-  
+  const [error, setError] = useState('');
+
   useEffect(() => {
     if (user && isOpen) {
       setName(user.name || '');
+      setError('');
     }
   }, [user, isOpen]);
-  
+
+  const trimmedName = name.trim();
+  const currentName = user?.name || '';
+  const hasChanges = trimmedName !== currentName;
+  const isNameValid = trimmedName.length > 0;
+
   const handleSave = async () => {
+    if (!isNameValid) {
+      setError(t.errorNameRequired);
+      return;
+    }
+
+    if (!hasChanges) {
+      onClose();
+      return;
+    }
+
     setSaving(true);
-    
+    setError('');
+
     try {
-      await updateProfile({ name: name.trim() });
-      onClose(); // Закрываем после успешного сохранения
-    } catch (error) {
-      console.error('Error saving profile:', error);
+      await updateProfile({ name: trimmedName });
+      onClose();
+    } catch (saveError) {
+      setError(t.errorGeneric);
+      console.error('Error saving profile:', saveError);
     } finally {
       setSaving(false);
     }
   };
-  
+
   if (!user) return null;
-  
+
   return (
     <Modal
       isOpen={isOpen}
@@ -40,33 +59,47 @@ const AccountModal = ({ isOpen, onClose }) => {
           <Button variant="secondary" onClick={onClose} className="flex-1">
             {t.cancel}
           </Button>
-          <Button onClick={handleSave} loading={saving} className="flex-1">
+          <Button
+            onClick={handleSave}
+            loading={saving}
+            className="flex-1"
+            disabled={!hasChanges || !isNameValid}
+          >
             {t.save}
           </Button>
         </>
       }
     >
       <div className="space-y-6">
-        {/* Avatar */}
+        {error && (
+          <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+            {error}
+          </div>
+        )}
+
         <div className="flex justify-center">
           <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center shadow-lg">
             <span className="text-white text-3xl font-bold">
-              {(name || user.email || 'U').charAt(0).toUpperCase()}
+              {(trimmedName || user.email || 'U').charAt(0).toUpperCase()}
             </span>
           </div>
         </div>
-        
-        {/* Name */}
+
         <Input
           type="text"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => {
+            setName(e.target.value);
+            if (error) {
+              setError('');
+            }
+          }}
           label={t.name}
           icon={User}
           placeholder={t.namePlaceholder}
+          error={error}
         />
-        
-        {/* Email (read-only) */}
+
         <div>
           <label className="block text-slate-400 text-sm mb-2">{t.email}</label>
           <div className="flex items-center gap-3 bg-slate-700/30 border border-slate-600/50 rounded-xl px-4 py-3">
