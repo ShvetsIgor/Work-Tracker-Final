@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { 
   onAuthStateChanged, 
   signInWithEmailAndPassword, 
@@ -37,6 +37,8 @@ export const useApp = () => {
 
 // Provider component
 export const AppProvider = ({ children }) => {
+  const shiftsUnsubscribeRef = useRef(null);
+
   // Auth state
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -50,10 +52,19 @@ export const AppProvider = ({ children }) => {
   // Derived state
   const t = getTranslation(settings.language);
   const rtl = isRTL(settings.language);
+
+  const cleanupShiftsSubscription = useCallback(() => {
+    if (shiftsUnsubscribeRef.current) {
+      shiftsUnsubscribeRef.current();
+      shiftsUnsubscribeRef.current = null;
+    }
+  }, []);
   
   // Listen to auth state changes
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
+      cleanupShiftsSubscription();
+
       if (firebaseUser) {
         // Load user profile to get name
         const profileRef = doc(db, 'users', firebaseUser.uid, 'profile', 'info');
@@ -70,7 +81,7 @@ export const AppProvider = ({ children }) => {
         await loadSettings(firebaseUser.uid);
         
         // Subscribe to shifts
-        subscribeToShifts(firebaseUser.uid);
+        shiftsUnsubscribeRef.current = subscribeToShifts(firebaseUser.uid);
       } else {
         setUser(null);
         setSettings(defaultSettings);
@@ -79,8 +90,11 @@ export const AppProvider = ({ children }) => {
       setAuthLoading(false);
     });
     
-    return () => unsubscribe();
-  }, []);
+    return () => {
+      cleanupShiftsSubscription();
+      unsubscribeAuth();
+    };
+  }, [cleanupShiftsSubscription]);
   
   // Load user settings from Firestore
   const loadSettings = async (userId) => {
@@ -230,6 +244,7 @@ export const AppProvider = ({ children }) => {
   
   const logout = async () => {
     try {
+      cleanupShiftsSubscription();
       await signOut(auth);
     } catch (error) {
       console.error('Error signing out:', error);
