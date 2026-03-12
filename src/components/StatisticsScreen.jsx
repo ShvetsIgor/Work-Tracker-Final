@@ -11,12 +11,12 @@ import { calculateStatistics, calculateShiftBaseEarnings } from '@/utils/calcula
 import { formatCurrency, formatTime, formatTimeLabeled } from '@/utils/formatters';
 
 const StatCard = ({ icon: Icon, label, value, color = 'theme-text-primary', subValue }) => (
-  <Card className="p-4">
-    <div className="flex items-center gap-2 mb-2">
+  <Card className="p-3.5">
+    <div className="flex items-center gap-2 mb-1.5">
       {Icon && <Icon className={`w-4 h-4 ${color}`} />}
       <span className="theme-text-muted text-[11px] uppercase tracking-[0.14em]">{label}</span>
     </div>
-    <div className={`font-bold text-xl tracking-tight ${color}`}>
+    <div className={`font-bold text-lg tracking-tight ${color}`}>
       {value}
     </div>
     {subValue && (
@@ -32,7 +32,7 @@ const ExpenseBreakdown = ({ expensesByType, currency, t, isDark }) => {
   
   return (
     <Card className="p-4">
-      <h3 className="theme-text-primary font-semibold mb-4 flex items-center gap-2">
+      <h3 className="theme-text-primary text-base font-bold mb-3 flex items-center gap-2">
         <Receipt className="w-5 h-5 text-red-400" />
         {t.expenseDetails}
       </h3>
@@ -103,12 +103,14 @@ const StatisticsScreen = () => {
   const [period, setPeriod] = useState('thisMonth');
   const [customFrom, setCustomFrom] = useState(prevMonth.from);
   const [customTo, setCustomTo] = useState(prevMonth.to);
+
+  const activeDateRange = useMemo(() => getDateRange(period, customFrom, customTo), [period, customFrom, customTo]);
   
   // Filter shifts based on selected period
   const filteredShifts = useMemo(() => {
-    const { startDate, endDate } = getDateRange(period, customFrom, customTo);
+    const { startDate, endDate } = activeDateRange;
     return shifts.filter(shift => isDateInRange(shift.date, startDate, endDate));
-  }, [shifts, period, customFrom, customTo]);
+  }, [shifts, activeDateRange]);
   
   // Calculate statistics - key includes period to force recalculation
   const stats = useMemo(() => {
@@ -130,25 +132,40 @@ const StatisticsScreen = () => {
     }
     return formatCurrency(stats.totalTipsCard, currency);
   };
+
+  const activeRangeLabel = useMemo(() => {
+    const from = formatDate(activeDateRange.startDate, settings.language);
+    const to = formatDate(activeDateRange.endDate, settings.language);
+    return from === to ? from : `${from} - ${to}`;
+  }, [activeDateRange, settings.language]);
+
+  const periodHelperText = useMemo(() => {
+    if (settings.language === 'ru') {
+      return `${filteredShifts.length} смен за выбранный период`;
+    }
+
+    if (settings.language === 'he') {
+      return `${filteredShifts.length} משמרות לתקופה שנבחרה`;
+    }
+
+    return `${filteredShifts.length} shifts in the selected period`;
+  }, [filteredShifts.length, settings.language]);
   
   return (
     <div className="pb-24">
       <div className="mb-6">
-        <div className="theme-text-muted text-[11px] uppercase tracking-[0.24em] mb-2">
-          Analytics
-        </div>
-        <h1 className="text-3xl font-bold theme-text-primary tracking-tight">{t.statistics}</h1>
+        <h1 className="text-2xl font-bold theme-text-primary">{t.statistics}</h1>
       </div>
       
-      <Card className="p-5 mb-6">
-        <div className="flex items-center justify-between gap-3 mb-4">
+      <Card className="p-4 mb-5">
+        <div className="flex items-center justify-between gap-3 mb-3">
           <label className="block theme-text-muted text-[11px] uppercase tracking-[0.18em]">{t.selectPeriod}</label>
-          <div className={`h-9 w-9 rounded-2xl flex items-center justify-center ${isDark ? 'bg-sky-500/10 text-sky-300' : 'bg-sky-100 text-sky-700'}`}>
+          <div className={`h-9 w-9 rounded-xl flex items-center justify-center ${isDark ? 'bg-sky-500/10 text-sky-300' : 'bg-sky-100 text-sky-700'}`}>
             <Calendar className="w-4 h-4" />
           </div>
         </div>
         
-        <div className="grid grid-cols-4 gap-2 mb-4">
+        <div className="grid grid-cols-4 gap-2 mb-3">
           {periodButtons.map((btn) => (
             <button
               key={btn.id}
@@ -188,6 +205,25 @@ const StatisticsScreen = () => {
             </div>
           </div>
         )}
+
+        <div className={`mt-4 flex flex-col gap-2 rounded-xl border px-4 py-3 ${isDark ? 'border-slate-700/50 bg-slate-900/55' : 'border-slate-200 bg-slate-50/90'}`}>
+          <div className="flex items-center justify-between gap-3">
+            <span className="theme-text-muted text-[11px] uppercase tracking-[0.16em]">
+              {settings.language === 'ru' && 'Активный диапазон'}
+              {settings.language === 'en' && 'Active range'}
+              {settings.language === 'he' && 'טווח פעיל'}
+            </span>
+            <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${isDark ? 'bg-sky-500/10 text-sky-300' : 'bg-sky-100 text-sky-700'}`}>
+              {periodButtons.find(btn => btn.id === period)?.label}
+            </span>
+          </div>
+          <div className="theme-text-primary text-sm font-semibold">
+            {activeRangeLabel}
+          </div>
+          <div className="theme-text-muted text-sm">
+            {periodHelperText}
+          </div>
+        </div>
       </Card>
       
       {filteredShifts.length === 0 ? (
@@ -195,7 +231,7 @@ const StatisticsScreen = () => {
       ) : (
         <div className="space-y-4" key={`${period}-${customFrom}-${customTo}`}>
           {/* Net income header */}
-          <div className={`rounded-[30px] p-6 border overflow-hidden relative ${
+          <div className={`rounded-[26px] p-5 border overflow-hidden relative ${
             isDark
               ? 'bg-[linear-gradient(145deg,rgba(8,23,39,0.94),rgba(18,42,72,0.92))] border-sky-400/20'
               : 'bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(235,244,252,0.92))] border-sky-200/80'
@@ -203,7 +239,7 @@ const StatisticsScreen = () => {
             <div className="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-sky-400/12 blur-2xl" />
             <div className="absolute -left-8 bottom-0 h-24 w-24 rounded-full bg-blue-500/10 blur-2xl" />
             <div className="flex items-center gap-3 mb-2">
-              <div className={`h-11 w-11 rounded-2xl flex items-center justify-center ${isDark ? 'bg-sky-500/12 text-sky-300' : 'bg-sky-100 text-sky-700'}`}>
+              <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${isDark ? 'bg-sky-500/12 text-sky-300' : 'bg-sky-100 text-sky-700'}`}>
                 <TrendingUp className="w-5 h-5" />
               </div>
               <div>
@@ -211,7 +247,7 @@ const StatisticsScreen = () => {
                 <span className="theme-text-secondary text-sm">{stats.shiftsCount} {t.shiftsCount}</span>
               </div>
             </div>
-            <div className="text-4xl font-bold theme-text-primary mb-2 tracking-tight">
+            <div className="text-3xl font-bold theme-text-primary mb-2 tracking-tight">
               {formatCurrency(stats.netIncome, currency)}
             </div>
             <div className="theme-text-muted text-sm">
@@ -220,7 +256,7 @@ const StatisticsScreen = () => {
           </div>
           
           {/* Stats grid - filtered by settings */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2.5">
             {sf.totalHours !== false && (
               <StatCard 
                 icon={Clock} 

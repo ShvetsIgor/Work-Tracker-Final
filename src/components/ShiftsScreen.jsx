@@ -4,7 +4,7 @@ import { useApp } from '@/context/AppContext';
 import { Button, Card, EmptyState } from '@/components/ui';
 import Modal from '@/components/ui/Modal';
 import { formatDate, isToday, isYesterday } from '@/utils/dateUtils';
-import { calculateShiftBaseEarnings, calculateNetTipsCard, calculateTotalExpenses, calculateShiftNetIncome } from '@/utils/calculations';
+import { calculateShiftBaseEarnings, calculateNetTipsCard, calculateTotalExpenses, calculateShiftNetIncome, calculateStatistics } from '@/utils/calculations';
 import { formatCurrency, formatTime } from '@/utils/formatters';
 
 const ShiftModal = lazy(() => import('@/components/ShiftModal'));
@@ -275,6 +275,8 @@ const ShiftsScreen = () => {
       })
       .sort((a, b) => new Date(b.date) - new Date(a.date));
   }, [shifts]);
+
+  const currentMonthStats = useMemo(() => calculateStatistics(currentMonthShifts, settings), [currentMonthShifts, settings]);
   
   return (
     <div className="pb-24">
@@ -312,6 +314,35 @@ const ShiftsScreen = () => {
           </div>
         </div>
       </Card>
+
+      {currentMonthShifts.length > 0 && (
+        <div className="mb-5 grid grid-cols-3 gap-2">
+          <Card className="p-3">
+            <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
+              {t.shiftsCount}
+            </div>
+            <div className="theme-text-primary text-lg font-bold">
+              {currentMonthStats.shiftsCount}
+            </div>
+          </Card>
+          <Card className="p-3">
+            <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
+              {t.totalHours}
+            </div>
+            <div className="theme-text-primary text-lg font-bold">
+              {formatTime(currentMonthStats.totalMinutes)}
+            </div>
+          </Card>
+          <Card className="p-3">
+            <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
+              {settings.workType !== 'pieceWork' ? t.totalEarnings : t.earnedAmount}
+            </div>
+            <div className="text-green-400 text-lg font-bold">
+              {formatCurrency(currentMonthStats.totalEarnings, settings.currency)}
+            </div>
+          </Card>
+        </div>
+      )}
       
       {/* Shifts List */}
       {currentMonthShifts.length === 0 ? (

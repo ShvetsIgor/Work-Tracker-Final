@@ -5,7 +5,7 @@ import { Card, Input, Select, Toggle } from '@/components/ui';
 import { currencies } from '@/config/currencies';
 
 const SettingRow = ({ children, noBorder = false }) => (
-  <div className={`py-4 ${!noBorder ? 'border-b border-slate-700/50 dark:border-slate-700/50' : ''}`}>
+  <div className={`py-3.5 ${!noBorder ? 'border-b border-slate-700/50 dark:border-slate-700/50' : ''}`}>
     {children}
   </div>
 );
@@ -26,7 +26,7 @@ const CollapsibleSection = ({ title, icon: Icon, iconColor, children, defaultOpe
       >
         <div className="flex items-center gap-2">
           {Icon && <Icon className={`w-5 h-5 ${iconColor}`} />}
-          <span className="theme-text-primary font-semibold">{title}</span>
+          <span className="theme-text-primary text-base font-bold">{title}</span>
         </div>
         {isOpen ? (
           <ChevronUp className="w-5 h-5 theme-text-muted" />
@@ -145,10 +145,7 @@ const SettingsScreen = () => {
     <div className="pb-24">
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <div className="theme-text-muted text-[11px] uppercase tracking-[0.24em] mb-2">
-            Preferences
-          </div>
-          <h1 className="text-3xl font-bold theme-text-primary tracking-tight">{t.settings}</h1>
+          <h1 className="text-2xl font-bold theme-text-primary">{t.settings}</h1>
         </div>
         {saveStatus && (
           <div className={`inline-flex items-center gap-2 self-start rounded-full border px-3 py-1.5 text-sm font-medium shadow-sm ${saveStatus.className}`}>
@@ -159,8 +156,8 @@ const SettingsScreen = () => {
       </div>
       
       {/* Language, Currency & Theme */}
-      <Card className="p-5 mb-4">
-        <h3 className="theme-text-primary font-semibold mb-4 flex items-center gap-2">
+      <Card className="p-4 mb-4">
+        <h3 className="theme-text-primary text-base font-bold mb-3 flex items-center gap-2">
           <Globe className="w-5 h-5 text-sky-400" />
           {t.language} & {t.currency}
         </h3>
@@ -206,8 +203,8 @@ const SettingsScreen = () => {
       </Card>
       
       {/* Work Type & Payment Settings */}
-      <Card className="p-5 mb-4">
-        <h3 className="theme-text-primary font-semibold mb-4 flex items-center gap-2">
+      <Card className="p-4 mb-4">
+        <h3 className="theme-text-primary text-base font-bold mb-3 flex items-center gap-2">
           <Briefcase className="w-5 h-5 text-emerald-400" />
           {t.workType}
         </h3>
