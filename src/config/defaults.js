@@ -2,6 +2,7 @@ export const defaultSettings = {
   language: 'ru',
   currency: 'ILS',
   theme: 'dark',
+  colorPalette: 'journal',
   workType: 'hourly', // 'hourly' или 'pieceWork'
   hourlyRate: 30,
   enableOvertime: true,

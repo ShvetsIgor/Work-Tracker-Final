@@ -26,9 +26,9 @@ const ShiftRow = ({ shift, onExpand, isExpanded, settings, t }) => {
       onClick={onExpand}
       className={`flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all ${
         isDark 
-          ? 'bg-slate-800/50 hover:bg-slate-700/50' 
+          ? 'bg-white/[0.03] hover:bg-white/[0.05]' 
           : 'bg-white/80 hover:bg-slate-50'
-      } ${isExpanded ? 'ring-2 ring-purple-500' : ''}`}
+      } ${isExpanded ? 'ring-1 ring-white/10' : ''}`}
     >
       <div className="flex items-center gap-4">
         <div className="theme-text-primary font-medium min-w-[80px]">
@@ -40,7 +40,7 @@ const ShiftRow = ({ shift, onExpand, isExpanded, settings, t }) => {
         </div>
       </div>
       <div className="flex items-center gap-3">
-        <div className={`font-bold ${isHourly ? 'text-green-400' : 'text-blue-400'}`}>
+        <div className={`font-bold ${isHourly ? 'theme-income-text' : 'theme-info-text'}`}>
           {formatCurrency(baseEarnings, settings.currency)}
         </div>
         {isExpanded ? (
@@ -76,13 +76,13 @@ const ShiftDetails = ({ shift, onEdit, onDelete, settings, t }) => {
       icon: DollarSign,
       label: t.earnedAmount,
       value: formatCurrency(baseEarnings, settings.currency),
-      color: 'text-blue-400'
+      color: 'theme-info-text'
     });
     if (shift.ordersCount > 0) {
-      stats.push({ icon: Package, label: t.orders, value: shift.ordersCount, color: 'text-blue-400' });
+      stats.push({ icon: Package, label: t.orders, value: shift.ordersCount, color: 'theme-info-text' });
     }
     if (avgPerHour > 0) {
-      stats.push({ icon: DollarSign, label: t.avgPerHour, value: formatCurrency(avgPerHour, settings.currency), color: 'text-purple-400' });
+      stats.push({ icon: DollarSign, label: t.avgPerHour, value: formatCurrency(avgPerHour, settings.currency), color: 'theme-warm-text' });
     }
   }
   
@@ -90,16 +90,16 @@ const ShiftDetails = ({ shift, onEdit, onDelete, settings, t }) => {
     stats.push({ icon: Car, label: t.mileage, value: `${shift.mileage} ${t.km}`, color: 'theme-text-primary' });
   }
   if (enabledFields.tipsCash && shift.tipsCash > 0) {
-    stats.push({ icon: Banknote, label: t.tipsCash, value: formatCurrency(shift.tipsCash, settings.currency), color: 'text-green-400' });
+    stats.push({ icon: Banknote, label: t.tipsCash, value: formatCurrency(shift.tipsCash, settings.currency), color: 'theme-income-soft-text' });
   }
   if (enabledFields.tipsCard && shift.tipsCard > 0) {
-    stats.push({ icon: CreditCard, label: t.tipsCard, value: formatCurrency(netTipsCard, settings.currency), color: 'text-green-400' });
+    stats.push({ icon: CreditCard, label: t.tipsCard, value: formatCurrency(netTipsCard, settings.currency), color: 'theme-info-text' });
   }
   if (enabledFields.expenses && totalExpenses > 0) {
-    stats.push({ icon: Receipt, label: t.expenses, value: `-${formatCurrency(totalExpenses, settings.currency)}`, color: 'text-red-400' });
+    stats.push({ icon: Receipt, label: t.expenses, value: `-${formatCurrency(totalExpenses, settings.currency)}`, color: 'theme-danger-text' });
   }
   if (enabledFields.bonus && shift.bonus > 0) {
-    stats.push({ icon: Gift, label: t.bonus, value: formatCurrency(shift.bonus, settings.currency), color: 'text-yellow-400' });
+    stats.push({ icon: Gift, label: t.bonus, value: formatCurrency(shift.bonus, settings.currency), color: 'theme-warm-text' });
   }
 
   const breakdown = [
@@ -149,17 +149,17 @@ const ShiftDetails = ({ shift, onEdit, onDelete, settings, t }) => {
   const summaryStats = stats.filter(stat => !breakdownLabels.has(stat.label));
   
   return (
-    <div className={`mt-2 p-4 rounded-xl animate-fade-in ${isDark ? 'bg-slate-700/30' : 'bg-slate-100/80'}`}>
-      <div className={`mb-3 rounded-xl border p-3 ${isDark ? 'border-slate-600/40 bg-slate-800/35' : 'border-slate-200 bg-white/80'}`}>
+    <div className={`mt-2 p-4 rounded-xl animate-fade-in ${isDark ? 'bg-white/[0.03]' : 'bg-slate-100/80'}`}>
+      <div className={`mb-3 rounded-xl border p-3 ${isDark ? 'border-white/[0.05] bg-[#232428]' : 'border-slate-200 bg-white/80'}`}>
         <div className="mb-2 flex items-center justify-between">
           <span className="theme-text-primary text-base font-bold">{t.netIncome}</span>
-          <span className="text-purple-400 text-xl font-bold">{formatCurrency(netIncome, settings.currency)}</span>
+          <span className="text-[#d8cec1] text-xl font-bold">{formatCurrency(netIncome, settings.currency)}</span>
         </div>
         <div className="space-y-2">
           {breakdown.map((item, index) => {
             const isNegative = item.tone === 'negative';
             const sign = isNegative ? '-' : '+';
-            const valueClass = isNegative ? 'text-red-400' : 'text-emerald-400';
+            const valueClass = isNegative ? 'theme-danger-text' : 'theme-income-text';
 
             return (
               <div key={`${item.label}-${index}`} className="flex items-start justify-between gap-3 text-sm">
@@ -184,7 +184,7 @@ const ShiftDetails = ({ shift, onEdit, onDelete, settings, t }) => {
       </div>
 
       {summaryStats.length > 0 && (
-          <div className={`mb-3 rounded-xl border p-3 ${isDark ? 'border-slate-600/40 bg-slate-800/20' : 'border-slate-200 bg-white/70'}`}>
+        <div className={`mb-3 rounded-xl border p-3 ${isDark ? 'border-white/[0.05] bg-[#202125]' : 'border-slate-200 bg-white/70'}`}>
             <div className="mb-2 theme-text-primary text-base font-bold">
               {settings.language === 'ru' && 'Дополнительно'}
               {settings.language === 'en' && 'Additional'}
@@ -194,7 +194,7 @@ const ShiftDetails = ({ shift, onEdit, onDelete, settings, t }) => {
             {summaryStats.map((stat, index) => {
               const Icon = stat.icon;
               return (
-                <div key={index} className={`rounded-lg p-2.5 ${isDark ? 'bg-slate-700/30' : 'bg-slate-50'}`}>
+              <div key={index} className={`rounded-lg p-2.5 ${isDark ? 'bg-white/[0.03]' : 'bg-slate-50'}`}>
                   <div className="mb-1 flex items-center gap-1.5 theme-text-muted text-xs">
                     <Icon className="w-3.5 h-3.5" />
                     <span className="truncate">{stat.label}</span>
@@ -288,7 +288,7 @@ const ShiftsScreen = () => {
         </Button>
       </div>
 
-      <Card className={`mb-4 overflow-hidden ${settings.theme !== 'light' ? 'bg-slate-800/60' : 'bg-white/85 border border-slate-200'}`}>
+      <Card className={`mb-4 overflow-hidden ${settings.theme !== 'light' ? 'bg-[#1d1e22]/88' : 'bg-white/85 border border-slate-200'}`}>
         <div className="p-4">
           <div className="theme-text-primary text-sm font-semibold capitalize">{currentMonthLabel}</div>
         </div>
@@ -316,7 +316,7 @@ const ShiftsScreen = () => {
             <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
               {settings.workType !== 'pieceWork' ? t.totalEarnings : t.earnedAmount}
             </div>
-            <div className="text-green-400 text-lg font-bold">
+          <div className="theme-income-text text-lg font-bold">
               {formatCurrency(currentMonthStats.totalEarnings, settings.currency)}
             </div>
           </Card>
@@ -400,7 +400,7 @@ const ShiftsScreen = () => {
         <div className="space-y-4">
           <div className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ${
             settings.theme !== 'light'
-              ? 'bg-red-500/15 text-red-300'
+              ? 'bg-[#b4877f]/16 text-[#d9b6b0]'
               : 'bg-red-100 text-red-600'
           }`}>
             <AlertTriangle className="h-7 w-7" />

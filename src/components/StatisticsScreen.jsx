@@ -33,7 +33,7 @@ const ExpenseBreakdown = ({ expensesByType, currency, t, isDark }) => {
   return (
     <Card className="p-4">
       <h3 className="theme-text-primary text-base font-bold mb-3 flex items-center gap-2">
-        <Receipt className="w-5 h-5 text-red-400" />
+        <Receipt className="w-5 h-5 theme-danger-text" />
         {t.expenseDetails}
       </h3>
       <div className="space-y-3">
@@ -45,14 +45,17 @@ const ExpenseBreakdown = ({ expensesByType, currency, t, isDark }) => {
               <div key={type}>
                 <div className="flex justify-between items-center mb-1">
                   <span className="theme-text-secondary">{t[type] || type}</span>
-                  <span className="text-red-400 font-medium">
+                  <span className="theme-danger-text font-medium">
                     {formatCurrency(amount, currency)}
                   </span>
                 </div>
                 <div className={`h-2 rounded-full overflow-hidden ${isDark ? 'bg-slate-700' : 'bg-slate-200'}`}>
-                  <div 
-                    className="h-full bg-gradient-to-r from-red-500 to-orange-500 rounded-full transition-all"
-                    style={{ width: `${percentage}%` }}
+                  <div
+                    className="h-full rounded-full transition-all"
+                    style={{
+                      width: `${percentage}%`,
+                      background: 'linear-gradient(to right, var(--warm-color), var(--danger-color))'
+                    }}
                   />
                 </div>
               </div>
@@ -160,7 +163,7 @@ const StatisticsScreen = () => {
       <Card className="p-4 mb-3">
         <div className="flex items-center justify-between gap-3 mb-3">
           <label className="block theme-text-muted text-[11px] uppercase tracking-[0.18em]">{t.selectPeriod}</label>
-          <div className={`h-9 w-9 rounded-xl flex items-center justify-center ${isDark ? 'bg-sky-500/10 text-sky-300' : 'bg-sky-100 text-sky-700'}`}>
+          <div className={`h-9 w-9 rounded-xl flex items-center justify-center ${isDark ? 'bg-white/[0.04] text-[#c9beaf]' : 'bg-sky-100 text-sky-700'}`}>
             <Calendar className="w-4 h-4" />
           </div>
         </div>
@@ -172,11 +175,15 @@ const StatisticsScreen = () => {
               onClick={() => setPeriod(btn.id)}
               className={`py-2.5 px-2 rounded-2xl text-xs font-semibold transition-all ${
                 period === btn.id
-                  ? 'bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-[0_12px_24px_rgba(14,165,233,0.24)]'
+                  ? 'text-[var(--accent-text)]'
                   : isDark 
                     ? 'bg-slate-800/65 text-slate-300 hover:bg-slate-700/80 border border-slate-700/50'
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'
               }`}
+              style={period === btn.id ? {
+                backgroundColor: 'var(--accent-secondary)',
+                boxShadow: '0 10px 20px var(--accent-shadow)'
+              } : undefined}
             >
               {btn.label}
             </button>
@@ -191,7 +198,7 @@ const StatisticsScreen = () => {
                 type="date" 
                 value={customFrom} 
                 onChange={(e) => setCustomFrom(e.target.value)}
-                className="w-full theme-bg-input rounded-2xl px-3 py-2.5 theme-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="w-full theme-bg-input rounded-2xl px-3 py-2.5 theme-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]"
               />
             </div>
             <div className="flex-1">
@@ -200,7 +207,7 @@ const StatisticsScreen = () => {
                 type="date" 
                 value={customTo} 
                 onChange={(e) => setCustomTo(e.target.value)}
-                className="w-full theme-bg-input rounded-2xl px-3 py-2.5 theme-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="w-full theme-bg-input rounded-2xl px-3 py-2.5 theme-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]"
               />
             </div>
           </div>
@@ -210,7 +217,7 @@ const StatisticsScreen = () => {
           <div className="min-w-0 theme-text-primary text-base font-semibold truncate">
             {activeRangeLabel}
           </div>
-          <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${isDark ? 'bg-sky-500/10 text-sky-300' : 'bg-sky-100 text-sky-700'}`}>
+          <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${isDark ? 'bg-[var(--selection-surface)] text-[var(--selection-text)] border border-[var(--selection-border)]' : 'bg-sky-100 text-sky-700'}`}>
             {periodButtons.find(btn => btn.id === period)?.label}
           </span>
         </div>
@@ -223,13 +230,13 @@ const StatisticsScreen = () => {
           {/* Net income header */}
           <div className={`rounded-[26px] p-4 border overflow-hidden relative ${
             isDark
-              ? 'bg-[linear-gradient(145deg,rgba(8,23,39,0.94),rgba(18,42,72,0.92))] border-sky-400/20'
+              ? 'bg-[#1f2024] border-white/[0.05]'
               : 'bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(235,244,252,0.92))] border-sky-200/80'
           }`}>
-            <div className="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-sky-400/12 blur-2xl" />
-            <div className="absolute -left-8 bottom-0 h-24 w-24 rounded-full bg-blue-500/10 blur-2xl" />
+            <div className="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-stone-200/[0.03] blur-2xl" />
+            <div className="absolute -left-8 bottom-0 h-24 w-24 rounded-full bg-white/[0.02] blur-2xl" />
             <div className="flex items-center gap-3 mb-2">
-              <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${isDark ? 'bg-sky-500/12 text-sky-300' : 'bg-sky-100 text-sky-700'}`}>
+              <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${isDark ? 'bg-white/[0.04] text-[#d9d0c4]' : 'bg-sky-100 text-sky-700'}`}>
                 <TrendingUp className="w-5 h-5" />
               </div>
               <div>
@@ -261,7 +268,7 @@ const StatisticsScreen = () => {
                 icon={DollarSign} 
                 label={isHourly ? t.totalEarnings : t.earnedAmount} 
                 value={formatCurrency(stats.totalEarnings, currency)} 
-                color="text-green-400" 
+                color="theme-income-text" 
               />
             )}
             
@@ -270,7 +277,7 @@ const StatisticsScreen = () => {
                 icon={TrendingUp} 
                 label={t.avgPerHour} 
                 value={formatCurrency(stats.avgPerHour, currency)} 
-                color="text-purple-400" 
+                color="theme-warm-text" 
               />
             )}
             
@@ -279,7 +286,7 @@ const StatisticsScreen = () => {
                 icon={Package} 
                 label={t.orders} 
                 value={stats.totalOrders} 
-                color="text-blue-400" 
+                color="theme-info-text" 
               />
             )}
             
@@ -288,7 +295,7 @@ const StatisticsScreen = () => {
                 icon={Banknote} 
                 label={t.totalTipsCash} 
                 value={formatCurrency(stats.totalTipsCash, currency)} 
-                color="text-green-400" 
+                color="theme-income-soft-text" 
               />
             )}
             
@@ -297,7 +304,7 @@ const StatisticsScreen = () => {
                 icon={CreditCard} 
                 label={t.totalTipsCard} 
                 value={formatTipsCardValue()} 
-                color="text-green-400" 
+                color="theme-info-text" 
                 subValue={settings.tipsCardPercent > 0 ? `${t.deduction}: ${settings.tipsCardPercent}%` : undefined} 
               />
             )}
@@ -315,7 +322,7 @@ const StatisticsScreen = () => {
                 icon={Receipt} 
                 label={t.totalExpenses} 
                 value={formatCurrency(stats.totalExpenses, currency)} 
-                color="text-red-400" 
+                color="theme-danger-text" 
               />
             )}
             
@@ -324,7 +331,7 @@ const StatisticsScreen = () => {
                 icon={Gift} 
                 label={t.totalBonus} 
                 value={formatCurrency(stats.totalBonus, currency)} 
-                color="text-yellow-400" 
+                color="theme-warm-text" 
               />
             )}
             
@@ -341,7 +348,7 @@ const StatisticsScreen = () => {
                 icon={TrendingUp} 
                 label={t.avgIncomePerShift} 
                 value={formatCurrency(stats.avgIncomePerShift, currency)} 
-                color="text-purple-400" 
+                color="theme-warm-text" 
               />
             )}
           </div>
@@ -356,7 +363,7 @@ const StatisticsScreen = () => {
               title={t.bonusComments || 'Комментарии к бонусам'} 
               comments={stats.bonusComments} 
               icon="gift"
-              color="text-yellow-400"
+              color="theme-warm-text"
               isDark={isDark} 
               t={t}
               currency={currency}
@@ -370,7 +377,7 @@ const StatisticsScreen = () => {
               title={t.expenseComments || 'Комментарии к затратам'} 
               comments={stats.expenseComments} 
               icon="receipt"
-              color="text-red-400"
+              color="theme-danger-text"
               isDark={isDark} 
               t={t}
               currency={currency}
@@ -543,7 +550,8 @@ const ExportButton = ({ shifts, settings, t, isDark, dateFrom, dateTo }) => {
       <Card className="p-4">
         <button
           onClick={() => setShowModal(true)}
-          className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold hover:brightness-105 transition-all shadow-[0_16px_30px_rgba(16,185,129,0.22)]"
+            className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-2xl text-[var(--accent-text)] font-semibold transition-all"
+            style={{ backgroundColor: 'var(--accent-secondary)', boxShadow: '0 14px 26px var(--accent-shadow)' }}
         >
           <Download className="w-5 h-5" />
           {t.exportToExcel || 'Выгрузить в Excel'}
@@ -555,7 +563,7 @@ const ExportButton = ({ shifts, settings, t, isDark, dateFrom, dateTo }) => {
           <div className={`w-full max-w-md rounded-[30px] p-6 border ${isDark ? 'bg-slate-900/95 border-slate-700/60' : 'bg-white/95 border-slate-200'}`}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="theme-text-primary font-semibold text-lg flex items-center gap-2">
-                <FileSpreadsheet className="w-5 h-5 text-green-500" />
+          <FileSpreadsheet className="w-5 h-5 theme-income-text" />
                 {t.exportToExcel || 'Выгрузить в Excel'}
               </h3>
               <button onClick={() => setShowModal(false)} className="theme-text-muted hover:theme-text-primary">
@@ -571,7 +579,8 @@ const ExportButton = ({ shifts, settings, t, isDark, dateFrom, dateTo }) => {
             <div className="flex gap-2 mb-4">
               <button
                 onClick={selectAll}
-                className="text-xs px-3 py-1.5 rounded-xl bg-sky-500/16 text-sky-300 hover:bg-sky-500/24"
+                    className="text-xs px-3 py-1.5 rounded-xl hover:brightness-105"
+                    style={{ backgroundColor: 'var(--selection-surface)', color: 'var(--selection-text)' }}
               >
                 {t.selectAll || 'Выбрать все'}
               </button>
@@ -595,7 +604,7 @@ const ExportButton = ({ shifts, settings, t, isDark, dateFrom, dateTo }) => {
                     disabled={isRequired}
                     className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-colors ${
                       isSelected
-                        ? 'bg-emerald-500/16 text-emerald-300 border border-emerald-500/20'
+                    ? 'bg-[var(--selection-surface)] text-[var(--selection-text)] border border-[var(--selection-border)]'
                         : isDark 
                           ? 'bg-slate-700/50 text-slate-400 border border-slate-600/30 hover:bg-slate-700'
                           : 'bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200'
@@ -611,7 +620,8 @@ const ExportButton = ({ shifts, settings, t, isDark, dateFrom, dateTo }) => {
             {/* Export button */}
             <button
               onClick={exportToExcel}
-              className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold hover:brightness-105 transition-all shadow-[0_16px_30px_rgba(16,185,129,0.22)]"
+                className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-2xl text-[var(--accent-text)] font-semibold transition-all"
+                style={{ backgroundColor: 'var(--accent-secondary)', boxShadow: '0 14px 26px var(--accent-shadow)' }}
             >
               <Download className="w-5 h-5" />
               {t.export || 'Выгрузить'} ({shifts.length} {t.shiftsCount || 'смен'})
@@ -749,12 +759,12 @@ const ShiftsList = ({ shifts, settings, t, isDark }) => {
   
   const getColumnColor = (colId) => {
     switch (colId) {
-      case 'earnings': return 'text-green-400';
-      case 'earnedAmount': return 'text-blue-400';
-      case 'tipsCash': return 'text-emerald-400';
-      case 'tipsCard': return 'text-blue-400';
-      case 'expenses': return 'text-red-400';
-      case 'bonus': return 'text-yellow-400';
+      case 'earnings': return 'theme-income-text';
+      case 'earnedAmount': return 'theme-info-text';
+      case 'tipsCash': return 'theme-income-soft-text';
+      case 'tipsCard': return 'theme-info-text';
+      case 'expenses': return 'theme-danger-text';
+      case 'bonus': return 'theme-warm-text';
       default: return 'theme-text-secondary';
     }
   };
@@ -769,7 +779,7 @@ const ShiftsList = ({ shifts, settings, t, isDark }) => {
         }`}
       >
         <div className="flex items-center gap-2">
-          <List className="w-5 h-5 text-blue-400" />
+          <List className="w-5 h-5 theme-info-text" />
           <span className="theme-text-primary font-semibold">
             {t.showShiftsList || 'Список смен'}
           </span>
@@ -788,7 +798,7 @@ const ShiftsList = ({ shifts, settings, t, isDark }) => {
           <div className={`px-4 py-2 border-b ${isDark ? 'border-slate-700/30' : 'border-slate-200'}`}>
             <button
               onClick={() => setShowColumnSelector(!showColumnSelector)}
-              className="flex items-center gap-2 text-sm text-sky-300 hover:text-sky-200"
+              className="flex items-center gap-2 text-sm theme-text-secondary hover:theme-text-primary"
             >
               <Settings className="w-4 h-4" />
               {t.selectColumns || 'Выбрать колонки'}
@@ -806,7 +816,7 @@ const ShiftsList = ({ shifts, settings, t, isDark }) => {
                       onClick={() => toggleColumn(col.id)}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                         isSelected
-                          ? 'bg-sky-500/16 text-sky-300 border border-sky-500/20'
+                        ? 'bg-[var(--selection-surface)] text-[var(--selection-text)] border border-[var(--selection-border)]'
                           : isDark 
                             ? 'bg-slate-700/50 text-slate-400 border border-slate-600/30 hover:bg-slate-700'
                             : 'bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200'

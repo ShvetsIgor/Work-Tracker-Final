@@ -14,11 +14,11 @@ export const Button = ({
   ...props 
 }) => {
   const variants = {
-    primary: 'bg-gradient-to-r from-sky-500 via-cyan-500 to-blue-600 text-white hover:brightness-105 shadow-[0_18px_40px_rgba(14,165,233,0.24)] hover:shadow-[0_20px_44px_rgba(14,165,233,0.32)]',
-    secondary: 'theme-bg-input theme-text-primary theme-border hover:border-sky-400/30 hover:bg-slate-700/60',
-    danger: 'bg-red-500/18 hover:bg-red-500/26 text-red-300 border border-red-500/20',
-    ghost: 'bg-transparent hover:bg-slate-700/40 theme-text-muted hover:theme-text-primary',
-    outline: 'bg-transparent theme-border theme-text-secondary hover:border-sky-400/30 hover:text-sky-300'
+    primary: 'text-[var(--accent-text)]',
+    secondary: 'theme-bg-input theme-text-primary theme-border hover:border-white/10 hover:bg-[#2f3137]',
+    danger: 'bg-[#b4877f]/14 hover:bg-[#b4877f]/20 text-[#e2c3bc] border border-[#b4877f]/16',
+    ghost: 'bg-transparent hover:bg-white/[0.04] theme-text-muted hover:theme-text-primary',
+    outline: 'bg-transparent theme-border theme-text-secondary hover:border-white/10 hover:text-[#f4efe8]'
   };
   
   const sizes = {
@@ -29,11 +29,17 @@ export const Button = ({
   
   return (
     <button
+      style={variant === 'primary'
+        ? {
+            backgroundColor: 'var(--accent-secondary)',
+            boxShadow: '0 10px 22px var(--accent-shadow)'
+          }
+        : undefined}
       className={`
         ${variants[variant]}
         ${sizes[size]}
         ${fullWidth ? 'w-full' : ''}
-        font-semibold rounded-2xl transition-all duration-200 
+        font-semibold rounded-xl transition-all duration-200 
         disabled:opacity-50 disabled:cursor-not-allowed
         flex items-center justify-center gap-2
         active:scale-[0.98]
@@ -81,10 +87,10 @@ export const Input = ({
       )}
       <div className="relative">
         {error && floatingError && (
-          <div className={`absolute bottom-full left-3 z-20 mb-2 rounded-xl border border-red-500/30 bg-slate-950 px-2.5 py-1.5 text-xs text-red-300 shadow-lg shadow-black/30 ${errorClassName}`}>
+          <div className={`absolute bottom-full left-3 z-20 mb-2 rounded-xl border border-[#b4877f]/30 bg-slate-950 px-2.5 py-1.5 text-xs text-[#e2c3bc] shadow-lg shadow-black/30 ${errorClassName}`}>
             <div className="relative">
               {error}
-              <span className="absolute left-3 top-full h-2 w-2 -translate-y-1 rotate-45 border-b border-r border-red-500/30 bg-slate-950" />
+              <span className="absolute left-3 top-full h-2 w-2 -translate-y-1 rotate-45 border-b border-r border-[#b4877f]/30 bg-slate-950" />
             </div>
           </div>
         )}
@@ -95,12 +101,12 @@ export const Input = ({
         )}
         <input
           className={`
-            w-full theme-bg-input rounded-2xl 
+            w-full theme-bg-input rounded-xl 
             px-4 py-3 theme-text-primary
             transition-all duration-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]
-            focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent
+            focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent
             ${Icon ? 'pl-10' : ''}
-            ${error ? 'border-red-500 focus:ring-red-500' : ''}
+            ${error ? 'border-[#b4877f] focus:ring-[#b4877f]' : ''}
             ${className}
           `}
           onWheel={handleWheel}
@@ -109,7 +115,7 @@ export const Input = ({
         />
       </div>
       {error && !hideErrorText && (
-        <p className="mt-1 text-red-400 text-sm">{error}</p>
+        <p className="mt-1 text-[#d2a49c] text-sm">{error}</p>
       )}
     </div>
   );
@@ -131,10 +137,10 @@ export const Select = ({
       <div className="relative">
         <select
           className={`
-            w-full appearance-none theme-bg-input rounded-2xl 
+            w-full appearance-none theme-bg-input rounded-xl 
             px-4 py-3 pr-11 theme-text-primary
             transition-all duration-200
-            focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent
+            focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent
             cursor-pointer
             ${className}
           `}
@@ -147,7 +153,7 @@ export const Select = ({
           ))}
         </select>
         <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center justify-center">
-          <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-slate-700/50 text-slate-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+          <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-[#2f2e2d] text-[var(--text-secondary)] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
             <ChevronDown className="h-4 w-4" />
           </div>
         </div>
@@ -172,7 +178,7 @@ export const Toggle = ({ checked, onChange, label, description, disabled = false
         onClick={() => !disabled && onChange(!checked)}
         className={`
           relative w-11 h-6 rounded-full transition-colors duration-200 flex-shrink-0
-          ${checked ? 'bg-sky-500' : 'bg-slate-600'}
+          ${checked ? 'bg-[var(--accent-secondary)]' : 'bg-[#4b4a49]'}
         `}
       >
         <span
@@ -192,8 +198,8 @@ export const Card = ({ children, className = '', hover = false, ...props }) => {
   return (
     <div
       className={`
-        theme-bg-card rounded-[26px] transition-all duration-200
-        ${hover ? 'hover:-translate-y-0.5 hover:border-sky-400/25 hover:shadow-[0_24px_52px_rgba(14,165,233,0.08)]' : ''}
+        theme-bg-card rounded-[24px] transition-all duration-200
+        ${hover ? 'hover:-translate-y-0.5 hover:border-white/10 hover:shadow-[0_18px_32px_rgba(0,0,0,0.18)]' : ''}
         ${className}
       `}
       {...props}
@@ -207,11 +213,11 @@ export const Card = ({ children, className = '', hover = false, ...props }) => {
 export const Badge = ({ children, variant = 'default', className = '' }) => {
   const variants = {
     default: 'bg-slate-700/70 theme-text-secondary',
-    success: 'bg-green-500/20 text-green-400',
-    warning: 'bg-yellow-500/20 text-yellow-400',
-    danger: 'bg-red-500/20 text-red-400',
-    info: 'bg-blue-500/20 text-blue-400',
-    purple: 'bg-sky-500/18 text-sky-300'
+    success: 'bg-[#a6b29a]/18 text-[#dce2d3]',
+    warning: 'bg-[#b79d7c]/18 text-[#e4d3c0]',
+    danger: 'bg-[#b4877f]/18 text-[#e1c0b9]',
+    info: 'bg-[var(--accent-soft)] text-[var(--selection-text)]',
+    purple: 'bg-[var(--selection-surface)] text-[var(--selection-text)]'
   };
   
   return (
@@ -235,7 +241,7 @@ export const Loader = ({ size = 'md', className = '' }) => {
   
   return (
     <div className={`flex items-center justify-center ${className}`}>
-      <Loader2 className={`${sizes[size]} animate-spin text-purple-500`} />
+      <Loader2 className={`${sizes[size]} animate-spin text-[var(--accent-primary)]`} />
     </div>
   );
 };

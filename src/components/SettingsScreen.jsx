@@ -1,8 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import { Globe, Utensils, CreditCard, Settings as SettingsIcon, Sun, Moon, Briefcase, BarChart3, ChevronDown, ChevronUp, CheckCircle2, AlertCircle, Loader } from 'lucide-react';
+import {
+  Globe,
+  Utensils,
+  CreditCard,
+  Settings as SettingsIcon,
+  Sun,
+  Moon,
+  Briefcase,
+  BarChart3,
+  ChevronDown,
+  ChevronUp,
+  CheckCircle2,
+  AlertCircle,
+  Loader,
+  Palette
+} from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { Card, Input, Select, Toggle } from '@/components/ui';
 import { currencies } from '@/config/currencies';
+import { paletteOrder } from '@/config/colorPalettes';
 
 const SettingRow = ({ children, noBorder = false }) => (
   <div className={`py-3.5 ${!noBorder ? 'border-b border-slate-700/50 dark:border-slate-700/50' : ''}`}>
@@ -10,12 +26,11 @@ const SettingRow = ({ children, noBorder = false }) => (
   </div>
 );
 
-// Collapsible section component
 const CollapsibleSection = ({ title, icon: Icon, iconColor, children, defaultOpen = false }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const { settings } = useApp();
   const isDark = settings.theme !== 'light';
-  
+
   return (
     <Card className="mb-3 overflow-hidden">
       <button
@@ -34,7 +49,7 @@ const CollapsibleSection = ({ title, icon: Icon, iconColor, children, defaultOpe
           <ChevronDown className="w-5 h-5 theme-text-muted" />
         )}
       </button>
-      
+
       {isOpen && (
         <div className="px-4 pb-4 animate-fade-in">
           {children}
@@ -48,19 +63,13 @@ const SettingsScreen = () => {
   const { t, settings, updateSettings, settingsSaving, settingsSaveError, settingsLastSavedAt } = useApp();
   const [showSavedState, setShowSavedState] = useState(false);
 
-  const isDark = settings.theme !== 'light';
   const isHourly = settings.workType !== 'pieceWork';
 
   useEffect(() => {
-    if (!settingsLastSavedAt || settingsSaveError) {
-      return;
-    }
+    if (!settingsLastSavedAt || settingsSaveError) return;
 
     setShowSavedState(true);
-    const timeoutId = setTimeout(() => {
-      setShowSavedState(false);
-    }, 2200);
-
+    const timeoutId = setTimeout(() => setShowSavedState(false), 2200);
     return () => clearTimeout(timeoutId);
   }, [settingsLastSavedAt, settingsSaveError]);
 
@@ -119,28 +128,35 @@ const SettingsScreen = () => {
         : null;
 
   const SaveStatusIcon = saveStatus?.icon;
-  
+
   const languageOptions = [
     { value: 'ru', label: 'Русский' },
     { value: 'en', label: 'English' },
     { value: 'he', label: 'עברית' }
   ];
-  
+
   const currencyOptions = Object.entries(currencies).map(([code, { symbol, name }]) => ({
     value: code,
     label: `${symbol} ${code} - ${name}`
   }));
-  
+
   const themeOptions = [
     { value: 'dark', label: t.themeDark },
     { value: 'light', label: t.themeLight }
   ];
-  
+
   const workTypeOptions = [
     { value: 'hourly', label: t.workTypeHourly },
     { value: 'pieceWork', label: t.workTypePieceWork }
   ];
-  
+
+  const colorsLabel = settings.language === 'ru' ? 'Цвета' : settings.language === 'he' ? 'צבעים' : 'Colors';
+  const paletteOptions = [
+    { value: 'journal', label: settings.language === 'ru' ? 'Основная' : settings.language === 'he' ? 'ראשית' : 'Journal' },
+    { value: 'neon', label: settings.language === 'ru' ? 'Неон' : settings.language === 'he' ? 'ניאון' : 'Neon' },
+    { value: 'contrast', label: settings.language === 'ru' ? 'Контраст' : settings.language === 'he' ? 'קונטרסט' : 'Contrast' }
+  ];
+
   return (
     <div className="pb-24">
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -154,14 +170,13 @@ const SettingsScreen = () => {
           </div>
         )}
       </div>
-      
-      {/* Language, Currency & Theme */}
+
       <Card className="p-4 mb-3">
         <h3 className="theme-text-primary text-base font-bold mb-3 flex items-center gap-2">
-          <Globe className="w-5 h-5 text-sky-400" />
+          <Globe className="w-5 h-5 theme-info-text" />
           {t.language} & {t.currency}
         </h3>
-        
+
         <SettingRow>
           <div className="flex justify-between items-center">
             <span className="theme-text-secondary">{t.language}</span>
@@ -173,7 +188,7 @@ const SettingsScreen = () => {
             />
           </div>
         </SettingRow>
-        
+
         <SettingRow>
           <div className="flex justify-between items-center">
             <span className="theme-text-secondary">{t.currency}</span>
@@ -185,8 +200,8 @@ const SettingsScreen = () => {
             />
           </div>
         </SettingRow>
-        
-        <SettingRow noBorder>
+
+        <SettingRow>
           <div className="flex justify-between items-center">
             <span className="theme-text-secondary flex items-center gap-2">
               {settings.theme === 'dark' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
@@ -200,15 +215,29 @@ const SettingsScreen = () => {
             />
           </div>
         </SettingRow>
+
+        <SettingRow noBorder>
+          <div className="flex justify-between items-center">
+            <span className="theme-text-secondary flex items-center gap-2">
+              <Palette className="w-4 h-4" />
+              {colorsLabel}
+            </span>
+            <Select
+              value={paletteOrder.includes(settings.colorPalette) ? settings.colorPalette : 'journal'}
+              onChange={(e) => handleChange('colorPalette', e.target.value)}
+              options={paletteOptions}
+              className="w-40"
+            />
+          </div>
+        </SettingRow>
       </Card>
-      
-      {/* Work Type & Payment Settings */}
+
       <Card className="p-4 mb-3">
         <h3 className="theme-text-primary text-base font-bold mb-3 flex items-center gap-2">
-          <Briefcase className="w-5 h-5 text-emerald-400" />
+          <Briefcase className="w-5 h-5 theme-income-soft-text" />
           {t.workType}
         </h3>
-        
+
         <SettingRow>
           <div className="flex justify-between items-center">
             <span className="theme-text-secondary">{t.workType}</span>
@@ -220,8 +249,7 @@ const SettingsScreen = () => {
             />
           </div>
         </SettingRow>
-        
-        {/* Hourly-specific settings */}
+
         {isHourly && (
           <>
             <SettingRow>
@@ -240,7 +268,7 @@ const SettingsScreen = () => {
                 </div>
               </div>
             </SettingRow>
-            
+
             <SettingRow>
               <Toggle
                 checked={settings.enableOvertime}
@@ -249,7 +277,7 @@ const SettingsScreen = () => {
                 description={t.overtimeInfo}
               />
             </SettingRow>
-            
+
             {settings.enableOvertime && (
               <SettingRow>
                 <Toggle
@@ -262,7 +290,7 @@ const SettingsScreen = () => {
             )}
           </>
         )}
-        
+
         <SettingRow>
           <Toggle
             checked={settings.unpaidLunch}
@@ -270,7 +298,7 @@ const SettingsScreen = () => {
             label={t.unpaidLunch}
           />
         </SettingRow>
-        
+
         {settings.unpaidLunch && (
           <SettingRow>
             <div className="flex justify-between items-center">
@@ -281,13 +309,13 @@ const SettingsScreen = () => {
               <Input
                 type="number"
                 value={settings.lunchDuration}
-                onChange={(e) => handleChange('lunchDuration', parseInt(e.target.value) || 0)}
+                onChange={(e) => handleChange('lunchDuration', parseInt(e.target.value, 10) || 0)}
                 className="w-20 text-right"
               />
             </div>
           </SettingRow>
         )}
-        
+
         <SettingRow noBorder>
           <div className="flex justify-between items-center">
             <span className="theme-text-secondary flex items-center gap-2">
@@ -308,12 +336,11 @@ const SettingsScreen = () => {
           </div>
         </SettingRow>
       </Card>
-      
-      {/* Enabled Fields - Collapsible */}
+
       <CollapsibleSection
         title={t.enabledFields}
         icon={SettingsIcon}
-        iconColor="text-sky-400"
+        iconColor="theme-info-text"
       >
         <SettingRow>
           <Toggle
@@ -322,7 +349,7 @@ const SettingsScreen = () => {
             label={t.fieldMileage}
           />
         </SettingRow>
-        
+
         <SettingRow>
           <Toggle
             checked={settings.enabledFields?.tipsCash !== false}
@@ -330,7 +357,7 @@ const SettingsScreen = () => {
             label={t.fieldTipsCash}
           />
         </SettingRow>
-        
+
         <SettingRow>
           <Toggle
             checked={settings.enabledFields?.tipsCard !== false}
@@ -338,7 +365,7 @@ const SettingsScreen = () => {
             label={t.fieldTipsCard}
           />
         </SettingRow>
-        
+
         <SettingRow>
           <Toggle
             checked={settings.enabledFields?.expenses !== false}
@@ -346,7 +373,7 @@ const SettingsScreen = () => {
             label={t.fieldExpenses}
           />
         </SettingRow>
-        
+
         <SettingRow noBorder>
           <Toggle
             checked={settings.enabledFields?.bonus !== false}
@@ -355,12 +382,11 @@ const SettingsScreen = () => {
           />
         </SettingRow>
       </CollapsibleSection>
-      
-      {/* Statistics Fields - Collapsible */}
+
       <CollapsibleSection
         title={t.statisticsFields}
         icon={BarChart3}
-        iconColor="text-blue-400"
+        iconColor="theme-accent-text"
       >
         <SettingRow>
           <Toggle
@@ -369,7 +395,7 @@ const SettingsScreen = () => {
             label={t.fieldTotalHours}
           />
         </SettingRow>
-        
+
         <SettingRow>
           <Toggle
             checked={settings.statisticsFields?.totalEarnings !== false}
@@ -377,7 +403,7 @@ const SettingsScreen = () => {
             label={t.fieldTotalEarnings}
           />
         </SettingRow>
-        
+
         <SettingRow>
           <Toggle
             checked={settings.statisticsFields?.avgPerHour !== false}
@@ -385,7 +411,7 @@ const SettingsScreen = () => {
             label={t.fieldAvgPerHour}
           />
         </SettingRow>
-        
+
         <SettingRow>
           <Toggle
             checked={settings.statisticsFields?.tipsCash !== false}
@@ -393,7 +419,7 @@ const SettingsScreen = () => {
             label={t.fieldTipsCash}
           />
         </SettingRow>
-        
+
         <SettingRow>
           <Toggle
             checked={settings.statisticsFields?.tipsCard !== false}
@@ -401,7 +427,7 @@ const SettingsScreen = () => {
             label={t.fieldTipsCard}
           />
         </SettingRow>
-        
+
         <SettingRow>
           <Toggle
             checked={settings.statisticsFields?.mileage !== false}
@@ -409,7 +435,7 @@ const SettingsScreen = () => {
             label={t.fieldMileage}
           />
         </SettingRow>
-        
+
         <SettingRow>
           <Toggle
             checked={settings.statisticsFields?.expenses !== false}
@@ -417,7 +443,7 @@ const SettingsScreen = () => {
             label={t.fieldExpenses}
           />
         </SettingRow>
-        
+
         <SettingRow>
           <Toggle
             checked={settings.statisticsFields?.avgHoursPerShift !== false}
@@ -425,7 +451,7 @@ const SettingsScreen = () => {
             label={t.fieldAvgHoursPerShift}
           />
         </SettingRow>
-        
+
         <SettingRow>
           <Toggle
             checked={settings.statisticsFields?.avgIncomePerShift !== false}
@@ -433,7 +459,7 @@ const SettingsScreen = () => {
             label={t.fieldAvgIncomePerShift}
           />
         </SettingRow>
-        
+
         <SettingRow noBorder>
           <Toggle
             checked={settings.statisticsFields?.expenseDetails !== false}

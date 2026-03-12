@@ -501,7 +501,7 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
               setDate(e.target.value);
               clearError('date');
             }}
-            className="w-full theme-bg-input rounded-xl px-4 py-3 theme-text-primary focus:outline-none focus:ring-2 focus:ring-purple-500 box-border"
+                  className="w-full theme-bg-input rounded-xl px-4 py-3 theme-text-primary focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] box-border"
           />
         </div>
         
@@ -588,7 +588,7 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
                       clearError('startTime');
                       clearError('totalMinutes');
                     }}
-                    className={`w-full theme-bg-input rounded-xl px-4 py-3 theme-text-primary focus:outline-none focus:ring-2 box-border ${errors.startTime ? 'border-red-500 focus:ring-red-500' : 'focus:ring-purple-500'}`}
+                  className={`w-full theme-bg-input rounded-xl px-4 py-3 theme-text-primary focus:outline-none focus:ring-2 box-border ${errors.startTime ? 'border-red-500 focus:ring-red-500' : 'focus:ring-[var(--accent-primary)]'}`}
                   />
                 </div>
                 <div className="relative">
@@ -609,7 +609,7 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
                       clearError('endTime');
                       clearError('totalMinutes');
                     }}
-                    className={`w-full theme-bg-input rounded-xl px-4 py-3 theme-text-primary focus:outline-none focus:ring-2 box-border ${errors.endTime ? 'border-red-500 focus:ring-red-500' : 'focus:ring-purple-500'}`}
+                  className={`w-full theme-bg-input rounded-xl px-4 py-3 theme-text-primary focus:outline-none focus:ring-2 box-border ${errors.endTime ? 'border-red-500 focus:ring-red-500' : 'focus:ring-[var(--accent-primary)]'}`}
                   />
                 </div>
               </div>
