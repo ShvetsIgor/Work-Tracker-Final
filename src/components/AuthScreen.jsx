@@ -134,28 +134,29 @@ const AuthScreen = () => {
   
   return (
     <div 
-      className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4"
+      className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,0.18),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(37,99,235,0.22),transparent_28%),linear-gradient(145deg,#07111f_0%,#0d1b2f_48%,#08131f_100%)] flex items-center justify-center p-4"
       dir={isRTL ? 'rtl' : 'ltr'}
     >
       {/* Background decorations */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-sky-500/18 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute inset-x-0 top-0 h-40 bg-[linear-gradient(to_bottom,rgba(7,17,31,0.5),transparent)]" />
       </div>
       
       <div className="relative w-full max-w-md">
         {/* Decorative corners */}
-        <div className="absolute -top-4 -left-4 w-24 h-24 border-l-2 border-t-2 border-purple-400/30" />
-        <div className="absolute -bottom-4 -right-4 w-24 h-24 border-r-2 border-b-2 border-purple-400/30" />
+        <div className="absolute -top-4 -left-4 w-24 h-24 border-l-2 border-t-2 border-sky-400/24" />
+        <div className="absolute -bottom-4 -right-4 w-24 h-24 border-r-2 border-b-2 border-sky-400/24" />
         
         {/* Card */}
-        <div className="bg-slate-800/80 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-2xl">
+        <div className="theme-surface-strong backdrop-blur-2xl rounded-[32px] p-8 border border-slate-700/50 shadow-[0_28px_60px_rgba(2,10,23,0.4)]">
           {/* Language selector */}
           <div className="flex justify-center mb-6">
             <select
               value={lang}
               onChange={(e) => setLang(e.target.value)}
-              className="bg-slate-700/50 text-slate-300 px-3 py-1.5 rounded-lg text-sm border border-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="bg-slate-800/70 text-slate-200 px-3 py-2 rounded-xl text-sm border border-slate-600 focus:outline-none focus:ring-2 focus:ring-sky-500"
             >
               <option value="ru">Русский</option>
               <option value="en">English</option>
@@ -165,13 +166,14 @@ const AuthScreen = () => {
           
           {/* Logo & Title */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl mb-4 shadow-lg shadow-purple-500/25">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-sky-500 via-cyan-500 to-blue-600 rounded-[22px] mb-4 shadow-[0_18px_36px_rgba(14,165,233,0.28)]">
               <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">{t.appName}</h1>
-            <p className="text-slate-400 text-sm mt-1">
+            <div className="text-slate-400 text-[11px] uppercase tracking-[0.28em] mb-2">Work Ledger</div>
+            <h1 className="text-3xl font-bold text-white tracking-tight">{t.appName}</h1>
+            <p className="text-slate-400 text-sm mt-2">
               {mode === 'login' && t.login}
               {mode === 'register' && t.register}
               {mode === 'reset' && t.resetPassword}
@@ -209,7 +211,7 @@ const AuthScreen = () => {
                   <button
                     onClick={handleGoogleLogin}
                     disabled={loading}
-                    className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-100 text-gray-800 font-medium py-3 px-4 rounded-xl transition-colors disabled:opacity-50"
+                    className="w-full flex items-center justify-center gap-3 bg-white hover:bg-slate-100 text-slate-800 font-semibold py-3.5 px-4 rounded-2xl transition-colors disabled:opacity-50 shadow-[0_14px_28px_rgba(255,255,255,0.08)]"
                   >
                     <GoogleIcon />
                     {t.continueWithGoogle || 'Войти через Google'}
@@ -221,7 +223,7 @@ const AuthScreen = () => {
                       <div className="w-full border-t border-slate-600"></div>
                     </div>
                     <div className="relative flex justify-center text-sm">
-                      <span className="px-4 bg-slate-800/80 text-slate-500">{t.or || 'или'}</span>
+                      <span className="px-4 bg-slate-900/90 text-slate-500">{t.or || 'или'}</span>
                     </div>
                   </div>
                 </>
@@ -289,7 +291,7 @@ const AuthScreen = () => {
                 
                 {/* Error message */}
                 {error && (
-                  <div className="bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 text-red-400 text-sm">
+                  <div className="bg-red-500/10 border border-red-500/30 rounded-2xl px-4 py-3 text-red-400 text-sm">
                     {error}
                   </div>
                 )}
@@ -318,7 +320,7 @@ const AuthScreen = () => {
                   <div>
                     <button
                       onClick={() => switchMode('register')}
-                      className="text-purple-400 hover:text-purple-300 text-sm transition-colors"
+                      className="text-sky-300 hover:text-sky-200 text-sm transition-colors"
                     >
                       {t.register}
                     </button>
@@ -329,7 +331,7 @@ const AuthScreen = () => {
               {mode === 'register' && (
                 <button
                   onClick={() => switchMode('login')}
-                  className="text-purple-400 hover:text-purple-300 text-sm transition-colors"
+                  className="text-sky-300 hover:text-sky-200 text-sm transition-colors"
                 >
                   {t.login}
                 </button>

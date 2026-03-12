@@ -52,8 +52,8 @@ const App = () => {
     <div 
       className={`min-h-screen transition-colors duration-300 ${
         isDark 
-          ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900' 
-          : 'bg-gradient-to-br from-slate-100 via-purple-50 to-slate-100'
+          ? 'bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,0.14),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(37,99,235,0.18),transparent_28%),linear-gradient(145deg,#07111f_0%,#0d1b2f_48%,#08131f_100%)]'
+          : 'bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,0.10),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(37,99,235,0.08),transparent_26%),linear-gradient(145deg,#f4f7fb_0%,#e9f0f8_48%,#f8fbff_100%)]'
       }`}
       dir={rtl ? 'rtl' : 'ltr'}
       data-theme={settings.theme || 'dark'}
@@ -61,16 +61,19 @@ const App = () => {
       {/* Background decorations */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className={`absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl ${
-          isDark ? 'bg-purple-500/10' : 'bg-purple-500/20'
+          isDark ? 'bg-sky-400/10' : 'bg-sky-400/16'
         }`} />
         <div className={`absolute bottom-1/4 right-0 w-96 h-96 rounded-full blur-3xl ${
-          isDark ? 'bg-blue-500/10' : 'bg-blue-500/20'
+          isDark ? 'bg-blue-500/12' : 'bg-blue-500/16'
+        }`} />
+        <div className={`absolute inset-x-0 top-0 h-48 ${
+          isDark ? 'bg-[linear-gradient(to_bottom,rgba(7,17,31,0.55),transparent)]' : 'bg-[linear-gradient(to_bottom,rgba(255,255,255,0.5),transparent)]'
         }`} />
       </div>
       
       <Header onOpenAccount={() => setShowAccountModal(true)} />
       
-      <main className="relative max-w-lg mx-auto px-4 py-6">
+      <main className="relative max-w-lg mx-auto px-4 py-6 pb-32">
         {activeTab === 'shifts' && <ShiftsScreen />}
         {activeTab === 'statistics' && (
           <Suspense fallback={secondaryScreenFallback}>

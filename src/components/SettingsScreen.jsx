@@ -144,7 +144,12 @@ const SettingsScreen = () => {
   return (
     <div className="pb-24">
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-bold theme-text-primary">{t.settings}</h1>
+        <div>
+          <div className="theme-text-muted text-[11px] uppercase tracking-[0.24em] mb-2">
+            Preferences
+          </div>
+          <h1 className="text-3xl font-bold theme-text-primary tracking-tight">{t.settings}</h1>
+        </div>
         {saveStatus && (
           <div className={`inline-flex items-center gap-2 self-start rounded-full border px-3 py-1.5 text-sm font-medium shadow-sm ${saveStatus.className}`}>
             <SaveStatusIcon className={`h-4 w-4 ${settingsSaving ? 'animate-spin' : ''}`} />
@@ -154,9 +159,9 @@ const SettingsScreen = () => {
       </div>
       
       {/* Language, Currency & Theme */}
-      <Card className="p-4 mb-4">
+      <Card className="p-5 mb-4">
         <h3 className="theme-text-primary font-semibold mb-4 flex items-center gap-2">
-          <Globe className="w-5 h-5 text-purple-400" />
+          <Globe className="w-5 h-5 text-sky-400" />
           {t.language} & {t.currency}
         </h3>
         
@@ -201,9 +206,9 @@ const SettingsScreen = () => {
       </Card>
       
       {/* Work Type & Payment Settings */}
-      <Card className="p-4 mb-4">
+      <Card className="p-5 mb-4">
         <h3 className="theme-text-primary font-semibold mb-4 flex items-center gap-2">
-          <Briefcase className="w-5 h-5 text-green-400" />
+          <Briefcase className="w-5 h-5 text-emerald-400" />
           {t.workType}
         </h3>
         
@@ -311,7 +316,7 @@ const SettingsScreen = () => {
       <CollapsibleSection
         title={t.enabledFields}
         icon={SettingsIcon}
-        iconColor="text-blue-400"
+        iconColor="text-sky-400"
       >
         <SettingRow>
           <Toggle
@@ -358,7 +363,7 @@ const SettingsScreen = () => {
       <CollapsibleSection
         title={t.statisticsFields}
         icon={BarChart3}
-        iconColor="text-purple-400"
+        iconColor="text-blue-400"
       >
         <SettingRow>
           <Toggle

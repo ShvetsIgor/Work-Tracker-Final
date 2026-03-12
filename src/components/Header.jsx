@@ -35,15 +35,25 @@ const Header = ({ onOpenAccount }) => {
   const displayName = user?.name || user?.email?.split('@')[0] || 'User';
   
   return (
-    <header className={`sticky top-0 theme-bg-header px-4 py-4 z-40 transition-colors duration-300`}>
+    <header className="sticky top-0 px-4 pt-4 z-40">
       <div className="max-w-lg mx-auto flex justify-between items-center">
         {/* Logo */}
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20">
+        <div className={`w-full flex items-center justify-between gap-3 rounded-[28px] border px-4 py-3 transition-colors duration-300 ${
+          isDark
+            ? 'theme-bg-header border-slate-700/40 shadow-[0_16px_42px_rgba(2,10,23,0.28)]'
+            : 'theme-bg-header border-white/70 shadow-[0_16px_34px_rgba(148,163,184,0.18)]'
+        }`}>
+          <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 bg-gradient-to-br from-sky-500 via-cyan-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-[0_14px_28px_rgba(14,165,233,0.28)]">
             <Clock className="w-5 h-5 text-white" />
           </div>
-          <span className="theme-text-primary font-bold text-lg">{t.appName}</span>
-        </div>
+          <div className="min-w-0">
+            <span className="theme-text-primary font-bold text-lg tracking-tight">{t.appName}</span>
+            <div className="theme-text-muted text-[11px] uppercase tracking-[0.22em]">
+              Work Ledger
+            </div>
+          </div>
+          </div>
         
         {/* User menu */}
         {user && (
@@ -52,11 +62,11 @@ const Header = ({ onOpenAccount }) => {
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-colors ${
                 isDark 
-                  ? 'bg-slate-700/50 hover:bg-slate-700' 
-                  : 'bg-white/50 hover:bg-white/80 border border-slate-200'
+                  ? 'bg-slate-800/70 hover:bg-slate-700/80 border border-slate-700/50' 
+                  : 'bg-white/70 hover:bg-white border border-slate-200/80'
               }`}
             >
-              <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-to-br from-sky-500 to-blue-600 rounded-xl flex items-center justify-center">
                 <span className="text-white text-sm font-medium">
                   {displayName.charAt(0).toUpperCase()}
                 </span>
@@ -106,6 +116,7 @@ const Header = ({ onOpenAccount }) => {
             )}
           </div>
         )}
+        </div>
       </div>
     </header>
   );

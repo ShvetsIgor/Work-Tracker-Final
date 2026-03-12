@@ -5,39 +5,47 @@
 /* CSS Variables for theming */
 :root {
   /* Dark theme (default) */
-  --bg-primary: #0f172a;
-  --bg-secondary: #1e1b4b;
-  --bg-card: rgba(30, 41, 59, 0.5);
-  --bg-input: rgba(51, 65, 85, 0.5);
-  --bg-header: rgba(30, 41, 59, 0.5);
-  --border-color: rgba(71, 85, 105, 0.5);
-  --border-card: rgba(71, 85, 105, 0.3);
-  --text-primary: #ffffff;
-  --text-secondary: #cbd5e1;
-  --text-muted: #94a3b8;
-  --text-placeholder: #64748b;
-  --accent-primary: #a855f7;
-  --accent-secondary: #3b82f6;
-  --scrollbar-track: rgba(30, 41, 59, 0.5);
-  --scrollbar-thumb: rgba(139, 92, 246, 0.5);
+  --bg-primary: #07111f;
+  --bg-secondary: #0d1b2f;
+  --bg-tertiary: #13253d;
+  --bg-card: rgba(12, 24, 41, 0.76);
+  --bg-card-strong: rgba(14, 29, 48, 0.92);
+  --bg-input: rgba(22, 39, 62, 0.78);
+  --bg-header: rgba(7, 17, 31, 0.72);
+  --border-color: rgba(107, 138, 177, 0.22);
+  --border-card: rgba(148, 187, 233, 0.14);
+  --text-primary: #f3f7fb;
+  --text-secondary: #c6d4e4;
+  --text-muted: #7f97b5;
+  --text-placeholder: #5f7694;
+  --accent-primary: #38bdf8;
+  --accent-secondary: #2563eb;
+  --accent-soft: rgba(56, 189, 248, 0.16);
+  --shadow-card: 0 22px 50px rgba(2, 10, 23, 0.32);
+  --scrollbar-track: rgba(11, 24, 42, 0.7);
+  --scrollbar-thumb: rgba(56, 189, 248, 0.4);
 }
 
 [data-theme="light"] {
-  --bg-primary: #f8fafc;
-  --bg-secondary: #e0e7ff;
-  --bg-card: rgba(255, 255, 255, 0.8);
-  --bg-input: rgba(241, 245, 249, 0.8);
+  --bg-primary: #f4f7fb;
+  --bg-secondary: #e9f0f8;
+  --bg-tertiary: #dbe7f3;
+  --bg-card: rgba(255, 255, 255, 0.88);
+  --bg-card-strong: rgba(255, 255, 255, 0.96);
+  --bg-input: rgba(240, 246, 252, 0.94);
   --bg-header: rgba(255, 255, 255, 0.8);
-  --border-color: rgba(203, 213, 225, 0.8);
-  --border-card: rgba(203, 213, 225, 0.5);
-  --text-primary: #1e293b;
-  --text-secondary: #475569;
-  --text-muted: #64748b;
-  --text-placeholder: #94a3b8;
-  --accent-primary: #9333ea;
-  --accent-secondary: #2563eb;
-  --scrollbar-track: rgba(226, 232, 240, 0.5);
-  --scrollbar-thumb: rgba(147, 51, 234, 0.5);
+  --border-color: rgba(123, 149, 184, 0.28);
+  --border-card: rgba(123, 149, 184, 0.2);
+  --text-primary: #11233a;
+  --text-secondary: #35506f;
+  --text-muted: #627b98;
+  --text-placeholder: #91a5bc;
+  --accent-primary: #0284c7;
+  --accent-secondary: #1d4ed8;
+  --accent-soft: rgba(14, 165, 233, 0.14);
+  --shadow-card: 0 18px 42px rgba(103, 126, 155, 0.16);
+  --scrollbar-track: rgba(222, 232, 243, 0.8);
+  --scrollbar-thumb: rgba(14, 165, 233, 0.36);
 }
 
 * {
@@ -53,7 +61,7 @@ html {
 }
 
 body {
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: "Avenir Next", "Segoe UI Variable", "Trebuchet MS", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
@@ -69,11 +77,17 @@ body {
 /* Theme backgrounds */
 [data-theme="dark"] body,
 body {
-  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-primary) 100%);
+  background:
+    radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(37, 99, 235, 0.2), transparent 30%),
+    linear-gradient(145deg, var(--bg-primary) 0%, var(--bg-secondary) 48%, #08131f 100%);
 }
 
 [data-theme="light"] body {
-  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-primary) 100%);
+  background:
+    radial-gradient(circle at top left, rgba(14, 165, 233, 0.1), transparent 26%),
+    radial-gradient(circle at bottom right, rgba(37, 99, 235, 0.08), transparent 26%),
+    linear-gradient(145deg, var(--bg-primary) 0%, var(--bg-secondary) 48%, #f7fbff 100%);
 }
 
 /* Custom scrollbar */
@@ -199,9 +213,10 @@ input[type="time"] {
 
 .theme-bg-card {
   background: var(--bg-card);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   border: 1px solid var(--border-card);
+  box-shadow: var(--shadow-card);
 }
 
 .theme-bg-input {
@@ -212,8 +227,8 @@ input[type="time"] {
 
 .theme-bg-header {
   background: var(--bg-header);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -231,4 +246,8 @@ input[type="time"] {
 
 .theme-border {
   border-color: var(--border-color);
+}
+
+.theme-surface-strong {
+  background: var(--bg-card-strong);
 }

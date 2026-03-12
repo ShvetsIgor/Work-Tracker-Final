@@ -152,8 +152,8 @@ const ShiftDetails = ({ shift, onEdit, onDelete, settings, t }) => {
     <div className={`mt-2 p-4 rounded-xl animate-fade-in ${isDark ? 'bg-slate-700/30' : 'bg-slate-100/80'}`}>
       <div className={`mb-3 rounded-xl border p-3 ${isDark ? 'border-slate-600/40 bg-slate-800/35' : 'border-slate-200 bg-white/80'}`}>
         <div className="mb-2 flex items-center justify-between">
-          <span className="theme-text-primary text-sm font-semibold">{t.netIncome}</span>
-          <span className="text-purple-400 text-lg font-bold">{formatCurrency(netIncome, settings.currency)}</span>
+          <span className="theme-text-primary text-base font-bold">{t.netIncome}</span>
+          <span className="text-purple-400 text-xl font-bold">{formatCurrency(netIncome, settings.currency)}</span>
         </div>
         <div className="space-y-2">
           {breakdown.map((item, index) => {
@@ -185,7 +185,7 @@ const ShiftDetails = ({ shift, onEdit, onDelete, settings, t }) => {
 
       {summaryStats.length > 0 && (
         <div className={`mb-3 rounded-xl border p-3 ${isDark ? 'border-slate-600/40 bg-slate-800/20' : 'border-slate-200 bg-white/70'}`}>
-          <div className="mb-2 theme-text-primary text-sm font-semibold">
+          <div className="mb-2 theme-text-primary text-base font-bold">
             {settings.language === 'ru' && 'Дополнительно'}
             {settings.language === 'en' && 'Additional'}
             {settings.language === 'he' && 'נוסף'}
