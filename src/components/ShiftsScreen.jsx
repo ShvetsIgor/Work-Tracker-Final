@@ -59,6 +59,7 @@ const ShiftDetails = ({ shift, onEdit, onDelete, settings, t }) => {
   const isHourly = settings.workType !== 'pieceWork';
   const baseEarnings = calculateShiftBaseEarnings(shift, settings);
   const netTipsCard = calculateNetTipsCard(shift.tipsCard, settings.tipsCardPercent);
+  const cardTipsDeduction = Math.max(0, (shift.tipsCard || 0) - netTipsCard);
   const totalExpenses = calculateTotalExpenses(shift.expenses);
   const netIncome = calculateShiftNetIncome(shift, settings);
   const isDark = settings.theme !== 'light';
@@ -92,10 +93,7 @@ const ShiftDetails = ({ shift, onEdit, onDelete, settings, t }) => {
     stats.push({ icon: Banknote, label: t.tipsCash, value: formatCurrency(shift.tipsCash, settings.currency), color: 'text-green-400' });
   }
   if (enabledFields.tipsCard && shift.tipsCard > 0) {
-    const grossFormatted = formatCurrency(shift.tipsCard, settings.currency);
-    const netFormatted = formatCurrency(netTipsCard, settings.currency);
-    const displayValue = settings.tipsCardPercent > 0 ? `${grossFormatted} (${netFormatted})` : grossFormatted;
-    stats.push({ icon: CreditCard, label: t.tipsCard, value: displayValue, color: 'text-green-400' });
+    stats.push({ icon: CreditCard, label: t.tipsCard, value: formatCurrency(netTipsCard, settings.currency), color: 'text-green-400' });
   }
   if (enabledFields.expenses && totalExpenses > 0) {
     stats.push({ icon: Receipt, label: t.expenses, value: `-${formatCurrency(totalExpenses, settings.currency)}`, color: 'text-red-400' });
@@ -103,32 +101,112 @@ const ShiftDetails = ({ shift, onEdit, onDelete, settings, t }) => {
   if (enabledFields.bonus && shift.bonus > 0) {
     stats.push({ icon: Gift, label: t.bonus, value: formatCurrency(shift.bonus, settings.currency), color: 'text-yellow-400' });
   }
+
+  const breakdown = [
+    {
+      label: isHourly ? (t.baseEarnings || t.earnings) : t.earnedAmount,
+      value: baseEarnings,
+      tone: 'positive'
+    }
+  ];
+
+  if (enabledFields.tipsCash && shift.tipsCash > 0) {
+    breakdown.push({
+      label: t.tipsCash,
+      value: shift.tipsCash,
+      tone: 'positive'
+    });
+  }
+
+  if (enabledFields.tipsCard && shift.tipsCard > 0) {
+    breakdown.push({
+      label: t.tipsCard,
+      value: netTipsCard,
+      tone: 'positive',
+      meta: settings.tipsCardPercent > 0
+        ? `${formatCurrency(shift.tipsCard, settings.currency)} - ${formatCurrency(cardTipsDeduction, settings.currency)} ${t.deduction?.toLowerCase?.() || 'deduction'}`
+        : null
+    });
+  }
+
+  if (enabledFields.bonus && shift.bonus > 0) {
+    breakdown.push({
+      label: t.bonus,
+      value: shift.bonus,
+      tone: 'positive'
+    });
+  }
+
+  if (enabledFields.expenses && totalExpenses > 0) {
+    breakdown.push({
+      label: t.expenses,
+      value: totalExpenses,
+      tone: 'negative'
+    });
+  }
+
+  const breakdownLabels = new Set(breakdown.map(item => item.label));
+  const summaryStats = stats.filter(stat => !breakdownLabels.has(stat.label));
   
   return (
     <div className={`mt-2 p-4 rounded-xl animate-fade-in ${isDark ? 'bg-slate-700/30' : 'bg-slate-100/80'}`}>
-      {stats.length > 0 && (
-        <div className="grid grid-cols-3 gap-2 mb-3">
-          {stats.map((stat, index) => {
-            const Icon = stat.icon;
+      <div className={`mb-3 rounded-xl border p-3 ${isDark ? 'border-slate-600/40 bg-slate-800/35' : 'border-slate-200 bg-white/80'}`}>
+        <div className="mb-2 flex items-center justify-between">
+          <span className="theme-text-primary text-sm font-semibold">{t.netIncome}</span>
+          <span className="text-purple-400 text-lg font-bold">{formatCurrency(netIncome, settings.currency)}</span>
+        </div>
+        <div className="space-y-2">
+          {breakdown.map((item, index) => {
+            const isNegative = item.tone === 'negative';
+            const sign = isNegative ? '-' : '+';
+            const valueClass = isNegative ? 'text-red-400' : 'text-emerald-400';
+
             return (
-              <div key={index} className={`rounded-lg p-2 text-center ${isDark ? 'bg-slate-600/30' : 'bg-white/60'}`}>
-                <div className="flex items-center justify-center gap-1 theme-text-muted text-xs">
-                  <Icon className="w-3 h-3" />
-                  <span className="truncate">{stat.label}</span>
+              <div key={`${item.label}-${index}`} className="flex items-start justify-between gap-3 text-sm">
+                <div className="min-w-0">
+                  <div className="theme-text-secondary flex items-center gap-2">
+                    <span className={`font-semibold ${valueClass}`}>{sign}</span>
+                    <span>{item.label}</span>
+                  </div>
+                  {item.meta && (
+                    <div className="mt-0.5 pl-5 text-xs theme-text-muted">
+                      {item.meta}
+                    </div>
+                  )}
                 </div>
-                <div className={`font-semibold text-sm ${stat.color}`}>{stat.value}</div>
+                <span className={`font-semibold ${valueClass}`}>
+                  {formatCurrency(item.value, settings.currency)}
+                </span>
               </div>
             );
           })}
         </div>
-      )}
-      
-      {/* Net income */}
-      <div className={`p-3 rounded-lg mb-3 text-center ${isDark ? 'bg-purple-500/20' : 'bg-purple-100'}`}>
-        <div className="theme-text-muted text-xs">{t.netIncome}</div>
-        <div className="text-purple-400 font-bold text-xl">{formatCurrency(netIncome, settings.currency)}</div>
       </div>
-      
+
+      {summaryStats.length > 0 && (
+        <div className={`mb-3 rounded-xl border p-3 ${isDark ? 'border-slate-600/40 bg-slate-800/20' : 'border-slate-200 bg-white/70'}`}>
+          <div className="mb-2 theme-text-primary text-sm font-semibold">
+            {settings.language === 'ru' && 'Дополнительно'}
+            {settings.language === 'en' && 'Additional'}
+            {settings.language === 'he' && 'נוסף'}
+          </div>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {summaryStats.map((stat, index) => {
+              const Icon = stat.icon;
+              return (
+                <div key={index} className={`rounded-lg p-2.5 ${isDark ? 'bg-slate-700/30' : 'bg-slate-50'}`}>
+                  <div className="mb-1 flex items-center gap-1.5 theme-text-muted text-xs">
+                    <Icon className="w-3.5 h-3.5" />
+                    <span className="truncate">{stat.label}</span>
+                  </div>
+                  <div className={`font-semibold text-sm ${stat.color}`}>{stat.value}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Actions */}
       <div className="flex gap-2">
         <Button variant="secondary" size="sm" onClick={() => onEdit(shift)} icon={Edit3} className="flex-1">
