@@ -72,6 +72,16 @@ export const calculateNetTipsCard = (tipsCard, tipsCardPercent) => {
 };
 
 /**
+ * Calculate the base earnings for a single shift based on work type
+ */
+export const calculateShiftBaseEarnings = (shift, settings) => {
+  const isHourly = settings.workType !== 'pieceWork';
+  return isHourly
+    ? calculateEarnings(shift.totalMinutes, settings, shift.date)
+    : (shift.earnedAmount || 0);
+};
+
+/**
  * Calculate total expenses for a shift
  */
 export const calculateTotalExpenses = (expenses) => {
@@ -83,12 +93,7 @@ export const calculateTotalExpenses = (expenses) => {
  * Calculate net income for a shift
  */
 export const calculateShiftNetIncome = (shift, settings) => {
-  const isHourly = settings.workType !== 'pieceWork';
-  
-  // For piece-work, use earnedAmount instead of calculated earnings
-  const earnings = isHourly 
-    ? calculateEarnings(shift.totalMinutes, settings, shift.date)
-    : (shift.earnedAmount || 0);
+  const earnings = calculateShiftBaseEarnings(shift, settings);
   
   const tipsCash = shift.tipsCash || 0;
   const netTipsCard = calculateNetTipsCard(shift.tipsCard, settings.tipsCardPercent);

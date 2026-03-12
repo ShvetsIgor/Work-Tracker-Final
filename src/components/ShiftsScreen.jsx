@@ -4,13 +4,14 @@ import { useApp } from '@/context/AppContext';
 import ShiftModal from '@/components/ShiftModal';
 import { Button, Card, EmptyState } from '@/components/ui';
 import { formatDate, isToday, isYesterday } from '@/utils/dateUtils';
-import { calculateEarnings, calculateNetTipsCard, calculateTotalExpenses, calculateShiftNetIncome } from '@/utils/calculations';
+import { calculateShiftBaseEarnings, calculateNetTipsCard, calculateTotalExpenses, calculateShiftNetIncome } from '@/utils/calculations';
 import { formatCurrency, formatTime } from '@/utils/formatters';
 
 // Compact shift row
 const ShiftRow = ({ shift, onExpand, isExpanded, settings, t }) => {
-  const baseEarnings = calculateEarnings(shift.totalMinutes, settings, shift.date);
+  const baseEarnings = calculateShiftBaseEarnings(shift, settings);
   const isDark = settings.theme !== 'light';
+  const isHourly = settings.workType !== 'pieceWork';
   
   const getDateLabel = () => {
     if (isToday(shift.date)) return t.today;
@@ -37,7 +38,7 @@ const ShiftRow = ({ shift, onExpand, isExpanded, settings, t }) => {
         </div>
       </div>
       <div className="flex items-center gap-3">
-        <div className="text-green-400 font-bold">
+        <div className={`font-bold ${isHourly ? 'text-green-400' : 'text-blue-400'}`}>
           {formatCurrency(baseEarnings, settings.currency)}
         </div>
         {isExpanded ? (
@@ -54,6 +55,7 @@ const ShiftRow = ({ shift, onExpand, isExpanded, settings, t }) => {
 const ShiftDetails = ({ shift, onEdit, onDelete, settings, t }) => {
   const { enabledFields } = settings;
   const isHourly = settings.workType !== 'pieceWork';
+  const baseEarnings = calculateShiftBaseEarnings(shift, settings);
   const netTipsCard = calculateNetTipsCard(shift.tipsCard, settings.tipsCardPercent);
   const totalExpenses = calculateTotalExpenses(shift.expenses);
   const netIncome = calculateShiftNetIncome(shift, settings);
@@ -67,6 +69,12 @@ const ShiftDetails = ({ shift, onEdit, onDelete, settings, t }) => {
   const stats = [];
   
   if (!isHourly) {
+    stats.push({
+      icon: DollarSign,
+      label: t.earnedAmount,
+      value: formatCurrency(baseEarnings, settings.currency),
+      color: 'text-blue-400'
+    });
     if (shift.ordersCount > 0) {
       stats.push({ icon: Package, label: t.orders, value: shift.ordersCount, color: 'text-blue-400' });
     }

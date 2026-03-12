@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Clock, DollarSign, Banknote, CreditCard, Car, Receipt, Gift, 
   TrendingUp, Calendar, BarChart3, Package, ChevronDown, ChevronUp, List, Settings,
@@ -7,7 +7,7 @@ import {
 import { useApp } from '@/context/AppContext';
 import { Card, EmptyState } from '@/components/ui';
 import { getDateRange, isDateInRange, formatDate } from '@/utils/dateUtils';
-import { calculateStatistics, calculateEarnings } from '@/utils/calculations';
+import { calculateStatistics, calculateShiftBaseEarnings } from '@/utils/calculations';
 import { formatCurrency, formatTime, formatTimeLabeled } from '@/utils/formatters';
 
 const StatCard = ({ icon: Icon, label, value, color = 'theme-text-primary', subValue }) => (
@@ -352,6 +352,7 @@ const EXPORT_COLUMNS = [
   { id: 'date', label: 'date', required: true },
   { id: 'hours', label: 'hours' },
   { id: 'earnings', label: 'earnings' },
+  { id: 'earnedAmount', label: 'earnedAmount' },
   { id: 'tipsCash', label: 'tipsCash' },
   { id: 'tipsCard', label: 'tipsCard' },
   { id: 'mileage', label: 'mileage' },
@@ -359,17 +360,29 @@ const EXPORT_COLUMNS = [
   { id: 'bonus', label: 'bonus' },
   { id: 'bonusComment', label: 'bonusComment' },
   { id: 'orders', label: 'orders' },
-  { id: 'earnedAmount', label: 'earnedAmount' },
 ];
 
 const ExportButton = ({ shifts, settings, t, isDark, dateFrom, dateTo }) => {
   const [showModal, setShowModal] = useState(false);
-  const [selectedFields, setSelectedFields] = useState(['date', 'hours', 'earnings', 'tipsCash', 'tipsCard']);
   const { enabledFields, workType, currency } = settings;
   const isHourly = workType !== 'pieceWork';
+  const [selectedFields, setSelectedFields] = useState(() => (
+    isHourly
+      ? ['date', 'hours', 'earnings', 'tipsCash', 'tipsCard']
+      : ['date', 'hours', 'earnedAmount', 'tipsCash', 'tipsCard']
+  ));
+
+  useEffect(() => {
+    setSelectedFields(prev => {
+      const next = prev.filter(fieldId => fieldId !== 'earnings' && fieldId !== 'earnedAmount');
+      return isHourly ? [...next, 'earnings'] : [...next, 'earnedAmount'];
+    });
+  }, [isHourly]);
   
   // Filter available columns based on settings
   const availableColumns = EXPORT_COLUMNS.filter(col => {
+    if (col.id === 'earnings') return isHourly;
+    if (col.id === 'earnedAmount') return !isHourly;
     if (col.id === 'tipsCash') return enabledFields?.tipsCash !== false;
     if (col.id === 'tipsCard') return enabledFields?.tipsCard !== false;
     if (col.id === 'mileage') return enabledFields?.mileage !== false;
@@ -407,7 +420,7 @@ const ExportButton = ({ shifts, settings, t, isDark, dateFrom, dateTo }) => {
       .sort((a, b) => new Date(a.date) - new Date(b.date))
       .map(shift => {
         const row = {};
-        const baseEarnings = calculateEarnings(shift.totalMinutes, settings, shift.date);
+        const baseEarnings = calculateShiftBaseEarnings(shift, settings);
         const totalExpenses = shift.expenses?.reduce((sum, e) => sum + (e.amount || 0), 0) || 0;
         
         selectedFields.forEach(fieldId => {
@@ -421,6 +434,9 @@ const ExportButton = ({ shifts, settings, t, isDark, dateFrom, dateTo }) => {
               break;
             case 'earnings':
               row[label] = baseEarnings;
+              break;
+            case 'earnedAmount':
+              row[label] = shift.earnedAmount || 0;
               break;
             case 'tipsCash':
               row[label] = shift.tipsCash || 0;
@@ -442,9 +458,6 @@ const ExportButton = ({ shifts, settings, t, isDark, dateFrom, dateTo }) => {
               break;
             case 'orders':
               row[label] = shift.ordersCount || 0;
-              break;
-            case 'earnedAmount':
-              row[label] = shift.earnedAmount || 0;
               break;
           }
         });
@@ -615,6 +628,7 @@ const CommentsSection = ({ title, comments, icon, color, isDark, t, currency }) 
 const SHIFT_COLUMNS = [
   { id: 'hours', label: 'hours', icon: Clock },
   { id: 'earnings', label: 'earnings', icon: DollarSign },
+  { id: 'earnedAmount', label: 'earnedAmount', icon: DollarSign },
   { id: 'tipsCash', label: 'tipsCash', icon: Banknote },
   { id: 'tipsCard', label: 'tipsCard', icon: CreditCard },
   { id: 'mileage', label: 'mileage', icon: Car },
@@ -626,15 +640,26 @@ const SHIFT_COLUMNS = [
 // Collapsible shifts list with column selector
 const ShiftsList = ({ shifts, settings, t, isDark }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedColumns, setSelectedColumns] = useState(['hours', 'earnings']);
   const [showColumnSelector, setShowColumnSelector] = useState(false);
   const { currency, enabledFields, workType } = settings;
   const isHourly = workType !== 'pieceWork';
+  const [selectedColumns, setSelectedColumns] = useState(() => (
+    isHourly ? ['hours', 'earnings'] : ['hours', 'earnedAmount']
+  ));
+
+  useEffect(() => {
+    setSelectedColumns(prev => {
+      const next = prev.filter(colId => colId !== 'earnings' && colId !== 'earnedAmount');
+      return isHourly ? [...next, 'earnings'] : [...next, 'earnedAmount'];
+    });
+  }, [isHourly]);
   
   if (shifts.length === 0) return null;
   
   // Filter available columns based on enabled fields
   const availableColumns = SHIFT_COLUMNS.filter(col => {
+    if (col.id === 'earnings') return isHourly;
+    if (col.id === 'earnedAmount') return !isHourly;
     if (col.id === 'tipsCash') return enabledFields?.tipsCash !== false;
     if (col.id === 'tipsCard') return enabledFields?.tipsCard !== false;
     if (col.id === 'mileage') return enabledFields?.mileage !== false;
@@ -656,12 +681,13 @@ const ShiftsList = ({ shifts, settings, t, isDark }) => {
   };
   
   const getColumnValue = (shift, colId) => {
-    const baseEarnings = calculateEarnings(shift.totalMinutes, settings, shift.date);
+    const baseEarnings = calculateShiftBaseEarnings(shift, settings);
     const totalExpenses = shift.expenses?.reduce((sum, e) => sum + (e.amount || 0), 0) || 0;
     
     switch (colId) {
       case 'hours': return formatTime(shift.totalMinutes);
       case 'earnings': return formatCurrency(baseEarnings, currency);
+      case 'earnedAmount': return formatCurrency(shift.earnedAmount || 0, currency);
       case 'tipsCash': return shift.tipsCash ? formatCurrency(shift.tipsCash, currency) : '-';
       case 'tipsCard': return shift.tipsCard ? formatCurrency(shift.tipsCard, currency) : '-';
       case 'mileage': return shift.mileage ? `${shift.mileage} ${t.km || 'км'}` : '-';
@@ -675,6 +701,7 @@ const ShiftsList = ({ shifts, settings, t, isDark }) => {
   const getColumnColor = (colId) => {
     switch (colId) {
       case 'earnings': return 'text-green-400';
+      case 'earnedAmount': return 'text-blue-400';
       case 'tipsCash': return 'text-emerald-400';
       case 'tipsCard': return 'text-blue-400';
       case 'expenses': return 'text-red-400';
