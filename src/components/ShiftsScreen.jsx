@@ -1,7 +1,8 @@
 import React, { lazy, Suspense, useState, useMemo } from 'react';
-import { Plus, Clock, Car, Banknote, CreditCard, Gift, Receipt, Trash2, Edit3, ClipboardList, Package, DollarSign, ChevronDown, ChevronUp, CalendarRange, BarChart3 } from 'lucide-react';
+import { Plus, Clock, Car, Banknote, CreditCard, Gift, Receipt, Trash2, Edit3, ClipboardList, Package, DollarSign, ChevronDown, ChevronUp, CalendarRange, BarChart3, AlertTriangle } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { Button, Card, EmptyState } from '@/components/ui';
+import Modal from '@/components/ui/Modal';
 import { formatDate, isToday, isYesterday } from '@/utils/dateUtils';
 import { calculateShiftBaseEarnings, calculateNetTipsCard, calculateTotalExpenses, calculateShiftNetIncome } from '@/utils/calculations';
 import { formatCurrency, formatTime } from '@/utils/formatters';
@@ -146,21 +147,30 @@ const ShiftsScreen = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingShift, setEditingShift] = useState(null);
   const [expandedId, setExpandedId] = useState(null);
-  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [shiftToDelete, setShiftToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   
   const handleEdit = (shift) => {
     setEditingShift(shift);
     setShowModal(true);
   };
   
-  const handleDelete = async (shiftId) => {
-    if (deleteConfirm === shiftId) {
-      await deleteShift(shiftId);
-      setDeleteConfirm(null);
+  const handleDeleteRequest = (shift) => {
+    setShiftToDelete(shift);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!shiftToDelete) return;
+
+    setDeleting(true);
+    try {
+      await deleteShift(shiftToDelete.id);
       setExpandedId(null);
-    } else {
-      setDeleteConfirm(shiftId);
-      setTimeout(() => setDeleteConfirm(null), 3000);
+      setShiftToDelete(null);
+    } catch (error) {
+      console.error('Error deleting shift:', error);
+    } finally {
+      setDeleting(false);
     }
   };
   
@@ -254,7 +264,7 @@ const ShiftsScreen = () => {
                   settings={settings}
                   t={t}
                   onEdit={handleEdit}
-                  onDelete={handleDelete}
+                  onDelete={() => handleDeleteRequest(shift)}
                 />
               )}
             </div>
@@ -272,6 +282,53 @@ const ShiftsScreen = () => {
           />
         </Suspense>
       )}
+
+      <Modal
+        isOpen={!!shiftToDelete}
+        onClose={() => !deleting && setShiftToDelete(null)}
+        title={t.delete}
+        size="sm"
+        footer={
+          <>
+            <Button
+              variant="secondary"
+              onClick={() => setShiftToDelete(null)}
+              className="flex-1"
+              disabled={deleting}
+            >
+              {t.cancel}
+            </Button>
+            <Button
+              variant="danger"
+              onClick={handleConfirmDelete}
+              className="flex-1"
+              loading={deleting}
+            >
+              {t.delete}
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ${
+            settings.theme !== 'light'
+              ? 'bg-red-500/15 text-red-300'
+              : 'bg-red-100 text-red-600'
+          }`}>
+            <AlertTriangle className="h-7 w-7" />
+          </div>
+          <div className="text-center">
+            <p className="theme-text-primary text-base font-semibold">
+              {t.deleteConfirm}
+            </p>
+            {shiftToDelete && (
+              <p className="mt-2 theme-text-muted text-sm">
+                {formatDate(shiftToDelete.date, settings.language)} • {formatTime(shiftToDelete.totalMinutes)}
+              </p>
+            )}
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
