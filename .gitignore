@@ -36,3 +36,6 @@ coverage/
 
 # Misc
 *.local
+
+# Claude Code
+.claude/

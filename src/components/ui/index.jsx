@@ -222,82 +222,163 @@ export const Loader = ({ size = 'md', className = '' }) => {
   );
 };
 
-// Full Screen Loader - Beautiful animated loader
+// Full Screen Loader - GPS Route animation
 export const FullScreenLoader = () => {
+  const routePath = "M 25,80 C 70,30 100,30 135,65 C 165,95 195,40 235,45 C 260,48 280,70 295,75";
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-      {/* Background glow effects */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/3 left-1/4 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/3 right-1/4 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-      </div>
-      
-      <div className="relative text-center">
-        {/* Main loader container */}
-        <div className="relative w-32 h-32 mx-auto mb-10">
-          {/* Outer rotating ring */}
-          <div className="absolute inset-0 rounded-full border-4 border-purple-500/20"></div>
-          <div 
-            className="absolute inset-0 rounded-full border-4 border-transparent border-t-purple-500 border-r-purple-400/50"
-            style={{ animation: 'spin 1.5s linear infinite' }}
-          ></div>
-          
-          {/* Middle pulsing ring */}
-          <div 
-            className="absolute inset-3 rounded-full border-2 border-blue-400/30"
-            style={{ animation: 'pulse 2s ease-in-out infinite' }}
-          ></div>
-          
-          {/* Inner gradient circle */}
-          <div className="absolute inset-5 rounded-full bg-gradient-to-br from-purple-500/30 to-blue-500/30 backdrop-blur-sm flex items-center justify-center shadow-lg shadow-purple-500/20">
-            {/* Clock icon with animated hands */}
-            <div className="relative">
-              <svg className="w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <circle cx="12" cy="12" r="9" strokeWidth="1.5" className="text-purple-300" />
-                {/* Hour hand */}
-                <line 
-                  x1="12" y1="12" x2="12" y2="8" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
-                  className="text-white origin-center"
-                  style={{ transformOrigin: '12px 12px', animation: 'spin 8s linear infinite' }}
-                />
-                {/* Minute hand */}
-                <line 
-                  x1="12" y1="12" x2="16" y2="12" 
-                  strokeWidth="1.5" 
-                  strokeLinecap="round" 
-                  className="text-purple-300 origin-center"
-                  style={{ transformOrigin: '12px 12px', animation: 'spin 2s linear infinite' }}
-                />
-                {/* Center dot */}
-                <circle cx="12" cy="12" r="1.5" fill="currentColor" className="text-purple-400" />
-              </svg>
-            </div>
-          </div>
-          
-          {/* Orbiting dots */}
-          <div className="absolute inset-0" style={{ animation: 'spin 3s linear infinite' }}>
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 w-2 h-2 rounded-full bg-purple-400 shadow-lg shadow-purple-400/50"></div>
-          </div>
-          <div className="absolute inset-0" style={{ animation: 'spin 3s linear infinite reverse' }}>
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1 w-1.5 h-1.5 rounded-full bg-blue-400 shadow-lg shadow-blue-400/50"></div>
-          </div>
+    <div
+      className="min-h-screen flex items-center justify-center relative overflow-hidden"
+      style={{ background: 'linear-gradient(135deg, #0f0c29 0%, #1a1040 50%, #0a0a1a 100%)' }}
+    >
+      <style>{`
+        @keyframes routeDraw {
+          0%   { stroke-dashoffset: 700; opacity: 1; }
+          65%  { stroke-dashoffset: 0;   opacity: 1; }
+          80%  { stroke-dashoffset: 0;   opacity: 1; }
+          92%  { stroke-dashoffset: 0;   opacity: 0; }
+          100% { stroke-dashoffset: 700; opacity: 0; }
+        }
+        @keyframes ambientFloat {
+          0%, 100% { opacity: 0.12; transform: scale(1); }
+          50%       { opacity: 0.22; transform: scale(1.08); }
+        }
+        @keyframes loadDot {
+          0%, 100% { transform: translateY(0); }
+          50%       { transform: translateY(-7px); }
+        }
+        @keyframes pinPop {
+          0%   { opacity: 0; transform: scale(0.2) translateY(-12px); }
+          65%  { opacity: 1; transform: scale(1.15) translateY(2px); }
+          100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .start-pin { transform-box: fill-box; transform-origin: 50% 100%; animation: pinPop 0.45s ease-out 0.25s both; }
+        .end-pin   { transform-box: fill-box; transform-origin: 50% 100%; animation: pinPop 0.45s ease-out 2.1s both; }
+      `}</style>
+
+      {/* Map grid */}
+      <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.05 }}>
+        <defs>
+          <pattern id="mapGrid" width="44" height="44" patternUnits="userSpaceOnUse">
+            <path d="M 44 0 L 0 0 0 44" fill="none" stroke="#7c3aed" strokeWidth="1" />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#mapGrid)" />
+      </svg>
+
+      {/* Ambient glow orbs */}
+      <div
+        className="absolute rounded-full pointer-events-none"
+        style={{
+          top: '18%', left: '12%', width: 340, height: 340,
+          background: 'radial-gradient(circle, rgba(124,58,237,0.28), transparent 70%)',
+          animation: 'ambientFloat 3.5s ease-in-out infinite',
+        }}
+      />
+      <div
+        className="absolute rounded-full pointer-events-none"
+        style={{
+          bottom: '18%', right: '12%', width: 340, height: 340,
+          background: 'radial-gradient(circle, rgba(37,99,235,0.22), transparent 70%)',
+          animation: 'ambientFloat 3.5s ease-in-out 1.75s infinite',
+        }}
+      />
+
+      <div className="relative z-10 text-center">
+        {/* Route SVG */}
+        <div style={{ width: 300, margin: '0 auto 28px' }}>
+          <svg viewBox="0 0 320 110" xmlns="http://www.w3.org/2000/svg" style={{ overflow: 'visible' }}>
+            <defs>
+              <linearGradient id="routeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%"   stopColor="#7c3aed" />
+                <stop offset="50%"  stopColor="#a855f7" />
+                <stop offset="100%" stopColor="#3b82f6" />
+              </linearGradient>
+              <filter id="pathGlow" x="-10%" y="-80%" width="120%" height="260%">
+                <feGaussianBlur stdDeviation="2.5" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+              <filter id="dotGlow" x="-120%" y="-120%" width="340%" height="340%">
+                <feGaussianBlur stdDeviation="4" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+
+            {/* Shadow route (always visible, dim) */}
+            <path d={routePath} fill="none" stroke="#312e81" strokeWidth="3.5" strokeLinecap="round" />
+
+            {/* Animated glowing route */}
+            <path
+              d={routePath}
+              fill="none"
+              stroke="url(#routeGrad)"
+              strokeWidth="3"
+              strokeLinecap="round"
+              filter="url(#pathGlow)"
+              style={{ strokeDasharray: 700, strokeDashoffset: 700, animation: 'routeDraw 2.6s cubic-bezier(0.4, 0, 0.2, 1) infinite' }}
+            />
+
+            {/* Waypoint markers */}
+            <circle cx="135" cy="65" r="4.5" fill="#8b5cf6" opacity="0.85" />
+            <circle cx="235" cy="45" r="4.5" fill="#60a5fa" opacity="0.85" />
+
+            {/* Start pin (purple) */}
+            <g className="start-pin">
+              <circle cx="25" cy="72" r="10" fill="#7c3aed" opacity="0">
+                <animate attributeName="r"       values="10;20"    dur="1.8s" repeatCount="indefinite" />
+                <animate attributeName="opacity" values="0.35;0"   dur="1.8s" repeatCount="indefinite" />
+              </circle>
+              <path d="M25,55 C18,55 13,61 13,67 C13,76 25,88 25,88 C25,88 37,76 37,67 C37,61 32,55 25,55Z" fill="#7c3aed" />
+              <circle cx="25" cy="67" r="4.5" fill="white" opacity="0.92" />
+            </g>
+
+            {/* End pin (blue) */}
+            <g className="end-pin">
+              <path d="M295,53 C288,53 283,59 283,65 C283,74 295,86 295,86 C295,86 307,74 307,65 C307,59 302,53 295,53Z" fill="#3b82f6" />
+              <circle cx="295" cy="65" r="4.5" fill="white" opacity="0.92" />
+            </g>
+
+            {/* Moving GPS vehicle dot */}
+            <g filter="url(#dotGlow)">
+              <animateMotion dur="2.6s" repeatCount="indefinite" path={routePath} />
+              <circle r="10" fill="#7c3aed" opacity="0.35" />
+              <circle r="6"  fill="#c4b5fd" />
+              <circle r="2.5" fill="white" opacity="0.95" />
+            </g>
+          </svg>
         </div>
-        
-        {/* App name with gradient */}
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent mb-4">
+
+        {/* App name */}
+        <h1
+          className="text-4xl font-bold mb-4"
+          style={{
+            background: 'linear-gradient(90deg, #a78bfa, #e879f9, #60a5fa)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+          }}
+        >
           Shifts
         </h1>
-        
+
         {/* Loading dots */}
-        <div className="flex items-center justify-center gap-1.5">
-          <span className="text-slate-400 text-sm">Загрузка</span>
-          <div className="flex gap-1">
-            <div className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: '0ms' }}></div>
-            <div className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: '150ms' }}></div>
-            <div className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: '300ms' }}></div>
-          </div>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 7 }}>
+          {[0, 150, 300].map((delay, i) => (
+            <div
+              key={i}
+              style={{
+                width: 7, height: 7, borderRadius: '50%',
+                background: '#a78bfa',
+                animation: `loadDot 0.85s ease-in-out ${delay}ms infinite`,
+              }}
+            />
+          ))}
         </div>
       </div>
     </div>
