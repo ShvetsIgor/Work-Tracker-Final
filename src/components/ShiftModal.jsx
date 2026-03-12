@@ -4,8 +4,8 @@ import { useApp } from '@/context/AppContext';
 import Modal from '@/components/ui/Modal';
 import { Button, Input, Select, Toggle, Card } from '@/components/ui';
 import { getEffectiveDate } from '@/utils/dateUtils';
-import { calculateMileage, calculateNetTipsCard } from '@/utils/calculations';
-import { formatCurrency } from '@/utils/formatters';
+import { calculateEarnings, calculateMileage, calculateNetTipsCard } from '@/utils/calculations';
+import { formatCurrency, formatTime } from '@/utils/formatters';
 import { expenseTypes } from '@/config/defaults';
 
 const ShiftModal = ({ isOpen, onClose, shift = null }) => {
@@ -246,6 +246,17 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
     : parseFloat(mileage) || 0;
   
   const netTipsCard = calculateNetTipsCard(parseFloat(tipsCard) || 0, settings.tipsCardPercent);
+  const previewTotalMinutes = getTotalMinutes();
+  const previewBaseEarnings = isHourly
+    ? calculateEarnings(previewTotalMinutes, settings, date)
+    : (parseFloat(earnedAmount) || 0);
+  const previewExpenses = expenses.reduce((sum, expense) => sum + (expense.amount || 0), 0);
+  const previewNetIncome =
+    previewBaseEarnings +
+    (parseFloat(tipsCash) || 0) +
+    netTipsCard +
+    (parseFloat(bonus) || 0) -
+    previewExpenses;
   
   const addExpense = () => {
     const amountState = parseNumber(newExpenseAmount);
@@ -925,9 +936,65 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
             </div>
           </Card>
         )}
+
+        <Card className={`p-4 ${isDark ? 'bg-slate-800/45' : 'bg-white/85 border border-slate-200'}`}>
+          <div className="mb-3 flex items-center justify-between">
+            <span className="theme-text-primary text-base font-bold">
+              {settings.language === 'ru' && 'Сводка'}
+              {settings.language === 'en' && 'Summary'}
+              {settings.language === 'he' && 'סיכום'}
+            </span>
+            <span className="theme-text-muted text-xs">
+              {formatDateLabel(date, t, settings.language)}
+            </span>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            <div className={`rounded-xl p-3 ${isDark ? 'bg-slate-700/30' : 'bg-slate-50'}`}>
+              <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
+                {t.totalTime || 'Total time'}
+              </div>
+              <div className="theme-text-primary text-sm font-bold">
+                {formatTime(previewTotalMinutes)}
+              </div>
+            </div>
+            <div className={`rounded-xl p-3 ${isDark ? 'bg-slate-700/30' : 'bg-slate-50'}`}>
+              <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
+                {isHourly ? (t.earnings || t.totalEarnings) : t.earnedAmount}
+              </div>
+              <div className="text-green-400 text-sm font-bold">
+                {formatCurrency(previewBaseEarnings, settings.currency)}
+              </div>
+            </div>
+            <div className={`rounded-xl p-3 ${isDark ? 'bg-slate-700/30' : 'bg-slate-50'}`}>
+              <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
+                {t.netIncome}
+              </div>
+              <div className="text-purple-400 text-sm font-bold">
+                {formatCurrency(previewNetIncome, settings.currency)}
+              </div>
+            </div>
+          </div>
+        </Card>
       </div>
     </Modal>
   );
+};
+
+const formatDateLabel = (dateValue, t, language) => {
+  if (!dateValue) {
+    return t.date;
+  }
+
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) {
+    return dateValue;
+  }
+
+  return new Intl.DateTimeFormat(language || 'ru', {
+    day: 'numeric',
+    month: 'short'
+  }).format(date);
 };
 
 export default ShiftModal;
