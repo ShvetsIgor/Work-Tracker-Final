@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Car, Banknote, CreditCard, Gift, Receipt, Package, Clock } from 'lucide-react';
+import { Plus, Trash2, Car, Banknote, CreditCard, Gift, Receipt, Package, Clock, ChevronDown, ChevronUp } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import Modal from '@/components/ui/Modal';
 import { Button, Input, Select, Toggle, Card } from '@/components/ui';
@@ -51,6 +51,9 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
   const [activeErrorField, setActiveErrorField] = useState('');
+  const [showTipsSection, setShowTipsSection] = useState(false);
+  const [showExpensesSection, setShowExpensesSection] = useState(false);
+  const [showBonusSection, setShowBonusSection] = useState(false);
 
   const clearError = (field) => {
     if (activeErrorField === field) {
@@ -239,6 +242,9 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
     setNewExpenseComment('');
     setBonus('');
     setBonusComment('');
+    setShowTipsSection(false);
+    setShowExpensesSection(false);
+    setShowBonusSection(false);
   };
   
   const calculatedMileage = mileageMode === 'odometer' 
@@ -257,6 +263,22 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
     netTipsCard +
     (parseFloat(bonus) || 0) -
     previewExpenses;
+  const hasTipsContent = (parseFloat(tipsCash) || 0) > 0 || (parseFloat(tipsCard) || 0) > 0;
+  const hasBonusContent = (parseFloat(bonus) || 0) > 0 || bonusComment.trim().length > 0;
+  const workTimeHasError = Boolean(errors.totalMinutes || errors.hours || errors.minutes || errors.startTime || errors.endTime || errors.breakMinutes);
+  const pieceworkHasError = Boolean(errors.ordersCount || errors.earnedAmount);
+  const mileageHasError = Boolean(errors.mileage || errors.startOdometer || errors.endOdometer);
+  const tipsHasError = Boolean(errors.tipsCash || errors.tipsCard);
+  const expensesHasError = Boolean(errors.newExpenseAmount);
+  const bonusHasError = Boolean(errors.bonus);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    setShowTipsSection(hasTipsContent);
+    setShowExpensesSection(expenses.length > 0);
+    setShowBonusSection(hasBonusContent);
+  }, [isOpen, hasTipsContent, hasBonusContent, expenses.length]);
   
   const addExpense = () => {
     const amountState = parseNumber(newExpenseAmount);
@@ -448,10 +470,10 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
       title={isEditing ? t.editShift : t.addShift}
       footer={
         <>
-          <Button variant="secondary" onClick={onClose} className="flex-1">
+          <Button variant="secondary" onClick={onClose} className="flex-1 min-h-[46px]">
             {t.cancel}
           </Button>
-          <Button onClick={handleSave} loading={saving} className="flex-1">
+          <Button onClick={handleSave} loading={saving} className="flex-1 min-h-[46px]">
             {t.save}
           </Button>
         </>
@@ -484,7 +506,7 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
         </div>
         
         {/* Work Time */}
-        <Card className={`p-4 ${isDark ? 'bg-slate-700/30' : 'bg-slate-100/80'}`}>
+        <Card className={`p-4 ${getSectionClassNames(isDark, workTimeHasError)}`}>
           <div className="flex items-center gap-2 mb-4">
             <Clock className="w-5 h-5 text-blue-400" />
             <span className="theme-text-primary font-medium">{t.workTime}</span>
@@ -621,7 +643,7 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
               
               {/* Show calculated time */}
               {displayCalculatedTime() && (
-                <div className="text-center p-2 rounded-lg bg-purple-500/20">
+                <div className={`text-center rounded-xl border p-2.5 ${isDark ? 'border-slate-700/60 bg-slate-800/55' : 'border-slate-200 bg-white/80'}`}>
                   <span className="theme-text-muted">{t.totalTime || 'Итого'}: </span>
                   <span className="text-purple-400 font-bold">{displayCalculatedTime()}</span>
                 </div>
@@ -632,7 +654,7 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
         
         {/* Piece-work specific fields */}
         {!isHourly && (
-          <Card className={`p-4 ${isDark ? 'bg-slate-700/30' : 'bg-slate-100/80'}`}>
+          <Card className={`p-4 ${getSectionClassNames(isDark, pieceworkHasError)}`}>
             <div className="flex items-center gap-2 mb-4">
               <Package className="w-5 h-5 text-blue-400" />
               <span className="theme-text-primary font-medium">{t.workTypePieceWork}</span>
@@ -675,28 +697,21 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
         
         {/* Mileage */}
         {enabledFields.mileage && (
-          <Card className={`p-4 ${isDark ? 'bg-slate-700/30' : 'bg-slate-100/80'}`}>
+          <Card className={`p-4 ${getSectionClassNames(isDark, mileageHasError)}`}>
             <div className="flex items-center gap-2 mb-4">
               <Car className="w-5 h-5 text-blue-400" />
               <span className="theme-text-primary font-medium">{t.mileage}</span>
             </div>
             
-            <div className="flex gap-2 mb-3">
-              <Button
-                variant={mileageMode === 'manual' ? 'primary' : 'secondary'}
-                size="sm"
-                onClick={() => setMileageMode('manual')}
-              >
-                {t.manualMileage}
-              </Button>
-              <Button
-                variant={mileageMode === 'odometer' ? 'primary' : 'secondary'}
-                size="sm"
-                onClick={() => setMileageMode('odometer')}
-              >
-                {t.odometerMode}
-              </Button>
-            </div>
+            <SegmentedControl
+              className="mb-3"
+              value={mileageMode}
+              onChange={setMileageMode}
+              options={[
+                { value: 'manual', label: t.manualMileage },
+                { value: 'odometer', label: t.odometerMode }
+              ]}
+            />
             
             {mileageMode === 'manual' ? (
               <Input
@@ -758,13 +773,17 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
         
         {/* Tips */}
         {(enabledFields.tipsCash || enabledFields.tipsCard) && (
-          <Card className={`p-4 ${isDark ? 'bg-slate-700/30' : 'bg-slate-100/80'}`}>
-            <div className="flex items-center gap-2 mb-4">
-              <Banknote className="w-5 h-5 text-green-400" />
-              <span className="theme-text-primary font-medium">{t.tips}</span>
-            </div>
-            
-            <div className="space-y-3">
+          <CollapsibleCard
+            title={t.tips}
+            icon={Banknote}
+            iconClassName="text-green-400"
+            isDark={isDark}
+            isOpen={showTipsSection}
+            onToggle={() => setShowTipsSection(prev => !prev)}
+            hasError={tipsHasError}
+            badge={hasTipsContent ? formatCurrency((parseFloat(tipsCash) || 0) + (parseFloat(tipsCard) || 0), settings.currency) : null}
+          >
+            <div className="space-y-3 pt-1">
               {enabledFields.tipsCash && (
                 <Input
                   type="number"
@@ -811,17 +830,21 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
                 </div>
               )}
             </div>
-          </Card>
+          </CollapsibleCard>
         )}
         
         {/* Expenses */}
         {enabledFields.expenses && (
-          <Card className={`p-4 ${isDark ? 'bg-slate-700/30' : 'bg-slate-100/80'}`}>
-            <div className="flex items-center gap-2 mb-4">
-              <Receipt className="w-5 h-5 text-red-400" />
-              <span className="theme-text-primary font-medium">{t.expenses}</span>
-            </div>
-            
+          <CollapsibleCard
+            title={t.expenses}
+            icon={Receipt}
+            iconClassName="text-red-400"
+            isDark={isDark}
+            isOpen={showExpensesSection}
+            onToggle={() => setShowExpensesSection(prev => !prev)}
+            hasError={expensesHasError}
+            badge={previewExpenses > 0 ? formatCurrency(previewExpenses, settings.currency) : null}
+          >
             {/* Expense list */}
             {expenses.length > 0 && (
               <div className="space-y-2 mb-4">
@@ -866,7 +889,7 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
                 options={expenseTypeOptions}
                 label={t.expenseType}
               />
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <Input
                   type="number"
                   value={newExpenseAmount}
@@ -900,17 +923,21 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
                 {t.addExpense}
               </Button>
             </div>
-          </Card>
+          </CollapsibleCard>
         )}
         
         {/* Bonus */}
         {enabledFields.bonus && (
-          <Card className={`p-4 ${isDark ? 'bg-slate-700/30' : 'bg-slate-100/80'}`}>
-            <div className="flex items-center gap-2 mb-4">
-              <Gift className="w-5 h-5 text-yellow-400" />
-              <span className="theme-text-primary font-medium">{t.bonus}</span>
-            </div>
-            
+          <CollapsibleCard
+            title={t.bonus}
+            icon={Gift}
+            iconClassName="text-yellow-400"
+            isDark={isDark}
+            isOpen={showBonusSection}
+            onToggle={() => setShowBonusSection(prev => !prev)}
+            hasError={bonusHasError}
+            badge={(parseFloat(bonus) || 0) > 0 ? formatCurrency(parseFloat(bonus) || 0, settings.currency) : null}
+          >
             <div className="space-y-3">
               <Input
                 type="number"
@@ -934,7 +961,7 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
                 label={t.bonusComment}
               />
             </div>
-          </Card>
+          </CollapsibleCard>
         )}
 
         <Card className={`p-4 ${isDark ? 'bg-slate-800/45' : 'bg-white/85 border border-slate-200'}`}>
@@ -948,7 +975,7 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
               {formatDateLabel(date, t, settings.language)}
             </span>
           </div>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
             <div className={`rounded-xl p-3 ${isDark ? 'bg-slate-700/30' : 'bg-slate-50'}`}>
               <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
                 {t.totalTime || 'Total time'}
@@ -996,5 +1023,80 @@ const formatDateLabel = (dateValue, t, language) => {
     month: 'short'
   }).format(date);
 };
+
+const getSectionClassNames = (isDark, hasError = false) => {
+  if (hasError) {
+    return isDark
+      ? 'bg-slate-700/30 ring-1 ring-red-500/40'
+      : 'bg-slate-100/80 ring-1 ring-red-400/40';
+  }
+
+  return isDark ? 'bg-slate-700/30' : 'bg-slate-100/80';
+};
+
+const SegmentedControl = ({ value, onChange, options, className = '' }) => (
+  <div className={`grid grid-cols-2 gap-2 rounded-2xl bg-slate-900/45 p-1 ${className}`}>
+    {options.map((option) => {
+      const isActive = option.value === value;
+
+      return (
+        <button
+          key={option.value}
+          type="button"
+          onClick={() => onChange(option.value)}
+          className={`rounded-xl px-3 py-2 text-sm font-semibold transition-colors ${
+            isActive
+              ? 'bg-sky-500 text-white shadow-[0_10px_20px_rgba(14,165,233,0.18)]'
+              : 'text-slate-300 hover:bg-slate-800/70'
+          }`}
+        >
+          {option.label}
+        </button>
+      );
+    })}
+  </div>
+);
+
+const CollapsibleCard = ({
+  title,
+  icon: Icon,
+  iconClassName,
+  isDark,
+  isOpen,
+  onToggle,
+  children,
+  badge,
+  hasError = false
+}) => (
+  <Card className={`overflow-hidden ${getSectionClassNames(isDark, hasError)}`}>
+    <button
+      type="button"
+      onClick={onToggle}
+      className="flex w-full items-center justify-between gap-3 p-4 text-left"
+    >
+      <div className="flex min-w-0 items-center gap-2">
+        {Icon && <Icon className={`h-5 w-5 ${iconClassName}`} />}
+        <span className="theme-text-primary font-medium">{title}</span>
+      </div>
+      <div className="flex items-center gap-2">
+        {badge && (
+          <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${isDark ? 'bg-slate-800/75 text-slate-200' : 'bg-white/85 text-slate-700'}`}>
+            {badge}
+          </span>
+        )}
+        {isOpen ? (
+          <ChevronUp className="h-4 w-4 theme-text-muted" />
+        ) : (
+          <ChevronDown className="h-4 w-4 theme-text-muted" />
+        )}
+      </div>
+    </button>
+    {isOpen && (
+      <div className="px-4 pb-4 animate-fade-in">
+        {children}
+      </div>
+    )}
+  </Card>
+);
 
 export default ShiftModal;
