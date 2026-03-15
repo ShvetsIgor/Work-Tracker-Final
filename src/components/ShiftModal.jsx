@@ -51,8 +51,6 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
   const [activeErrorField, setActiveErrorField] = useState('');
-  const [showTipsSection, setShowTipsSection] = useState(false);
-  const [showExpensesSection, setShowExpensesSection] = useState(false);
   const [showBonusSection, setShowBonusSection] = useState(false);
 
   const clearError = (field) => {
@@ -242,8 +240,6 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
     setNewExpenseComment('');
     setBonus('');
     setBonusComment('');
-    setShowTipsSection(false);
-    setShowExpensesSection(false);
     setShowBonusSection(false);
   };
   
@@ -263,7 +259,6 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
     netTipsCard +
     (parseFloat(bonus) || 0) -
     previewExpenses;
-  const hasTipsContent = (parseFloat(tipsCash) || 0) > 0 || (parseFloat(tipsCard) || 0) > 0;
   const hasBonusContent = (parseFloat(bonus) || 0) > 0 || bonusComment.trim().length > 0;
   const workTimeHasError = Boolean(errors.totalMinutes || errors.hours || errors.minutes || errors.startTime || errors.endTime || errors.breakMinutes);
   const pieceworkHasError = Boolean(errors.ordersCount || errors.earnedAmount);
@@ -275,10 +270,8 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
   useEffect(() => {
     if (!isOpen) return;
 
-    setShowTipsSection(hasTipsContent);
-    setShowExpensesSection(expenses.length > 0);
     setShowBonusSection(hasBonusContent);
-  }, [isOpen, hasTipsContent, hasBonusContent, expenses.length]);
+  }, [isOpen, hasBonusContent]);
   
   const addExpense = () => {
     const amountState = parseNumber(newExpenseAmount);
@@ -773,17 +766,12 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
         
         {/* Tips */}
         {(enabledFields.tipsCash || enabledFields.tipsCard) && (
-          <CollapsibleCard
-            title={t.tips}
-            icon={Banknote}
-            iconClassName="text-green-400"
-            isDark={isDark}
-            isOpen={showTipsSection}
-            onToggle={() => setShowTipsSection(prev => !prev)}
-            hasError={tipsHasError}
-            badge={hasTipsContent ? formatCurrency((parseFloat(tipsCash) || 0) + (parseFloat(tipsCard) || 0), settings.currency) : null}
-          >
-            <div className="space-y-3 pt-1">
+          <Card className={`p-4 ${getSectionClassNames(isDark, tipsHasError)}`}>
+            <div className="mb-4 flex items-center gap-2">
+              <Banknote className="w-5 h-5 text-green-400" />
+              <span className="theme-text-primary font-medium">{t.tips}</span>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
               {enabledFields.tipsCash && (
                 <Input
                   type="number"
@@ -803,7 +791,7 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
               )}
               
               {enabledFields.tipsCard && (
-                <div>
+                <div className={enabledFields.tipsCash ? '' : 'col-span-2'}>
                   <Input
                     type="number"
                     value={tipsCard}
@@ -830,21 +818,21 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
                 </div>
               )}
             </div>
-          </CollapsibleCard>
+          </Card>
         )}
         
         {/* Expenses */}
         {enabledFields.expenses && (
-          <CollapsibleCard
-            title={t.expenses}
-            icon={Receipt}
-            iconClassName="text-red-400"
-            isDark={isDark}
-            isOpen={showExpensesSection}
-            onToggle={() => setShowExpensesSection(prev => !prev)}
-            hasError={expensesHasError}
-            badge={previewExpenses > 0 ? formatCurrency(previewExpenses, settings.currency) : null}
-          >
+          <Card className={`p-4 ${getSectionClassNames(isDark, expensesHasError)}`}>
+            <div className="mb-4 flex items-center gap-2">
+              <Receipt className="w-5 h-5 text-red-400" />
+              <span className="theme-text-primary font-medium">{t.expenses}</span>
+              {previewExpenses > 0 && (
+                <span className={`ml-auto rounded-full px-2.5 py-1 text-xs font-medium ${isDark ? 'bg-slate-800/75 text-slate-200' : 'bg-white/85 text-slate-700'}`}>
+                  {formatCurrency(previewExpenses, settings.currency)}
+                </span>
+              )}
+            </div>
             {/* Expense list */}
             {expenses.length > 0 && (
               <div className="space-y-2 mb-4">
@@ -923,7 +911,7 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
                 {t.addExpense}
               </Button>
             </div>
-          </CollapsibleCard>
+          </Card>
         )}
         
         {/* Bonus */}

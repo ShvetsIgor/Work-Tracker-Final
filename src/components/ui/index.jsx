@@ -310,7 +310,7 @@ export const FullScreenLoader = () => {
 
       <div className="relative z-10 text-center">
         {/* Route SVG */}
-        <div style={{ width: 300, margin: '0 auto 28px' }}>
+        <div style={{ width: 268, margin: '0 auto 22px' }}>
           <svg viewBox="0 0 320 110" xmlns="http://www.w3.org/2000/svg" style={{ overflow: 'visible' }}>
             <defs>
               <linearGradient id="routeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -380,7 +380,7 @@ export const FullScreenLoader = () => {
 
         {/* App name */}
         <h1
-          className="text-4xl font-bold mb-4"
+          className="mb-3 text-3xl font-bold"
           style={{
             background: 'linear-gradient(90deg, #a78bfa, #e879f9, #60a5fa)',
             WebkitBackgroundClip: 'text',

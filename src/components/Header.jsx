@@ -37,7 +37,7 @@ const Header = ({ onOpenAccount }) => {
   
   return (
     <header
-      className="sticky top-0 z-40 px-4 lg:px-8 lg:pt-6"
+      className="px-4 lg:px-8 lg:pt-6"
       style={{ paddingTop: mobileSafeTop }}
     >
       <div className="mx-auto flex max-w-7xl justify-between items-center lg:pl-[18rem]">

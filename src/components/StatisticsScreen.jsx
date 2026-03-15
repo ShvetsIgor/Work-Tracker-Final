@@ -214,13 +214,10 @@ const StatisticsScreen = () => {
           </div>
         )}
 
-        <div className={`mt-3 flex items-center justify-between gap-3 rounded-xl border px-3 py-2 ${isDark ? 'border-slate-700/50 bg-slate-900/45' : 'border-slate-200 bg-slate-50/90'}`}>
+        <div className={`mt-3 rounded-xl border px-3 py-2 ${isDark ? 'border-slate-700/50 bg-slate-900/45' : 'border-slate-200 bg-slate-50/90'}`}>
           <div className="min-w-0 theme-text-primary text-base font-semibold truncate">
             {activeRangeLabel}
           </div>
-          <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${isDark ? 'bg-[var(--selection-surface)] text-[var(--selection-text)] border border-[var(--selection-border)]' : 'bg-sky-100 text-sky-700'}`}>
-            {periodButtons.find(btn => btn.id === period)?.label}
-          </span>
         </div>
       </Card>
       
