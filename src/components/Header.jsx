@@ -37,7 +37,7 @@ const Header = ({ onOpenAccount }) => {
   
   return (
     <header
-      className={`relative z-[70] border-b px-0 lg:border-b-0 lg:px-8 lg:pt-6 ${
+      className={`sticky top-0 z-[70] border-b px-0 lg:border-b-0 lg:px-8 lg:pt-6 ${
         isDark ? 'theme-bg-header border-white/[0.05]' : 'theme-bg-header border-slate-200/80'
       }`}
       style={{ paddingTop: mobileSafeTop }}
