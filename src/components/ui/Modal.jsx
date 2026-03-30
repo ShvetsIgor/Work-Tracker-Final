@@ -43,7 +43,7 @@ const Modal = ({
   
   return (
     <div 
-      className="fixed inset-0 z-[60] flex items-center justify-center p-4 pb-20"
+      className="fixed inset-0 z-[120] flex items-center justify-center p-4 pb-20"
       dir={rtl ? 'rtl' : 'ltr'}
     >
       {/* Backdrop */}

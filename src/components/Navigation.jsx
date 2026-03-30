@@ -66,16 +66,22 @@ const Navigation = ({ activeTab, setActiveTab }) => {
       </aside>
 
       <nav
-        className="fixed bottom-0 left-0 right-0 z-50 lg:hidden"
-        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+        className={`fixed bottom-0 left-0 right-0 z-50 border-t lg:hidden ${
+          isDark ? 'border-white/[0.05]' : 'border-slate-200/80'
+        }`}
+        style={isDark ? {
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+          background: 'var(--nav-bg)'
+        } : {
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)'
+        }}
       >
         <div
-          className={`border px-2 py-2 backdrop-blur-2xl transition-colors duration-300 ${
+          className={`px-2 py-2 backdrop-blur-2xl transition-colors duration-300 ${
             isDark
-              ? 'border-white/[0.05] shadow-[0_16px_28px_rgba(0,0,0,0.2)]'
-              : 'bg-white/85 border-white/80 shadow-[0_18px_36px_rgba(148,163,184,0.22)]'
+              ? 'shadow-[0_-16px_28px_rgba(0,0,0,0.18)]'
+              : 'bg-white/85 shadow-[0_-18px_36px_rgba(148,163,184,0.18)]'
           }`}
-          style={isDark ? { background: 'var(--nav-bg)' } : undefined}
         >
           <div className="flex justify-around items-center">
             {tabs.map((tab) => {

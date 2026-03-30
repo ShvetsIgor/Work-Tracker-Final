@@ -37,15 +37,17 @@ const Header = ({ onOpenAccount }) => {
   
   return (
     <header
-      className="relative z-[70] lg:px-8 lg:pt-6"
+      className={`relative z-[70] border-b px-0 lg:border-b-0 lg:px-8 lg:pt-6 ${
+        isDark ? 'theme-bg-header border-white/[0.05]' : 'theme-bg-header border-slate-200/80'
+      }`}
       style={{ paddingTop: mobileSafeTop }}
     >
       <div className="mx-auto flex justify-between items-center lg:max-w-7xl lg:pl-[18rem]">
         {/* Logo */}
-        <div className={`w-full flex items-center justify-between gap-3 border px-4 py-3 transition-colors duration-300 lg:rounded-[24px] ${
+        <div className={`w-full flex items-center justify-between gap-3 px-4 py-3 transition-colors duration-300 lg:rounded-[24px] lg:border ${
           isDark
-            ? 'theme-bg-header border-white/[0.05] shadow-[0_14px_28px_rgba(0,0,0,0.18)]'
-            : 'theme-bg-header border-white/70 shadow-[0_16px_34px_rgba(148,163,184,0.18)]'
+            ? 'theme-bg-header lg:border-white/[0.05] lg:shadow-[0_14px_28px_rgba(0,0,0,0.18)]'
+            : 'theme-bg-header lg:border-white/70 lg:shadow-[0_16px_34px_rgba(148,163,184,0.18)]'
         }`}>
           <div className="flex items-center gap-3 min-w-0">
           <div
