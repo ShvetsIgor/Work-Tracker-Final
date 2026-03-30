@@ -39,7 +39,7 @@ export const Button = ({
         ${variants[variant]}
         ${sizes[size]}
         ${fullWidth ? 'w-full' : ''}
-        font-semibold rounded-xl transition-all duration-200 
+        font-semibold rounded-lg transition-all duration-200 
         disabled:opacity-50 disabled:cursor-not-allowed
         flex items-center justify-center gap-2
         active:scale-[0.98]
@@ -87,7 +87,7 @@ export const Input = ({
       )}
       <div className="relative">
         {error && floatingError && (
-          <div className={`absolute bottom-full left-3 z-20 mb-2 rounded-xl border border-[#b4877f]/30 bg-slate-950 px-2.5 py-1.5 text-xs text-[#e2c3bc] shadow-lg shadow-black/30 ${errorClassName}`}>
+          <div className={`absolute bottom-full left-3 z-20 mb-2 rounded-lg border border-[#b4877f]/30 bg-slate-950 px-2.5 py-1.5 text-xs text-[#e2c3bc] shadow-lg shadow-black/30 ${errorClassName}`}>
             <div className="relative">
               {error}
               <span className="absolute left-3 top-full h-2 w-2 -translate-y-1 rotate-45 border-b border-r border-[#b4877f]/30 bg-slate-950" />
@@ -101,7 +101,7 @@ export const Input = ({
         )}
         <input
           className={`
-            w-full theme-bg-input rounded-xl 
+            w-full theme-bg-input rounded-lg 
             px-4 py-3 theme-text-primary
             transition-all duration-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]
             focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent
@@ -137,7 +137,7 @@ export const Select = ({
       <div className="relative">
         <select
           className={`
-            w-full appearance-none theme-bg-input rounded-xl 
+            w-full appearance-none theme-bg-input rounded-lg 
             px-4 py-3 pr-11 theme-text-primary
             transition-all duration-200
             focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent
@@ -153,7 +153,7 @@ export const Select = ({
           ))}
         </select>
         <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center justify-center">
-          <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-[#2f2e2d] text-[var(--text-secondary)] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#2f2e2d] text-[var(--text-secondary)] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
             <ChevronDown className="h-4 w-4" />
           </div>
         </div>
@@ -198,7 +198,7 @@ export const Card = ({ children, className = '', hover = false, ...props }) => {
   return (
     <div
       className={`
-        theme-bg-card rounded-[24px] transition-all duration-200
+        theme-bg-card rounded-[16px] transition-all duration-200
         ${hover ? 'hover:-translate-y-0.5 hover:border-white/10 hover:shadow-[0_18px_32px_rgba(0,0,0,0.18)]' : ''}
         ${className}
       `}
@@ -222,7 +222,7 @@ export const Badge = ({ children, variant = 'default', className = '' }) => {
   
   return (
     <span className={`
-      px-2 py-1 rounded-lg text-xs font-medium
+      px-2 py-1 rounded-md text-xs font-medium
       ${variants[variant]}
       ${className}
     `}>

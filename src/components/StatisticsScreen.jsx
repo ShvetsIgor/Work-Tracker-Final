@@ -11,17 +11,19 @@ import { calculateStatistics, calculateShiftBaseEarnings } from '@/utils/calcula
 import { formatCurrency, formatTime, formatTimeLabeled } from '@/utils/formatters';
 
 const StatCard = ({ icon: Icon, label, value, color = 'theme-text-primary', subValue }) => (
-  <Card className="p-3.5">
-    <div className="flex items-center gap-2 mb-1.5">
-      {Icon && <Icon className={`w-4 h-4 ${color}`} />}
-      <span className="theme-text-muted text-[11px] uppercase tracking-[0.14em]">{label}</span>
+  <Card className="h-full p-3">
+    <div className="flex h-full flex-col justify-center">
+      <div className="mb-1 flex items-center gap-1.5">
+        {Icon && <Icon className={`h-3.5 w-3.5 ${color}`} />}
+        <span className="theme-text-muted text-[11px] uppercase tracking-[0.14em]">{label}</span>
+      </div>
+      <div className={`text-base font-bold tracking-tight ${color}`}>
+        {value}
+      </div>
+      {subValue && (
+        <div className="theme-text-muted mt-1 text-xs">{subValue}</div>
+      )}
     </div>
-    <div className={`font-bold text-lg tracking-tight ${color}`}>
-      {value}
-    </div>
-    {subValue && (
-      <div className="theme-text-muted text-xs mt-1">{subValue}</div>
-    )}
   </Card>
 );
 
@@ -31,9 +33,9 @@ const ExpenseBreakdown = ({ expensesByType, currency, t, isDark }) => {
   const total = Object.values(expensesByType).reduce((sum, val) => sum + val, 0);
   
   return (
-    <Card className="p-4">
-      <h3 className="theme-text-primary text-base font-bold mb-3 flex items-center gap-2">
-        <Receipt className="w-5 h-5 theme-danger-text" />
+    <Card className="p-3.5">
+      <h3 className="mb-2.5 flex items-center gap-2 text-sm font-bold theme-text-primary">
+        <Receipt className="h-4.5 w-4.5 theme-danger-text" />
         {t.expenseDetails}
       </h3>
       <div className="space-y-3">
@@ -161,20 +163,20 @@ const StatisticsScreen = () => {
       </div>
       
       <div className="lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] lg:gap-4 lg:items-stretch">
-      <Card className="p-4 mb-3 lg:mb-0">
-        <div className="flex items-center justify-between gap-3 mb-3">
+      <Card className="p-3.5 mb-3 lg:mb-0">
+        <div className="flex items-center justify-between gap-3 mb-2.5">
           <label className="block theme-text-muted text-[11px] uppercase tracking-[0.18em]">{t.selectPeriod}</label>
-          <div className={`h-9 w-9 rounded-xl flex items-center justify-center ${isDark ? 'bg-white/[0.04] text-[#c9beaf]' : 'bg-sky-100 text-sky-700'}`}>
+          <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${isDark ? 'bg-white/[0.04] text-[#c9beaf]' : 'bg-sky-100 text-sky-700'}`}>
             <Calendar className="w-4 h-4" />
           </div>
         </div>
         
-        <div className="grid grid-cols-4 gap-2 mb-2.5">
+        <div className="grid grid-cols-4 gap-1.5 mb-2.5">
           {periodButtons.map((btn) => (
             <button
               key={btn.id}
               onClick={() => setPeriod(btn.id)}
-              className={`py-2.5 px-2 rounded-2xl text-xs font-semibold transition-all ${
+              className={`py-2 px-2 rounded-xl text-[11px] font-semibold transition-all ${
                 period === btn.id
                   ? 'text-[var(--accent-text)]'
                   : isDark 
@@ -192,14 +194,14 @@ const StatisticsScreen = () => {
         </div>
         
         {period === 'custom' && (
-          <div className="flex gap-4">
+          <div className="flex gap-3">
             <div className="flex-1">
               <label className="block theme-text-muted text-xs mb-1">{t.from}</label>
               <input 
                 type="date" 
                 value={customFrom} 
                 onChange={(e) => setCustomFrom(e.target.value)}
-                className="w-full theme-bg-input rounded-2xl px-3 py-2.5 theme-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]"
+                className="w-full theme-bg-input rounded-xl px-3 py-2 theme-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]"
               />
             </div>
             <div className="flex-1">
@@ -208,14 +210,14 @@ const StatisticsScreen = () => {
                 type="date" 
                 value={customTo} 
                 onChange={(e) => setCustomTo(e.target.value)}
-                className="w-full theme-bg-input rounded-2xl px-3 py-2.5 theme-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]"
+                className="w-full theme-bg-input rounded-xl px-3 py-2 theme-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]"
               />
             </div>
           </div>
         )}
 
-        <div className={`mt-3 rounded-xl border px-3 py-2 ${isDark ? 'border-slate-700/50 bg-slate-900/45' : 'border-slate-200 bg-slate-50/90'}`}>
-          <div className="min-w-0 theme-text-primary text-base font-semibold truncate">
+        <div className={`mt-3 rounded-lg border px-3 py-2 ${isDark ? 'border-slate-700/50 bg-slate-900/45' : 'border-slate-200 bg-slate-50/90'}`}>
+          <div className="min-w-0 theme-text-primary text-sm font-semibold truncate">
             {activeRangeLabel}
           </div>
         </div>
@@ -250,9 +252,9 @@ const StatisticsScreen = () => {
             </div>
           </div>
           
-          <div className="space-y-2.5 lg:col-span-2">
+          <div className="space-y-2 lg:col-span-2">
           {/* Stats grid - filtered by settings */}
-          <div className="grid grid-cols-2 gap-2.5 xl:grid-cols-4">
+          <div className="grid auto-rows-fr grid-cols-2 gap-2 xl:grid-cols-4">
             {sf.totalHours !== false && (
               <StatCard 
                 icon={Clock} 
@@ -548,10 +550,10 @@ const ExportButton = ({ shifts, settings, t, isDark, dateFrom, dateTo }) => {
   
   return (
     <>
-      <Card className="p-4">
+      <Card className="p-3.5">
         <button
           onClick={() => setShowModal(true)}
-            className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-2xl text-[var(--accent-text)] font-semibold transition-all"
+            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-[var(--accent-text)] font-semibold transition-all"
             style={{ backgroundColor: 'var(--accent-secondary)', boxShadow: '0 14px 26px var(--accent-shadow)' }}
         >
           <Download className="w-5 h-5" />
@@ -561,14 +563,14 @@ const ExportButton = ({ shifts, settings, t, isDark, dateFrom, dateTo }) => {
       
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className={`w-full max-w-md rounded-[30px] p-6 border ${isDark ? 'bg-slate-900/95 border-slate-700/60' : 'bg-white/95 border-slate-200'}`}>
+          <div className={`w-full max-w-md rounded-[26px] p-5 border ${isDark ? 'bg-slate-900/95 border-slate-700/60' : 'bg-white/95 border-slate-200'}`}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="theme-text-primary font-semibold text-lg flex items-center gap-2">
-          <FileSpreadsheet className="w-5 h-5 theme-income-text" />
+              <h3 className="theme-text-primary font-semibold text-base flex items-center gap-2">
+          <FileSpreadsheet className="w-4.5 h-4.5 theme-income-text" />
                 {t.exportToExcel || 'Выгрузить в Excel'}
               </h3>
               <button onClick={() => setShowModal(false)} className="theme-text-muted hover:theme-text-primary">
-                <X className="w-5 h-5" />
+                <X className="w-4.5 h-4.5" />
               </button>
             </div>
             
@@ -603,7 +605,7 @@ const ExportButton = ({ shifts, settings, t, isDark, dateFrom, dateTo }) => {
                     key={col.id}
                     onClick={() => toggleField(col.id)}
                     disabled={isRequired}
-                    className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-colors ${
+                    className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-colors ${
                       isSelected
                     ? 'bg-[var(--selection-surface)] text-[var(--selection-text)] border border-[var(--selection-border)]'
                         : isDark 
@@ -621,7 +623,7 @@ const ExportButton = ({ shifts, settings, t, isDark, dateFrom, dateTo }) => {
             {/* Export button */}
             <button
               onClick={exportToExcel}
-                className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-2xl text-[var(--accent-text)] font-semibold transition-all"
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-[var(--accent-text)] font-semibold transition-all"
                 style={{ backgroundColor: 'var(--accent-secondary)', boxShadow: '0 14px 26px var(--accent-shadow)' }}
             >
               <Download className="w-5 h-5" />
@@ -644,19 +646,19 @@ const CommentsSection = ({ title, comments, icon, color, isDark, t, currency, la
     <Card className="overflow-hidden">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full p-4 flex items-center justify-between transition-colors ${
+        className={`w-full p-3.5 flex items-center justify-between transition-colors ${
           isDark ? 'hover:bg-slate-700/30' : 'hover:bg-slate-50'
         }`}
       >
         <div className="flex items-center gap-2">
-          <IconComponent className={`w-5 h-5 ${color}`} />
-          <span className="theme-text-primary font-semibold">{title}</span>
+          <IconComponent className={`w-4.5 h-4.5 ${color}`} />
+          <span className="theme-text-primary text-sm font-semibold">{title}</span>
           <span className="theme-text-muted text-sm">({comments.length})</span>
         </div>
         {isOpen ? (
-          <ChevronUp className="w-5 h-5 theme-text-muted" />
+          <ChevronUp className="w-4.5 h-4.5 theme-text-muted" />
         ) : (
-          <ChevronDown className="w-5 h-5 theme-text-muted" />
+          <ChevronDown className="w-4.5 h-4.5 theme-text-muted" />
         )}
       </button>
       
@@ -775,21 +777,21 @@ const ShiftsList = ({ shifts, settings, t, isDark }) => {
       {/* Header */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full p-4 flex items-center justify-between transition-colors ${
+        className={`w-full p-3.5 flex items-center justify-between transition-colors ${
           isDark ? 'hover:bg-slate-700/30' : 'hover:bg-slate-50'
         }`}
       >
         <div className="flex items-center gap-2">
-          <List className="w-5 h-5 theme-info-text" />
+          <List className="w-4.5 h-4.5 theme-info-text" />
           <span className="theme-text-primary font-semibold">
             {t.showShiftsList || 'Список смен'}
           </span>
           <span className="theme-text-muted text-sm">({shifts.length})</span>
         </div>
         {isOpen ? (
-          <ChevronUp className="w-5 h-5 theme-text-muted" />
+          <ChevronUp className="w-4.5 h-4.5 theme-text-muted" />
         ) : (
-          <ChevronDown className="w-5 h-5 theme-text-muted" />
+          <ChevronDown className="w-4.5 h-4.5 theme-text-muted" />
         )}
       </button>
       

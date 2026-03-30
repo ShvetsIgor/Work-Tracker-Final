@@ -8,7 +8,7 @@ const Header = ({ onOpenAccount }) => {
   const menuRef = useRef(null);
   
   const isDark = settings.theme !== 'light';
-  const mobileSafeTop = 'calc(env(safe-area-inset-top, 0px) + 0.75rem)';
+  const mobileSafeTop = 'calc(env(safe-area-inset-top, 0px) + 0.35rem)';
   
   // Close menu when clicking outside
   useEffect(() => {
@@ -44,21 +44,21 @@ const Header = ({ onOpenAccount }) => {
     >
       <div className="mx-auto flex justify-between items-center lg:max-w-7xl lg:pl-[18rem]">
         {/* Logo */}
-        <div className={`w-full flex items-center justify-between gap-3 px-4 py-3 transition-colors duration-300 lg:rounded-[24px] lg:border ${
+        <div className={`w-full flex items-center justify-between gap-3 px-3.5 py-2.5 transition-colors duration-300 lg:rounded-[16px] lg:border ${
           isDark
             ? 'theme-bg-header lg:border-white/[0.05] lg:shadow-[0_14px_28px_rgba(0,0,0,0.18)]'
             : 'theme-bg-header lg:border-white/70 lg:shadow-[0_16px_34px_rgba(148,163,184,0.18)]'
         }`}>
           <div className="flex items-center gap-3 min-w-0">
           <div
-            className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-[0_14px_28px_rgba(0,0,0,0.12)]"
+            className="flex h-9 w-9 items-center justify-center rounded-lg shadow-[0_10px_22px_rgba(0,0,0,0.1)]"
             style={{ background: 'var(--chip-bg)', color: 'var(--chip-text)' }}
           >
-            <Clock className="w-4.5 h-4.5" />
+            <Clock className="h-4 w-4" />
           </div>
           <div className="min-w-0">
-            <span className="theme-text-primary font-bold text-lg tracking-tight">{t.appName}</span>
-            <div className="theme-text-muted text-[11px] tracking-[0.08em]">
+            <span className="theme-text-primary text-base font-bold tracking-tight">{t.appName}</span>
+            <div className="theme-text-muted text-[10px] tracking-[0.08em]">
               Daily shift journal
             </div>
           </div>
@@ -69,7 +69,7 @@ const Header = ({ onOpenAccount }) => {
           <div className="relative" ref={menuRef}>
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-colors ${
+              className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 transition-colors ${
                 isDark 
                   ? 'border border-white/[0.05]' 
                   : 'bg-white/70 hover:bg-white border border-slate-200/80'
@@ -77,14 +77,14 @@ const Header = ({ onOpenAccount }) => {
               style={isDark ? { backgroundColor: 'var(--control-bg)' } : undefined}
             >
               <div
-                className="w-8 h-8 rounded-xl flex items-center justify-center"
+                className="flex h-7 w-7 items-center justify-center rounded-md"
                 style={{ background: 'var(--avatar-bg)' }}
               >
-                <span className="text-[var(--avatar-text)] text-sm font-medium">
+                <span className="text-xs font-medium text-[var(--avatar-text)]">
                   {displayName.charAt(0).toUpperCase()}
                 </span>
               </div>
-              <span className="theme-text-primary text-sm font-medium max-w-24 truncate hidden sm:block">
+              <span className="hidden max-w-24 truncate text-sm font-medium theme-text-primary sm:block">
                 {displayName}
               </span>
               <ChevronDown className={`w-4 h-4 theme-text-muted transition-transform ${isMenuOpen ? 'rotate-180' : ''}`} />
@@ -92,7 +92,7 @@ const Header = ({ onOpenAccount }) => {
             
             {/* Dropdown menu */}
             {isMenuOpen && (
-              <div className={`absolute mt-2 w-48 rounded-xl shadow-xl overflow-hidden animate-fade-in z-[90] ${
+              <div className={`absolute mt-2 w-48 rounded-[14px] shadow-xl overflow-hidden animate-fade-in z-[90] ${
                 rtl ? 'left-0' : 'right-0'
               } ${
                 isDark 
@@ -101,7 +101,7 @@ const Header = ({ onOpenAccount }) => {
               }`}>
                 {isDark && (
                   <div
-                    className="absolute inset-0 -z-10 rounded-xl"
+                    className="absolute inset-0 -z-10 rounded-[14px]"
                     style={{ background: 'var(--menu-bg)' }}
                   />
                 )}

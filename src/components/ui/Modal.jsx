@@ -57,7 +57,7 @@ const Modal = ({
         className={`
           relative w-full ${sizes[size]} 
           ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}
-          rounded-2xl border
+          rounded-[16px] border
           max-h-[85vh] flex flex-col
           animate-slide-up
           overflow-hidden

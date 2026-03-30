@@ -463,16 +463,16 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
       title={isEditing ? t.editShift : t.addShift}
       footer={
         <>
-          <Button variant="secondary" onClick={onClose} className="flex-1 min-h-[46px]">
+          <Button variant="secondary" onClick={onClose} className="flex-1 min-h-[42px]">
             {t.cancel}
           </Button>
-          <Button onClick={handleSave} loading={saving} className="flex-1 min-h-[46px]">
+          <Button onClick={handleSave} loading={saving} className="flex-1 min-h-[42px]">
             {t.save}
           </Button>
         </>
       }
     >
-      <div className="relative space-y-6">
+      <div className="relative">
         <style>{`
           @keyframes fieldShake {
             0%, 100% { transform: translateX(0); }
@@ -482,10 +482,23 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
           .field-shake {
             animation: fieldShake 0.22s ease-in-out 2;
           }
+          .shift-form-shell {
+            overflow: hidden;
+            border-radius: 20px;
+          }
+          .shift-form-shell > .shift-form-section {
+            margin-top: 0 !important;
+            border-radius: 0 !important;
+            background: transparent !important;
+            box-shadow: none !important;
+          }
+          .shift-form-shell > .shift-form-section + .shift-form-section {
+            border-top: 1px solid rgba(255,255,255,0.05);
+          }
         `}</style>
-
+        <div className={`shift-form-shell ${isDark ? 'border border-white/[0.05] bg-slate-800/38' : 'border border-slate-200 bg-white/90'}`}>
         {/* Date */}
-        <div>
+        <div className="px-4 py-3">
           <label className="block theme-text-muted text-sm mb-2">{t.date}</label>
           <input
             type="date"
@@ -499,14 +512,14 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
         </div>
         
         {/* Work Time */}
-        <Card className={`p-4 ${getSectionClassNames(isDark, workTimeHasError)}`}>
-          <div className="flex items-center gap-2 mb-4">
+        <Card className={`shift-form-section p-3.5 ${getSectionClassNames(isDark, workTimeHasError)}`}>
+          <div className="mb-3 flex items-center gap-2">
             <Clock className="w-5 h-5 text-blue-400" />
             <span className="theme-text-primary font-medium">{t.workTime}</span>
           </div>
           
           {/* Time mode toggle */}
-          <div className="flex gap-2 mb-4">
+          <div className="mb-3 flex gap-2">
             <Button
               variant={timeMode === 'manual' ? 'primary' : 'secondary'}
               size="sm"
@@ -524,7 +537,7 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
           </div>
           
           {timeMode === 'manual' ? (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2.5">
               <Input
                 type="number"
                 value={hours}
@@ -562,7 +575,7 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-2 gap-3 mb-3">
+              <div className="mb-2.5 grid grid-cols-2 gap-2.5">
                 <div className="relative">
                   <label className="block theme-text-muted text-sm mb-2">{t.startTime || 'Начало'}</label>
                     {errors.startTime && activeErrorField === 'startTime' && (
@@ -608,14 +621,14 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
               </div>
               
               {/* Break */}
-              <div className="mb-3">
+              <div className="mb-2.5">
                 <Toggle
                   checked={hasBreak}
                   onChange={setHasBreak}
                   label={t.addBreak}
                 />
                 {hasBreak && (
-                  <div className="mt-2">
+                    <div className="mt-1.5">
                     <Input
                       type="number"
                       value={breakMinutes}
@@ -636,7 +649,7 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
               
               {/* Show calculated time */}
               {displayCalculatedTime() && (
-                <div className={`text-center rounded-xl border p-2.5 ${isDark ? 'border-slate-700/60 bg-slate-800/55' : 'border-slate-200 bg-white/80'}`}>
+                <div className={`rounded-lg border p-2 text-center ${isDark ? 'border-slate-700/60 bg-slate-800/55' : 'border-slate-200 bg-white/80'}`}>
                   <span className="theme-text-muted">{t.totalTime || 'Итого'}: </span>
                   <span className="text-purple-400 font-bold">{displayCalculatedTime()}</span>
                 </div>
@@ -647,13 +660,13 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
         
         {/* Piece-work specific fields */}
         {!isHourly && (
-          <Card className={`p-4 ${getSectionClassNames(isDark, pieceworkHasError)}`}>
-            <div className="flex items-center gap-2 mb-4">
+          <Card className={`shift-form-section p-3.5 ${getSectionClassNames(isDark, pieceworkHasError)}`}>
+            <div className="mb-3 flex items-center gap-2">
               <Package className="w-5 h-5 text-blue-400" />
               <span className="theme-text-primary font-medium">{t.workTypePieceWork}</span>
             </div>
             
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2.5">
               <Input
                 type="number"
                 value={ordersCount}
@@ -690,14 +703,14 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
         
         {/* Mileage */}
         {enabledFields.mileage && (
-          <Card className={`p-4 ${getSectionClassNames(isDark, mileageHasError)}`}>
-            <div className="flex items-center gap-2 mb-4">
+          <Card className={`shift-form-section p-3.5 ${getSectionClassNames(isDark, mileageHasError)}`}>
+            <div className="mb-3 flex items-center gap-2">
               <Car className="w-5 h-5 text-blue-400" />
               <span className="theme-text-primary font-medium">{t.mileage}</span>
             </div>
             
             <SegmentedControl
-              className="mb-3"
+              className="mb-2.5"
               value={mileageMode}
               onChange={setMileageMode}
               options={[
@@ -723,7 +736,7 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
               />
             ) : (
               <>
-                <div className="grid grid-cols-2 gap-3 mb-2">
+                <div className="mb-2 grid grid-cols-2 gap-2.5">
                   <Input
                     type="number"
                     value={startOdometer}
@@ -766,12 +779,12 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
         
         {/* Tips */}
         {(enabledFields.tipsCash || enabledFields.tipsCard) && (
-          <Card className={`p-4 ${getSectionClassNames(isDark, tipsHasError)}`}>
-            <div className="mb-4 flex items-center gap-2">
+          <Card className={`shift-form-section p-3.5 ${getSectionClassNames(isDark, tipsHasError)}`}>
+            <div className="mb-3 flex items-center gap-2">
               <Banknote className="w-5 h-5 text-green-400" />
               <span className="theme-text-primary font-medium">{t.tips}</span>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2.5">
               {enabledFields.tipsCash && (
                 <Input
                   type="number"
@@ -808,7 +821,7 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
                     errorClassName={activeErrorField === 'tipsCard' ? 'field-shake' : ''}
                   />
                   {parseFloat(tipsCard) > 0 && settings.tipsCardPercent > 0 && (
-                    <div className="mt-2 text-sm theme-text-muted">
+                    <div className="mt-1.5 text-xs theme-text-muted">
                       -{settings.tipsCardPercent}% → 
                       <span className="text-green-400 font-medium ml-1">
                         {formatCurrency(tipsCard, settings.currency)} ({formatCurrency(netTipsCard, settings.currency)})
@@ -823,8 +836,8 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
         
         {/* Expenses */}
         {enabledFields.expenses && (
-          <Card className={`p-4 ${getSectionClassNames(isDark, expensesHasError)}`}>
-            <div className="mb-4 flex items-center gap-2">
+          <Card className={`shift-form-section p-3.5 ${getSectionClassNames(isDark, expensesHasError)}`}>
+            <div className="mb-3 flex items-center gap-2">
               <Receipt className="w-5 h-5 text-red-400" />
               <span className="theme-text-primary font-medium">{t.expenses}</span>
               {previewExpenses > 0 && (
@@ -835,13 +848,13 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
             </div>
             {/* Expense list */}
             {expenses.length > 0 && (
-              <div className="space-y-2 mb-4">
+              <div className="mb-3 space-y-1.5">
                 {expenses.map((expense) => {
                   const typeInfo = expenseTypes.find(et => et.id === expense.type);
                   return (
                     <div 
                       key={expense.id} 
-                      className={`flex items-center justify-between p-2 rounded-lg ${
+                      className={`flex items-center justify-between rounded-lg p-2 ${
                         isDark ? 'bg-slate-600/50' : 'bg-slate-200/50'
                       }`}
                     >
@@ -870,14 +883,14 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
             )}
             
             {/* Add expense form */}
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Select
                 value={newExpenseType}
                 onChange={(e) => setNewExpenseType(e.target.value)}
                 options={expenseTypeOptions}
                 label={t.expenseType}
               />
-              <div className="grid grid-cols-[110px,minmax(0,1fr),48px] gap-2 items-end">
+              <div className="grid grid-cols-[104px,minmax(0,1fr),44px] items-end gap-2">
                 <Input
                   type="number"
                   value={newExpenseAmount}
@@ -904,7 +917,7 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
                   size="sm"
                   onClick={addExpense}
                   icon={Plus}
-                  className="h-[50px] w-12 self-end px-0"
+                  className="h-[42px] w-11 self-end px-0"
                   disabled={!newExpenseAmount}
                   title={t.addExpense}
                   aria-label={t.addExpense}
@@ -925,8 +938,9 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
             onToggle={() => setShowBonusSection(prev => !prev)}
             hasError={bonusHasError}
             badge={(parseFloat(bonus) || 0) > 0 ? formatCurrency(parseFloat(bonus) || 0, settings.currency) : null}
+            className="shift-form-section"
           >
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               <Input
                 type="number"
                 value={bonus}
@@ -952,19 +966,19 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
           </CollapsibleCard>
         )}
 
-        <Card className={`p-4 ${isDark ? 'bg-slate-800/45' : 'bg-white/85 border border-slate-200'}`}>
-          <div className="mb-3 flex items-center justify-between">
-            <span className="theme-text-primary text-base font-bold">
+        <Card className={`shift-form-section p-3.5 ${isDark ? 'bg-slate-800/45' : 'bg-white/85 border border-slate-200'}`}>
+          <div className="mb-2.5 flex items-center justify-between">
+            <span className="theme-text-primary text-sm font-bold">
               {settings.language === 'ru' && 'Сводка'}
               {settings.language === 'en' && 'Summary'}
               {settings.language === 'he' && 'סיכום'}
             </span>
-            <span className="theme-text-muted text-xs">
+            <span className="theme-text-muted text-[11px]">
               {formatDateLabel(date, t, settings.language)}
             </span>
           </div>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-            <div className={`rounded-xl p-3 ${isDark ? 'bg-slate-700/30' : 'bg-slate-50'}`}>
+            <div className={`rounded-lg p-2.5 ${isDark ? 'bg-slate-700/30' : 'bg-slate-50'}`}>
               <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
                 {t.totalTime || 'Total time'}
               </div>
@@ -972,7 +986,7 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
                 {formatTime(previewTotalMinutes)}
               </div>
             </div>
-            <div className={`rounded-xl p-3 ${isDark ? 'bg-slate-700/30' : 'bg-slate-50'}`}>
+            <div className={`rounded-lg p-2.5 ${isDark ? 'bg-slate-700/30' : 'bg-slate-50'}`}>
               <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
                 {isHourly ? (t.earnings || t.totalEarnings) : t.earnedAmount}
               </div>
@@ -980,7 +994,7 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
                 {formatCurrency(previewBaseEarnings, settings.currency)}
               </div>
             </div>
-            <div className={`rounded-xl p-3 ${isDark ? 'bg-slate-700/30' : 'bg-slate-50'}`}>
+            <div className={`rounded-lg p-2.5 ${isDark ? 'bg-slate-700/30' : 'bg-slate-50'}`}>
               <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
                 {t.netIncome}
               </div>
@@ -990,6 +1004,7 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
             </div>
           </div>
         </Card>
+        </div>
       </div>
     </Modal>
   );
@@ -1054,13 +1069,14 @@ const CollapsibleCard = ({
   onToggle,
   children,
   badge,
-  hasError = false
+  hasError = false,
+  className = ''
 }) => (
-  <Card className={`overflow-hidden ${getSectionClassNames(isDark, hasError)}`}>
+  <Card className={`overflow-hidden ${getSectionClassNames(isDark, hasError)} ${className}`}>
     <button
       type="button"
       onClick={onToggle}
-      className="flex w-full items-center justify-between gap-3 p-4 text-left"
+      className="flex w-full items-center justify-between gap-3 p-3.5 text-left"
     >
       <div className="flex min-w-0 items-center gap-2">
         {Icon && <Icon className={`h-5 w-5 ${iconClassName}`} />}
@@ -1080,7 +1096,7 @@ const CollapsibleCard = ({
       </div>
     </button>
     {isOpen && (
-      <div className="px-4 pb-4 animate-fade-in">
+      <div className="animate-fade-in px-3.5 pb-3.5">
         {children}
       </div>
     )}

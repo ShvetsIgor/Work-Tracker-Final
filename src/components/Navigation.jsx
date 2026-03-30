@@ -16,7 +16,7 @@ const Navigation = ({ activeTab, setActiveTab }) => {
     <>
       <aside className="fixed left-6 top-6 bottom-6 z-40 hidden w-64 lg:block">
         <div
-          className={`h-full rounded-[30px] border p-4 backdrop-blur-2xl transition-colors duration-300 ${
+          className={`h-full rounded-[20px] border p-4 backdrop-blur-2xl transition-colors duration-300 ${
             isDark
               ? 'border-white/[0.05] shadow-[0_20px_40px_rgba(0,0,0,0.22)]'
               : 'bg-white/88 border-white/80 shadow-[0_20px_36px_rgba(148,163,184,0.18)]'
@@ -41,7 +41,7 @@ const Navigation = ({ activeTab, setActiveTab }) => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition-all duration-200 ${
+                  className={`flex w-full items-center gap-3 rounded-[14px] px-4 py-3 text-left transition-all duration-200 ${
                     isActive
                       ? 'border border-white/[0.06]'
                       : isDark
@@ -77,7 +77,7 @@ const Navigation = ({ activeTab, setActiveTab }) => {
         }}
       >
         <div
-          className={`px-2 py-2 backdrop-blur-2xl transition-colors duration-300 ${
+          className={`px-2 py-1.5 backdrop-blur-2xl transition-colors duration-300 ${
             isDark
               ? 'shadow-[0_-16px_28px_rgba(0,0,0,0.18)]'
               : 'bg-white/85 shadow-[0_-18px_36px_rgba(148,163,184,0.18)]'
@@ -94,7 +94,7 @@ const Navigation = ({ activeTab, setActiveTab }) => {
                   onClick={() => setActiveTab(tab.id)}
                   className={`
                     relative flex flex-col items-center justify-center
-                    min-w-[86px] py-2.5 px-4 rounded-2xl transition-all duration-200
+                    min-w-[78px] rounded-lg px-3 py-2 transition-all duration-200
                     ${isActive 
                       ? 'border border-white/[0.06]' 
                       : isDark 
@@ -108,8 +108,8 @@ const Navigation = ({ activeTab, setActiveTab }) => {
                       : { color: 'var(--nav-idle-text)' }
                     : undefined}
                 >
-                  <Icon className={`w-5 h-5 mb-1 ${isActive ? 'scale-105' : ''} transition-transform`} />
-                  <span className={`text-xs whitespace-nowrap ${isActive ? 'font-semibold tracking-[0.02em]' : 'font-medium'}`}>
+                  <Icon className={`mb-0.5 h-4.5 w-4.5 ${isActive ? 'scale-105' : ''} transition-transform`} />
+                  <span className={`whitespace-nowrap text-[11px] ${isActive ? 'font-semibold tracking-[0.02em]' : 'font-medium'}`}>
                     {tab.label}
                   </span>
                 </button>
