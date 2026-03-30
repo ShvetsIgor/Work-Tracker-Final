@@ -153,7 +153,13 @@ export const Select = ({
           ))}
         </select>
         <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center justify-center">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#2f2e2d] text-[var(--text-secondary)] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+          <div
+            className="flex h-7 w-7 items-center justify-center rounded-lg theme-text-secondary shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+            style={{
+              background: 'var(--control-bg)',
+              border: '1px solid var(--border-color)'
+            }}
+          >
             <ChevronDown className="h-4 w-4" />
           </div>
         </div>

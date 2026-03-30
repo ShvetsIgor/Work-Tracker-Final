@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Globe,
   Utensils,
@@ -61,17 +61,81 @@ const CollapsibleSection = ({ title, icon: Icon, iconColor, children, defaultOpe
 
 const SettingsScreen = ({ embedded = false }) => {
   const { t, settings, updateSettings, settingsSaving, settingsSaveError, settingsLastSavedAt } = useApp();
-  const [showSavedState, setShowSavedState] = useState(false);
+  const [saveToast, setSaveToast] = useState(null);
+  const previousSavingRef = useRef(settingsSaving);
+  const lastSeenSavedAtRef = useRef(settingsLastSavedAt);
+  const lastSeenErrorRef = useRef(settingsSaveError);
+  const toastTimeoutRef = useRef(null);
 
   const isHourly = settings.workType !== 'pieceWork';
 
   useEffect(() => {
-    if (!settingsLastSavedAt || settingsSaveError) return;
+    return () => {
+      if (toastTimeoutRef.current) {
+        clearTimeout(toastTimeoutRef.current);
+      }
+    };
+  }, []);
 
-    setShowSavedState(true);
-    const timeoutId = setTimeout(() => setShowSavedState(false), 2200);
-    return () => clearTimeout(timeoutId);
-  }, [settingsLastSavedAt, settingsSaveError]);
+  const showSaveToast = (toast) => {
+    setSaveToast(toast);
+
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
+
+    if (!toast?.persistent) {
+      toastTimeoutRef.current = setTimeout(() => {
+        setSaveToast(null);
+        toastTimeoutRef.current = null;
+      }, toast?.duration ?? 2200);
+    }
+  };
+
+  useEffect(() => {
+    if (settingsSaving && !previousSavingRef.current) {
+      showSaveToast({
+        icon: Loader,
+        text: t.settingsSaving || 'Saving settings...',
+        className: 'border-amber-500/30 bg-slate-950/90 text-amber-200 shadow-[0_10px_30px_rgba(15,23,42,0.4)]',
+        persistent: true
+      });
+    }
+
+    if (!settingsSaving && previousSavingRef.current && saveToast?.persistent) {
+      setSaveToast(null);
+    }
+
+    previousSavingRef.current = settingsSaving;
+  }, [saveToast?.persistent, settingsSaving, t.settingsSaving]);
+
+  useEffect(() => {
+    if (settingsSaveError && settingsSaveError !== lastSeenErrorRef.current) {
+      showSaveToast({
+        icon: AlertCircle,
+        text: settingsSaveError || t.errorSettingsSave || t.errorGeneric || 'Could not save settings',
+        className: 'border-red-500/30 bg-slate-950/90 text-red-300 shadow-[0_10px_30px_rgba(127,29,29,0.28)]'
+      });
+    }
+
+    lastSeenErrorRef.current = settingsSaveError;
+  }, [settingsSaveError, t.errorGeneric, t.errorSettingsSave]);
+
+  useEffect(() => {
+    if (
+      settingsLastSavedAt &&
+      settingsLastSavedAt !== lastSeenSavedAtRef.current &&
+      !settingsSaveError
+    ) {
+      showSaveToast({
+        icon: CheckCircle2,
+        text: t.settingsSaved || 'Settings saved',
+        className: 'border-emerald-500/30 bg-slate-950/90 text-emerald-200 shadow-[0_10px_30px_rgba(6,95,70,0.28)]'
+      });
+    }
+
+    lastSeenSavedAtRef.current = settingsLastSavedAt;
+  }, [settingsLastSavedAt, settingsSaveError, t.settingsSaved]);
 
   const handleChange = async (key, value) => {
     try {
@@ -107,27 +171,7 @@ const SettingsScreen = ({ embedded = false }) => {
     }
   };
 
-  const saveStatus = settingsSaveError
-    ? {
-        icon: AlertCircle,
-        text: settingsSaveError || t.errorSettingsSave || t.errorGeneric || 'Could not save settings',
-        className: 'border-red-500/30 bg-red-500/10 text-red-300'
-      }
-    : settingsSaving
-      ? {
-          icon: Loader,
-          text: t.settingsSaving || 'Saving settings...',
-          className: 'border-amber-500/30 bg-amber-500/10 text-amber-200'
-        }
-      : showSavedState
-        ? {
-            icon: CheckCircle2,
-            text: t.settingsSaved || 'Settings saved',
-            className: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200'
-          }
-        : null;
-
-  const SaveStatusIcon = saveStatus?.icon;
+  const SaveStatusIcon = saveToast?.icon;
 
   const languageOptions = [
     { value: 'ru', label: 'Русский' },
@@ -158,25 +202,21 @@ const SettingsScreen = ({ embedded = false }) => {
   ];
 
   return (
-    <div className={embedded ? '' : 'pb-24'}>
-      {!embedded && (
-        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold theme-text-primary">{t.settings}</h1>
+    <div className={`relative ${embedded ? '' : 'pb-24'}`}>
+      {saveToast && (
+        <div className="pointer-events-none sticky top-[calc(env(safe-area-inset-top)+0.75rem)] z-30 mb-3 flex justify-center px-2">
+          <div className={`inline-flex min-h-11 items-center gap-2 rounded-2xl border px-3 py-2 text-sm font-medium backdrop-blur-md ${saveToast.className}`}>
+            <SaveStatusIcon className={`h-4 w-4 shrink-0 ${saveToast.persistent ? 'animate-spin' : ''}`} />
+            <span>{saveToast.text}</span>
           </div>
-          {saveStatus && (
-            <div className={`inline-flex items-center gap-2 self-start rounded-full border px-3 py-1.5 text-sm font-medium shadow-sm ${saveStatus.className}`}>
-              <SaveStatusIcon className={`h-4 w-4 ${settingsSaving ? 'animate-spin' : ''}`} />
-              <span>{saveStatus.text}</span>
-            </div>
-          )}
         </div>
       )}
 
-      {embedded && saveStatus && (
-        <div className={`mb-4 inline-flex items-center gap-2 self-start rounded-full border px-3 py-1.5 text-sm font-medium shadow-sm ${saveStatus.className}`}>
-          <SaveStatusIcon className={`h-4 w-4 ${settingsSaving ? 'animate-spin' : ''}`} />
-          <span>{saveStatus.text}</span>
+      {!embedded && (
+        <div className="mb-5">
+          <div>
+            <h1 className="text-2xl font-bold theme-text-primary">{t.settings}</h1>
+          </div>
         </div>
       )}
 
