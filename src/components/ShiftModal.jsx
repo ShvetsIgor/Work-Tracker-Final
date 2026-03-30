@@ -877,7 +877,7 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
                 options={expenseTypeOptions}
                 label={t.expenseType}
               />
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <div className="grid grid-cols-[110px,minmax(0,1fr),48px] gap-2 items-end">
                 <Input
                   type="number"
                   value={newExpenseAmount}
@@ -899,17 +899,17 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
                   placeholder={t.comment}
                   label={t.comment}
                 />
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={addExpense}
+                  icon={Plus}
+                  className="h-[50px] w-12 self-end px-0"
+                  disabled={!newExpenseAmount}
+                  title={t.addExpense}
+                  aria-label={t.addExpense}
+                />
               </div>
-              <Button 
-                variant="secondary" 
-                size="sm" 
-                onClick={addExpense}
-                icon={Plus}
-                fullWidth
-                disabled={!newExpenseAmount}
-              >
-                {t.addExpense}
-              </Button>
             </div>
           </Card>
         )}

@@ -66,11 +66,11 @@ const Navigation = ({ activeTab, setActiveTab }) => {
       </aside>
 
       <nav
-        className="fixed bottom-0 left-0 right-0 px-4 z-50 lg:hidden"
-        style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
+        className="fixed bottom-0 left-0 right-0 z-50 lg:hidden"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       >
         <div
-          className={`max-w-lg mx-auto rounded-[28px] border px-2 py-2 backdrop-blur-2xl transition-colors duration-300 ${
+          className={`border px-2 py-2 backdrop-blur-2xl transition-colors duration-300 ${
             isDark
               ? 'border-white/[0.05] shadow-[0_16px_28px_rgba(0,0,0,0.2)]'
               : 'bg-white/85 border-white/80 shadow-[0_18px_36px_rgba(148,163,184,0.22)]'

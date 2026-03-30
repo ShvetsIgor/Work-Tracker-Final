@@ -37,12 +37,12 @@ const Header = ({ onOpenAccount }) => {
   
   return (
     <header
-      className="px-4 lg:px-8 lg:pt-6"
+      className="relative z-[70] lg:px-8 lg:pt-6"
       style={{ paddingTop: mobileSafeTop }}
     >
-      <div className="mx-auto flex max-w-7xl justify-between items-center lg:pl-[18rem]">
+      <div className="mx-auto flex justify-between items-center lg:max-w-7xl lg:pl-[18rem]">
         {/* Logo */}
-        <div className={`w-full flex items-center justify-between gap-3 rounded-[24px] border px-4 py-3 transition-colors duration-300 ${
+        <div className={`w-full flex items-center justify-between gap-3 border px-4 py-3 transition-colors duration-300 lg:rounded-[24px] ${
           isDark
             ? 'theme-bg-header border-white/[0.05] shadow-[0_14px_28px_rgba(0,0,0,0.18)]'
             : 'theme-bg-header border-white/70 shadow-[0_16px_34px_rgba(148,163,184,0.18)]'
@@ -90,7 +90,7 @@ const Header = ({ onOpenAccount }) => {
             
             {/* Dropdown menu */}
             {isMenuOpen && (
-              <div className={`absolute mt-2 w-48 rounded-xl shadow-xl overflow-hidden animate-fade-in z-50 ${
+              <div className={`absolute mt-2 w-48 rounded-xl shadow-xl overflow-hidden animate-fade-in z-[90] ${
                 rtl ? 'left-0' : 'right-0'
               } ${
                 isDark 
