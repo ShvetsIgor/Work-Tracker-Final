@@ -24,29 +24,29 @@ const ShiftRow = ({ shift, onExpand, isExpanded, settings, t }) => {
   return (
     <div 
       onClick={onExpand}
-      className={`flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all ${
+      className={`flex items-center justify-between rounded-lg p-2.5 cursor-pointer transition-all ${
         isDark 
           ? 'bg-white/[0.03] hover:bg-white/[0.05]' 
           : 'bg-white/80 hover:bg-slate-50'
       } ${isExpanded ? 'ring-1 ring-white/10' : ''}`}
     >
-      <div className="flex items-center gap-4">
-        <div className="theme-text-primary font-medium min-w-[80px]">
+      <div className="flex items-center gap-3">
+        <div className="min-w-[72px] text-sm font-medium theme-text-primary">
           {getDateLabel()}
         </div>
         <div className="flex items-center gap-1 theme-text-muted">
-          <Clock className="w-4 h-4" />
-          <span className="font-semibold theme-text-primary">{formatTime(shift.totalMinutes)}</span>
+          <Clock className="h-3.5 w-3.5" />
+          <span className="text-sm font-semibold theme-text-primary">{formatTime(shift.totalMinutes)}</span>
         </div>
       </div>
-      <div className="flex items-center gap-3">
-        <div className={`font-bold ${isHourly ? 'theme-income-text' : 'theme-info-text'}`}>
+      <div className="flex items-center gap-2.5">
+        <div className={`text-sm font-bold ${isHourly ? 'theme-income-text' : 'theme-info-text'}`}>
           {formatCurrency(baseEarnings, settings.currency)}
         </div>
         {isExpanded ? (
-          <ChevronUp className="w-5 h-5 theme-text-muted" />
+          <ChevronUp className="h-4.5 w-4.5 theme-text-muted" />
         ) : (
-          <ChevronDown className="w-5 h-5 theme-text-muted" />
+          <ChevronDown className="h-4.5 w-4.5 theme-text-muted" />
         )}
       </div>
     </div>
@@ -149,10 +149,10 @@ const ShiftDetails = ({ shift, onEdit, onDelete, settings, t }) => {
   const summaryStats = stats.filter(stat => !breakdownLabels.has(stat.label));
   
   return (
-    <div className={`mt-2 p-4 rounded-xl animate-fade-in ${isDark ? 'bg-white/[0.03]' : 'bg-slate-100/80'}`}>
-      <div className={`mb-3 rounded-xl border p-3 ${isDark ? 'border-white/[0.05] bg-[#232428]' : 'border-slate-200 bg-white/80'}`}>
+    <div className={`mt-2 rounded-lg p-3 animate-fade-in ${isDark ? 'bg-white/[0.03]' : 'bg-slate-100/80'}`}>
+      <div className={`mb-2.5 rounded-lg border p-2.5 ${isDark ? 'border-white/[0.05] bg-[#232428]' : 'border-slate-200 bg-white/80'}`}>
         <div className="mb-2 flex items-center justify-between">
-          <span className="theme-text-primary text-base font-bold">{t.netIncome}</span>
+          <span className="theme-text-primary text-sm font-bold">{t.netIncome}</span>
           <span className="text-[#d8cec1] text-xl font-bold">{formatCurrency(netIncome, settings.currency)}</span>
         </div>
         <div className="space-y-2">
@@ -184,8 +184,8 @@ const ShiftDetails = ({ shift, onEdit, onDelete, settings, t }) => {
       </div>
 
       {summaryStats.length > 0 && (
-        <div className={`mb-3 rounded-xl border p-3 ${isDark ? 'border-white/[0.05] bg-[#202125]' : 'border-slate-200 bg-white/70'}`}>
-            <div className="mb-2 theme-text-primary text-base font-bold">
+        <div className={`mb-2.5 rounded-lg border p-2.5 ${isDark ? 'border-white/[0.05] bg-[#202125]' : 'border-slate-200 bg-white/70'}`}>
+            <div className="mb-2 text-sm font-bold theme-text-primary">
               {settings.language === 'ru' && 'Дополнительно'}
               {settings.language === 'en' && 'Additional'}
               {settings.language === 'he' && 'נוסף'}
@@ -194,9 +194,9 @@ const ShiftDetails = ({ shift, onEdit, onDelete, settings, t }) => {
             {summaryStats.map((stat, index) => {
               const Icon = stat.icon;
               return (
-              <div key={index} className={`rounded-lg p-2.5 ${isDark ? 'bg-white/[0.03]' : 'bg-slate-50'}`}>
-                  <div className="mb-1 flex items-center gap-1.5 theme-text-muted text-xs">
-                    <Icon className="w-3.5 h-3.5" />
+              <div key={index} className={`rounded-lg p-2 ${isDark ? 'bg-white/[0.03]' : 'bg-slate-50'}`}>
+                  <div className="mb-1 flex items-center gap-1.5 text-[11px] theme-text-muted">
+                    <Icon className="h-3.5 w-3.5" />
                     <span className="truncate">{stat.label}</span>
                   </div>
                   <div className={`font-semibold text-sm ${stat.color}`}>{stat.value}</div>
@@ -227,6 +227,11 @@ const ShiftsScreen = () => {
   const [expandedId, setExpandedId] = useState(null);
   const [shiftToDelete, setShiftToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [monthsOpen, setMonthsOpen] = useState(false);
+  const [selectedMonthKey, setSelectedMonthKey] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  });
   
   const handleEdit = (shift) => {
     setEditingShift(shift);
@@ -257,31 +262,60 @@ const ShiftsScreen = () => {
     setEditingShift(null);
   };
 
+  const currentMonthDate = useMemo(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  }, []);
+
   const currentMonthLabel = useMemo(() => {
-    const now = new Date();
-    return formatDate(now, settings.language, 'LLLL yyyy');
-  }, [settings.language]);
-  
-  // Filter to current month only and sort by date
-  const currentMonthShifts = useMemo(() => {
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth();
-    
+    return formatDate(currentMonthDate, settings.language, 'LLLL yyyy');
+  }, [currentMonthDate, settings.language]);
+
+  const currentMonthKey = useMemo(() => (
+    `${currentMonthDate.getFullYear()}-${String(currentMonthDate.getMonth() + 1).padStart(2, '0')}`
+  ), [currentMonthDate]);
+
+  const monthOptions = useMemo(() => {
+    const year = currentMonthDate.getFullYear();
+    const currentMonthIndex = currentMonthDate.getMonth();
+
+    return Array.from({ length: currentMonthIndex + 1 }, (_, offset) => {
+      const monthIndex = currentMonthIndex - offset;
+      const monthDate = new Date(year, monthIndex, 1);
+      return {
+        value: `${year}-${String(monthIndex + 1).padStart(2, '0')}`,
+        label: formatDate(monthDate, settings.language, 'LLLL yyyy')
+      };
+    });
+  }, [currentMonthDate, settings.language]);
+
+  const visibleMonthDate = useMemo(() => {
+    const [year, month] = selectedMonthKey.split('-').map(Number);
+    return new Date(year, month - 1, 1);
+  }, [selectedMonthKey]);
+
+  const visibleMonthLabel = useMemo(() => (
+    formatDate(visibleMonthDate, settings.language, 'LLLL yyyy')
+  ), [visibleMonthDate, settings.language]);
+
+  const visibleShifts = useMemo(() => {
+    const visibleYear = visibleMonthDate.getFullYear();
+    const visibleMonth = visibleMonthDate.getMonth();
+
     return shifts
-      .filter(shift => {
+      .filter((shift) => {
         const shiftDate = new Date(shift.date);
-        return shiftDate.getFullYear() === currentYear && shiftDate.getMonth() === currentMonth;
+        return shiftDate.getFullYear() === visibleYear && shiftDate.getMonth() === visibleMonth;
       })
       .sort((a, b) => new Date(b.date) - new Date(a.date));
-  }, [shifts]);
+  }, [shifts, visibleMonthDate]);
 
-  const currentMonthStats = useMemo(() => calculateStatistics(currentMonthShifts, settings), [currentMonthShifts, settings]);
+  const visibleStats = useMemo(() => calculateStatistics(visibleShifts, settings), [visibleShifts, settings]);
   
   return (
     <div className="pb-24">
       {/* Header */}
-      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <h1 className="text-2xl font-bold theme-text-primary">{t.shifts}</h1>
         <Button onClick={() => setShowModal(true)} icon={Plus}>
           {t.addShift}
@@ -290,34 +324,79 @@ const ShiftsScreen = () => {
       
       <div className="lg:grid lg:grid-cols-[minmax(0,1.7fr)_minmax(320px,0.9fr)] lg:gap-6 lg:items-start">
         <div className="min-w-0">
-          {currentMonthShifts.length === 0 ? (
+          <Card className="relative z-20 mb-3 overflow-visible p-2.5 lg:p-3.5">
+            <button
+              type="button"
+              onClick={() => setMonthsOpen(prev => !prev)}
+              className="flex w-full items-center justify-between gap-3 rounded-xl text-left"
+            >
+              <div className="theme-text-primary text-base font-semibold capitalize">
+                {visibleMonthLabel}
+              </div>
+              {monthsOpen ? (
+                <ChevronUp className="h-4.5 w-4.5 theme-text-muted" />
+              ) : (
+                <ChevronDown className="h-4.5 w-4.5 theme-text-muted" />
+              )}
+            </button>
+            {monthsOpen && (
+              <div className="absolute left-2.5 right-2.5 top-[calc(100%-0.25rem)] space-y-2 rounded-2xl border theme-border theme-surface-strong p-2.5 shadow-[0_18px_40px_rgba(0,0,0,0.28)] animate-fade-in lg:left-3.5 lg:right-3.5">
+                {monthOptions.map((option) => {
+                  const isActive = selectedMonthKey === option.value;
+
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => {
+                        setSelectedMonthKey(option.value);
+                        setExpandedId(null);
+                        setMonthsOpen(false);
+                      }}
+                      className={`w-full rounded-xl border px-3.5 py-3 text-left capitalize transition-all ${
+                        isActive
+                          ? 'theme-bg-input theme-text-primary border-white/10 shadow-[0_10px_24px_rgba(0,0,0,0.16)]'
+                          : 'theme-text-secondary border-transparent bg-white/[0.03] hover:border-white/8 hover:bg-white/[0.05]'
+                      }`}
+                    >
+                      <span className="block text-sm font-semibold">{option.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </Card>
+
+          {visibleShifts.length === 0 ? (
             <EmptyState
               icon={ClipboardList}
               title={t.noShifts}
               description={t.noData}
               action={
-                <Button onClick={() => setShowModal(true)} icon={Plus}>
-                  {t.addShift}
-                </Button>
+                selectedMonthKey === currentMonthKey ? (
+                  <Button onClick={() => setShowModal(true)} icon={Plus}>
+                    {t.addShift}
+                  </Button>
+                ) : null
               }
             />
           ) : (
-            <Card className="p-3 lg:p-4">
-              <div className="mb-3 hidden items-center justify-between lg:flex">
+            <Card className="p-2.5 lg:p-3.5">
+              <div className="mb-2.5 hidden items-center justify-between lg:flex">
                 <div>
                   <div className="theme-text-muted text-[11px] uppercase tracking-[0.16em]">
-                    {t.thisMonth || 'This month'}
+                    {t.shifts}
                   </div>
-                  <div className="theme-text-primary mt-1 text-lg font-semibold capitalize">
-                    {currentMonthLabel}
+                  <div className="theme-text-primary mt-1 text-base font-semibold capitalize">
+                    {visibleMonthLabel}
                   </div>
                 </div>
                 <div className="theme-text-muted text-sm">
-                  {currentMonthStats.shiftsCount} {t.shiftsCount}
+                  {visibleStats.shiftsCount} {t.shiftsCount}
                 </div>
               </div>
               <div className="space-y-2">
-                {currentMonthShifts.map((shift) => (
+                {visibleShifts.map((shift) => (
                   <div key={shift.id}>
                     <ShiftRow
                       shift={shift}
@@ -342,42 +421,31 @@ const ShiftsScreen = () => {
           )}
         </div>
 
-        <div className="mt-4 space-y-4 lg:sticky lg:top-28 lg:mt-0">
-          <Card className={`overflow-hidden ${settings.theme !== 'light' ? 'bg-[#1d1e22]/88' : 'bg-white/85 border border-slate-200'}`}>
-            <div className="p-4 lg:p-5">
-              <div className="theme-text-muted text-[11px] uppercase tracking-[0.16em]">
-                {t.thisMonth || 'This month'}
-              </div>
-              <div className="theme-text-primary mt-2 text-base font-semibold capitalize lg:text-xl">
-                {currentMonthLabel}
-              </div>
-            </div>
-          </Card>
-
-          {currentMonthShifts.length > 0 && (
+        <div className="mt-3 space-y-3 lg:sticky lg:top-28 lg:mt-0">
+          {visibleShifts.length > 0 && (
             <div className="grid grid-cols-3 gap-2 lg:grid-cols-1">
-              <Card className="p-3.5 lg:p-4">
+              <Card className="p-3 lg:p-3.5">
                 <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
                   {t.shiftsCount}
                 </div>
-                <div className="theme-text-primary text-lg font-bold lg:text-2xl">
-                  {currentMonthStats.shiftsCount}
+                <div className="theme-text-primary text-base font-bold lg:text-xl">
+                  {visibleStats.shiftsCount}
                 </div>
               </Card>
-              <Card className="p-3.5 lg:p-4">
+              <Card className="p-3 lg:p-3.5">
                 <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
                   {t.totalHours}
                 </div>
-                <div className="theme-text-primary text-lg font-bold lg:text-2xl">
-                  {formatTime(currentMonthStats.totalMinutes)}
+                <div className="theme-text-primary text-base font-bold lg:text-xl">
+                  {formatTime(visibleStats.totalMinutes)}
                 </div>
               </Card>
-              <Card className="p-3.5 lg:p-4">
+              <Card className="p-3 lg:p-3.5">
                 <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
                   {settings.workType !== 'pieceWork' ? t.totalEarnings : t.earnedAmount}
                 </div>
-                <div className="theme-income-text text-lg font-bold lg:text-2xl">
-                  {formatCurrency(currentMonthStats.totalEarnings, settings.currency)}
+                <div className="theme-income-text text-base font-bold lg:text-xl">
+                  {formatCurrency(visibleStats.totalEarnings, settings.currency)}
                 </div>
               </Card>
             </div>
