@@ -136,10 +136,34 @@ shift-manager/
 ## 🔧 Scripts / Команды
 
 ```bash
-npm run dev      # Start development server
-npm run build    # Build for production
-npm run preview  # Preview production build
+npm run dev       # Start development server
+npm run build     # Build for production
+npm run preview   # Preview production build
+npm run lint      # Check code with ESLint
+npm run lint:fix  # Auto-fix lint issues
+npm run format    # Format code with Prettier
+npm run test      # Run tests
 ```
+
+## 🚢 Deployment / Деплой
+
+The app is deployed to Firebase Hosting.
+
+```bash
+npm run build
+npx firebase-tools deploy
+```
+
+### PWA Cache Update / Обновление кэша PWA
+
+After each release, increment the cache version in `public/sw.js` so users with the installed PWA receive the updated app:
+
+```js
+// public/sw.js
+const CACHE_NAME = 'shifts-v22'; // bump this on every deploy
+```
+
+The service worker will automatically delete the old cache and load the new version on the user's next visit.
 
 ## 💡 Usage Tips / Советы по использованию
 
