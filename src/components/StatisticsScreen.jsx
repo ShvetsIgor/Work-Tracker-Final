@@ -117,10 +117,9 @@ const StatisticsScreen = () => {
     return shifts.filter(shift => isDateInRange(shift.date, startDate, endDate));
   }, [shifts, activeDateRange]);
   
-  // Calculate statistics - key includes period to force recalculation
   const stats = useMemo(() => {
     return calculateStatistics(filteredShifts, settings);
-  }, [filteredShifts, settings, period, customFrom, customTo]);
+  }, [filteredShifts, settings]);
   
   const periodButtons = [
     { id: 'today', label: t.today },
@@ -144,18 +143,6 @@ const StatisticsScreen = () => {
     return from === to ? from : `${from} - ${to}`;
   }, [activeDateRange, settings.language]);
 
-  const periodHelperText = useMemo(() => {
-    if (settings.language === 'ru') {
-      return `${filteredShifts.length} смен за выбранный период`;
-    }
-
-    if (settings.language === 'he') {
-      return `${filteredShifts.length} משמרות לתקופה שנבחרה`;
-    }
-
-    return `${filteredShifts.length} shifts in the selected period`;
-  }, [filteredShifts.length, settings.language]);
-  
   return (
     <div className="pb-24">
       <div className="mb-4">
@@ -423,7 +410,7 @@ const EXPORT_COLUMNS = [
 
 const ExportButton = ({ shifts, settings, t, isDark, dateFrom, dateTo }) => {
   const [showModal, setShowModal] = useState(false);
-  const { enabledFields, workType, currency } = settings;
+  const { enabledFields, workType } = settings;
   const isHourly = workType !== 'pieceWork';
   const [selectedFields, setSelectedFields] = useState(() => (
     isHourly
@@ -637,7 +624,7 @@ const ExportButton = ({ shifts, settings, t, isDark, dateFrom, dateTo }) => {
 };
 
 // Comments section (for bonus and expenses)
-const CommentsSection = ({ title, comments, icon, color, isDark, t, currency, language }) => {
+const CommentsSection = ({ title, comments, icon, color, isDark, currency, language }) => {
   const [isOpen, setIsOpen] = useState(false);
   
   const IconComponent = icon === 'gift' ? Gift : Receipt;
@@ -709,12 +696,14 @@ const ShiftsList = ({ shifts, settings, t, isDark }) => {
     isHourly ? ['hours', 'earnings'] : ['hours', 'earnedAmount']
   ));
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     setSelectedColumns(prev => {
       const next = prev.filter(colId => colId !== 'earnings' && colId !== 'earnedAmount');
       return isHourly ? [...next, 'earnings'] : [...next, 'earnedAmount'];
     });
   }, [isHourly]);
+  /* eslint-enable react-hooks/set-state-in-effect */
   
   if (shifts.length === 0) return null;
   

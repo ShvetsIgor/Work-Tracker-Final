@@ -20,8 +20,12 @@ export default defineConfig({
             return 'react-vendor';
           }
 
+          if (id.includes('firebase/auth') || id.includes('@firebase/auth')) {
+            return 'firebase-auth';
+          }
+
           if (id.includes('firebase')) {
-            return 'firebase-vendor';
+            return 'firebase-firestore';
           }
 
           if (id.includes('date-fns') || id.includes('lucide-react')) {

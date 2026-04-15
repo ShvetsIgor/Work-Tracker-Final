@@ -267,10 +267,6 @@ const ShiftsScreen = () => {
     return new Date(now.getFullYear(), now.getMonth(), 1);
   }, []);
 
-  const currentMonthLabel = useMemo(() => {
-    return formatDate(currentMonthDate, settings.language, 'LLLL yyyy');
-  }, [currentMonthDate, settings.language]);
-
   const currentMonthKey = useMemo(() => (
     `${currentMonthDate.getFullYear()}-${String(currentMonthDate.getMonth() + 1).padStart(2, '0')}`
   ), [currentMonthDate]);

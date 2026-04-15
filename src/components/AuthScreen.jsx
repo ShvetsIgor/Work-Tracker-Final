@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Mail, Lock, Eye, EyeOff, ArrowLeft, User } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { Button, Input } from '@/components/ui';
@@ -51,15 +51,10 @@ const AuthScreen = () => {
     return true;
   }, [confirmPassword, mode, normalizedEmail, password, trimmedName]);
 
-  useEffect(() => {
-    if (localError) {
-      setLocalError('');
-    }
-
-    if (authError) {
-      setAuthError(null);
-    }
-  }, [name, email, password, confirmPassword, localError, authError, setAuthError]);
+  const clearErrors = () => {
+    if (localError) setLocalError('');
+    if (authError) setAuthError(null);
+  };
   
   const validateForm = () => {
     setLocalError('');
@@ -108,7 +103,7 @@ const AuthScreen = () => {
         await resetPassword(normalizedEmail);
         setResetSent(true);
       }
-    } catch (error) {
+    } catch {
       // Error is handled by context
     }
   };
@@ -118,7 +113,7 @@ const AuthScreen = () => {
     setLocalError('');
     try {
       await loginWithGoogle();
-    } catch (error) {
+    } catch {
       // Error is handled by context
     }
   };
@@ -235,7 +230,7 @@ const AuthScreen = () => {
                   <Input
                     type="text"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(e) => { setName(e.target.value); clearErrors(); }}
                     placeholder={t.namePlaceholder}
                     label={t.name}
                     icon={User}
@@ -247,7 +242,7 @@ const AuthScreen = () => {
                 <Input
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => { setEmail(e.target.value); clearErrors(); }}
                   placeholder="your@email.com"
                   label={t.email}
                   icon={Mail}
@@ -260,7 +255,7 @@ const AuthScreen = () => {
                     <Input
                       type={showPassword ? 'text' : 'password'}
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e) => { setPassword(e.target.value); clearErrors(); }}
                       placeholder="••••••••"
                       label={t.password}
                       icon={Lock}
@@ -281,7 +276,7 @@ const AuthScreen = () => {
                   <Input
                     type={showPassword ? 'text' : 'password'}
                     value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onChange={(e) => { setConfirmPassword(e.target.value); clearErrors(); }}
                     placeholder="••••••••"
                     label={t.confirmPassword}
                     icon={Lock}

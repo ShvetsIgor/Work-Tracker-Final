@@ -92,6 +92,7 @@ const SettingsScreen = ({ embedded = false }) => {
     }
   };
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (settingsSaving && !previousSavingRef.current) {
       showSaveToast({
@@ -136,6 +137,7 @@ const SettingsScreen = ({ embedded = false }) => {
 
     lastSeenSavedAtRef.current = settingsLastSavedAt;
   }, [settingsLastSavedAt, settingsSaveError, t.settingsSaved]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleChange = async (key, value) => {
     try {

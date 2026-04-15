@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { Mail, Settings as SettingsIcon, User } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
-import { Button, Card, Input } from '@/components/ui';
-import SettingsScreen from '@/components/SettingsScreen';
+import { Button, Card, Input, FullScreenLoader } from '@/components/ui';
+
+const SettingsScreen = lazy(() => import('@/components/SettingsScreen'));
 
 const AccountScreen = () => {
   const { t, user, updateProfile, settings } = useApp();
@@ -180,7 +181,9 @@ const AccountScreen = () => {
             </div>
           </Card>
         ) : (
-          <SettingsScreen embedded />
+          <Suspense fallback={<FullScreenLoader />}>
+            <SettingsScreen embedded />
+          </Suspense>
         )}
       </div>
     </div>
