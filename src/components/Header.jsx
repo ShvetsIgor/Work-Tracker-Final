@@ -8,7 +8,7 @@ const Header = ({ onOpenAccount, onOpenSettings }) => {
   const menuRef = useRef(null);
   
   const isDark = settings.theme !== 'light';
-  const mobileSafeTop = 'calc(env(safe-area-inset-top, 0px) + 0.35rem)';
+  const mobileSafeTop = 'env(safe-area-inset-top, 0px)';
   
   // Close menu when clicking outside
   useEffect(() => {
