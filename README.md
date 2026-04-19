@@ -154,16 +154,26 @@ npm run build
 npx firebase-tools deploy
 ```
 
-### PWA Cache Update / Обновление кэша PWA
+### ⚠️ Release checklist / Обязательный чек-лист релиза
 
-After each release, increment the cache version in `public/sw.js` so users with the installed PWA receive the updated app:
+**Every deploy MUST bump both version markers — otherwise installed PWAs keep serving the old cached app.**
 
-```js
-// public/sw.js
-const CACHE_NAME = 'shifts-v22'; // bump this on every deploy
-```
+**Каждый деплой обязан поднимать оба маркера версии — иначе установленные PWA продолжают отдавать старый кэшированный билд.**
 
-The service worker will automatically delete the old cache and load the new version on the user's next visit.
+1. Bump the SW cache name in [`public/sw.js`](public/sw.js):
+   ```js
+   const CACHE_NAME = 'shifts-vNN'; // increment NN on every deploy
+   ```
+2. Bump `version` in [`package.json`](package.json) (semver).
+3. Build and deploy:
+   ```bash
+   npm run build
+   firebase deploy --only hosting
+   ```
+
+When the new service worker activates, `controllerchange` in [`index.html`](index.html) auto-reloads open tabs so users land on the fresh build without a manual refresh.
+
+Когда новый service worker активируется, обработчик `controllerchange` в [`index.html`](index.html) автоматически перезагружает открытые вкладки — пользователям не нужно обновлять страницу вручную.
 
 ## 💡 Usage Tips / Советы по использованию
 
