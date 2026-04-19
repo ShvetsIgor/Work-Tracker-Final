@@ -39,7 +39,7 @@ export const Button = ({
         ${variants[variant]}
         ${sizes[size]}
         ${fullWidth ? 'w-full' : ''}
-        font-semibold rounded-lg transition-all duration-200 
+        font-semibold rounded-xl transition-all duration-200 tracking-[-0.01em]
         disabled:opacity-50 disabled:cursor-not-allowed
         flex items-center justify-center gap-2
         active:scale-[0.98]
@@ -101,7 +101,7 @@ export const Input = ({
         )}
         <input
           className={`
-            w-full theme-bg-input rounded-lg 
+            w-full theme-bg-input rounded-xl
             px-4 py-3 theme-text-primary
             transition-all duration-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]
             focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent
@@ -137,7 +137,7 @@ export const Select = ({
       <div className="relative">
         <select
           className={`
-            w-full appearance-none theme-bg-input rounded-lg 
+            w-full appearance-none theme-bg-input rounded-xl
             px-4 py-3 pr-11 theme-text-primary
             transition-all duration-200
             focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent
@@ -228,7 +228,7 @@ export const Badge = ({ children, variant = 'default', className = '' }) => {
   
   return (
     <span className={`
-      px-2 py-1 rounded-md text-xs font-medium
+      px-2.5 py-1 rounded-full text-xs font-medium tracking-[-0.01em]
       ${variants[variant]}
       ${className}
     `}>
