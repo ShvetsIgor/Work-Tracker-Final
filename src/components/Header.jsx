@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Clock, ChevronDown, User, LogOut } from 'lucide-react';
+import { Clock, ChevronDown, User, LogOut, Settings } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 
-const Header = ({ onOpenAccount }) => {
+const Header = ({ onOpenAccount, onOpenSettings }) => {
   const { t, user, logout, settings, rtl } = useApp();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
@@ -64,9 +64,24 @@ const Header = ({ onOpenAccount }) => {
           </div>
           </div>
         
-        {/* User menu */}
+        {/* Settings + User menu */}
         {user && (
-          <div className="relative" ref={menuRef}>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onOpenSettings}
+              aria-label={t.settings}
+              title={t.settings}
+              className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${
+                isDark
+                  ? 'border border-white/[0.05] theme-text-secondary hover:text-white'
+                  : 'bg-white/70 hover:bg-white border border-slate-200/80 theme-text-secondary hover:text-slate-900'
+              }`}
+              style={isDark ? { backgroundColor: 'var(--control-bg)' } : undefined}
+            >
+              <Settings className="h-4 w-4" />
+            </button>
+            <div className="relative" ref={menuRef}>
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 transition-colors ${
@@ -133,6 +148,7 @@ const Header = ({ onOpenAccount }) => {
                 </div>
               </div>
             )}
+            </div>
           </div>
         )}
         </div>

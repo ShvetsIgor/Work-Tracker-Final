@@ -9,6 +9,7 @@ import { colorPalettes } from '@/config/colorPalettes';
 const AuthScreen = lazy(() => import('@/components/AuthScreen'));
 const StatisticsScreen = lazy(() => import('@/components/StatisticsScreen'));
 const AccountScreen = lazy(() => import('@/components/AccountScreen'));
+const SettingsScreen = lazy(() => import('@/components/SettingsScreen'));
 
 const App = () => {
   const { user, authLoading, rtl, settings } = useApp();
@@ -131,8 +132,11 @@ const App = () => {
         }`} />
       </div>
       
-      <Header onOpenAccount={() => setActiveTab('account')} />
-      
+      <Header
+        onOpenAccount={() => setActiveTab('account')}
+        onOpenSettings={() => setActiveTab('settings')}
+      />
+
       <main className="relative mx-auto max-w-7xl px-4 py-5 pb-32 lg:px-8 lg:pl-[20rem] lg:pr-8 lg:py-6">
         {activeTab === 'shifts' && <ShiftsScreen />}
         {activeTab === 'statistics' && (
@@ -143,6 +147,11 @@ const App = () => {
         {activeTab === 'account' && (
           <Suspense fallback={secondaryScreenFallback}>
             <AccountScreen />
+          </Suspense>
+        )}
+        {activeTab === 'settings' && (
+          <Suspense fallback={secondaryScreenFallback}>
+            <SettingsScreen />
           </Suspense>
         )}
       </main>
