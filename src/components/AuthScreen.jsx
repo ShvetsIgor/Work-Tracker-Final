@@ -128,51 +128,41 @@ const AuthScreen = () => {
   const error = localError || authError;
   
   return (
-    <div 
-      className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,0.18),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(37,99,235,0.22),transparent_28%),linear-gradient(145deg,#07111f_0%,#0d1b2f_48%,#08131f_100%)] flex items-center justify-center p-4"
+    <div
+      className="relative min-h-screen flex items-center justify-center p-4 theme-bg-app"
       dir={isRTL ? 'rtl' : 'ltr'}
     >
-      {/* Background decorations */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-sky-500/18 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="absolute inset-x-0 top-0 h-40 bg-[linear-gradient(to_bottom,rgba(7,17,31,0.5),transparent)]" />
-      </div>
-      
       <div className="relative w-full max-w-md">
-        {/* Decorative corners */}
-        <div className="absolute -top-4 -left-4 w-24 h-24 border-l-2 border-t-2 border-sky-400/24" />
-        <div className="absolute -bottom-4 -right-4 w-24 h-24 border-r-2 border-b-2 border-sky-400/24" />
-        
-        {/* Card */}
-        <div className="theme-surface-strong backdrop-blur-2xl rounded-[32px] p-8 border border-slate-700/50 shadow-[0_28px_60px_rgba(2,10,23,0.4)]">
+        <div className="rounded-[24px] border border-white/[0.05] bg-slate-900/60 p-7 backdrop-blur-xl shadow-[0_28px_60px_rgba(2,10,23,0.4)]">
           {/* Language selector */}
-          <div className="flex justify-center mb-6">
+          <div className="flex justify-end mb-4">
             <select
               value={lang}
               onChange={(e) => setLang(e.target.value)}
-              className="bg-slate-800/70 text-slate-200 px-3 py-2 rounded-xl text-sm border border-slate-600 focus:outline-none focus:ring-2 focus:ring-sky-500"
+              className="bg-slate-800/70 text-slate-200 px-3 py-1.5 rounded-lg text-xs border border-white/[0.05] focus:outline-none focus:ring-2 focus:ring-sky-500"
             >
               <option value="ru">Русский</option>
               <option value="en">English</option>
               <option value="he">עברית</option>
             </select>
           </div>
-          
+
           {/* Logo & Title */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-sky-500 via-cyan-500 to-blue-600 rounded-[22px] mb-4 shadow-[0_18px_36px_rgba(14,165,233,0.28)]">
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="mb-8">
+            <div
+              className="inline-flex h-11 w-11 items-center justify-center rounded-xl mb-5"
+              style={{ background: 'var(--chip-bg)', color: 'var(--chip-text)' }}
+            >
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <div className="text-slate-400 text-[11px] uppercase tracking-[0.28em] mb-2">Work Ledger</div>
-            <h1 className="text-3xl font-bold text-white tracking-tight">{t.appName}</h1>
-            <p className="text-slate-400 text-sm mt-2">
+            <div className="text-slate-400 text-[11px] uppercase tracking-[0.14em]">{t.appName}</div>
+            <h1 className="mt-1.5 text-3xl font-bold text-white tracking-tight">
               {mode === 'login' && t.login}
               {mode === 'register' && t.register}
               {mode === 'reset' && t.resetPassword}
-            </p>
+            </h1>
           </div>
           
           {/* Back button for reset mode */}
