@@ -49,7 +49,8 @@ const AccountScreen = () => {
     <div className="space-y-4 pb-24 lg:space-y-5 lg:pb-10">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <h1 className="text-2xl font-bold theme-text-primary">{t.account}</h1>
+          <div className="theme-text-muted text-[11px] uppercase tracking-[0.14em]">{t.appName}</div>
+          <h1 className="theme-text-primary mt-1 text-3xl font-bold tracking-tight">{t.account}</h1>
         </div>
       </div>
 

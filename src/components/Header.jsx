@@ -57,10 +57,7 @@ const Header = ({ onOpenAccount, onOpenSettings }) => {
             <Clock className="h-4 w-4" />
           </div>
           <div className="min-w-0">
-            <span className="theme-text-primary text-base font-bold tracking-tight">{t.appName}</span>
-            <div className="theme-text-muted text-[10px] tracking-[0.08em]">
-              Daily shift journal
-            </div>
+            <span className="theme-text-primary text-[17px] font-semibold tracking-[-0.01em]">{t.appName}</span>
           </div>
           </div>
         

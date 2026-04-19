@@ -20,11 +20,19 @@ import { Card, Input, Select, Toggle } from '@/components/ui';
 import { currencies } from '@/config/currencies';
 import { paletteOrder } from '@/config/colorPalettes';
 
-const SettingRow = ({ children, noBorder = false }) => (
-  <div className={`py-3.5 ${!noBorder ? 'border-b border-slate-700/50 dark:border-slate-700/50' : ''}`}>
-    {children}
-  </div>
-);
+const SettingRow = ({ children, noBorder = false }) => {
+  const { settings } = useApp();
+  const isDark = settings.theme !== 'light';
+  return (
+    <div
+      className={`py-3.5 ${!noBorder ? 'border-b' : ''} ${
+        !noBorder ? (isDark ? 'border-white/[0.05]' : 'border-slate-200/70') : ''
+      }`}
+    >
+      {children}
+    </div>
+  );
+};
 
 const CollapsibleSection = ({ title, icon: Icon, iconColor, children, defaultOpen = false }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
@@ -215,10 +223,9 @@ const SettingsScreen = ({ embedded = false }) => {
       )}
 
       {!embedded && (
-        <div className="mb-5">
-          <div>
-            <h1 className="text-2xl font-bold theme-text-primary">{t.settings}</h1>
-          </div>
+        <div className="mb-6">
+          <div className="theme-text-muted text-[11px] uppercase tracking-[0.14em]">{t.appName}</div>
+          <h1 className="theme-text-primary mt-1 text-3xl font-bold tracking-tight">{t.settings}</h1>
         </div>
       )}
 

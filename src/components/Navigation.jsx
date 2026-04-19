@@ -83,35 +83,29 @@ const Navigation = ({ activeTab, setActiveTab }) => {
               : 'bg-white/85 shadow-[0_-18px_36px_rgba(148,163,184,0.18)]'
           }`}
         >
-          <div className="flex justify-around items-center">
+          <div className="flex justify-around items-center py-2">
             {tabs.map((tab) => {
-              const Icon = tab.icon;
               const isActive = activeTab === tab.id;
 
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`
-                    relative flex flex-col items-center justify-center
-                    min-w-[78px] rounded-lg px-3 py-2 transition-all duration-200
-                    ${isActive 
-                      ? 'border border-white/[0.06]' 
-                      : isDark 
-                        ? 'hover:bg-white/[0.03]'
-                        : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100'
-                    }
-                  `}
+                  className="relative flex flex-col items-center justify-center gap-1.5 px-4 py-1.5 bg-transparent"
                   style={isDark
                     ? isActive
-                      ? { background: 'var(--nav-active-bg)', color: 'var(--nav-active-text)' }
+                      ? { color: 'var(--nav-active-text)' }
                       : { color: 'var(--nav-idle-text)' }
                     : undefined}
                 >
-                  <Icon className={`mb-0.5 h-4.5 w-4.5 ${isActive ? 'scale-105' : ''} transition-transform`} />
-                  <span className={`whitespace-nowrap text-[11px] ${isActive ? 'font-semibold tracking-[0.02em]' : 'font-medium'}`}>
+                  <span className={`text-[13px] tracking-[-0.01em] ${isActive ? 'font-semibold' : 'font-medium'}`}>
                     {tab.label}
                   </span>
+                  <span
+                    aria-hidden="true"
+                    className={`block h-[2px] rounded-full transition-all duration-200 ${isActive ? 'w-6' : 'w-0'}`}
+                    style={{ background: 'currentColor' }}
+                  />
                 </button>
               );
             })}
