@@ -1,6 +1,6 @@
 {
   "name": "shift-manager",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "Shift Manager for hourly workers with expense tracking",
   "type": "module",
   "private": true,
