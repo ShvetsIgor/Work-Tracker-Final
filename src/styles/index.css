@@ -338,12 +338,6 @@ input[type="time"] {
 }
 
 /* Font utilities */
-.font-display {
-  font-family: var(--font-display);
-  font-weight: 500;
-  letter-spacing: -0.01em;
-}
-
 .font-mono-data {
   font-family: var(--font-mono);
   font-feature-settings: "tnum" 1, "zero" 1;
@@ -354,6 +348,16 @@ input[type="time"] {
   font-family: var(--font-mono);
   font-feature-settings: "tnum" 1, "zero" 1;
   font-variant-numeric: tabular-nums;
+}
+
+/* .font-display must come AFTER .tabular-nums so that hero totals
+   (which combine both) keep the Fraunces serif font family. */
+.font-display {
+  font-family: var(--font-display);
+  font-feature-settings: "tnum" 1, "zero" 1;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  letter-spacing: -0.01em;
 }
 
 .no-scrollbar {
