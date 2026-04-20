@@ -1,4 +1,4 @@
-const CACHE_NAME = 'shifts-v30';
+const CACHE_NAME = 'shifts-v31';
 const urlsToCache = [
   '/',
   '/index.html',

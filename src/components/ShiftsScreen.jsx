@@ -333,9 +333,11 @@ const ShiftsScreen = () => {
       {/* Title row */}
       <div className="mb-4 flex items-end justify-between">
         <h1 className="text-3xl font-bold theme-text-primary tracking-tight">{t.shifts}</h1>
-        <Button onClick={() => setShowModal(true)} icon={Plus} size="sm">
-          {t.addShift}
-        </Button>
+        <div className="hidden lg:block">
+          <Button onClick={() => setShowModal(true)} icon={Plus} size="sm">
+            {t.addShift}
+          </Button>
+        </div>
       </div>
 
       <div className="lg:grid lg:grid-cols-[minmax(0,1.7fr)_minmax(300px,0.9fr)] lg:gap-6 lg:items-start">
@@ -357,7 +359,7 @@ const ShiftsScreen = () => {
             </div>
 
             <div className="mt-3 flex items-baseline gap-3">
-              <div className="theme-text-primary text-[32px] font-bold leading-none tabular-nums">
+              <div className="theme-text-primary font-display text-[36px] leading-none tabular-nums">
                 {formatCurrency(visibleStats.totalEarnings, settings.currency)}
               </div>
             </div>
@@ -542,6 +544,21 @@ const ShiftsScreen = () => {
           </div>
         </div>
       </Modal>
+
+      <button
+        type="button"
+        onClick={() => setShowModal(true)}
+        aria-label={t.addShift}
+        className="fixed left-1/2 z-40 flex h-12 -translate-x-1/2 items-center gap-2 rounded-full px-5 font-semibold tracking-[-0.01em] shadow-[0_10px_24px_rgba(0,0,0,0.28)] active:scale-95 transition-transform lg:hidden"
+        style={{
+          bottom: 'calc(env(safe-area-inset-bottom, 0px) + 76px)',
+          background: 'var(--accent-secondary)',
+          color: 'var(--accent-text)'
+        }}
+      >
+        <Plus className="h-5 w-5" />
+        <span>{t.addShift}</span>
+      </button>
     </div>
   );
 };

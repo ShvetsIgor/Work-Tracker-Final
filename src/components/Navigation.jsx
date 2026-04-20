@@ -66,23 +66,17 @@ const Navigation = ({ activeTab, setActiveTab }) => {
       </aside>
 
       <nav
-        className={`fixed bottom-0 left-0 right-0 z-50 border-t lg:hidden ${
-          isDark ? 'border-white/[0.05]' : 'border-slate-200/80'
+        className={`fixed bottom-0 left-0 right-0 z-50 border-t lg:hidden backdrop-blur-2xl transition-colors duration-300 ${
+          isDark
+            ? 'border-white/[0.05] shadow-[0_-16px_28px_rgba(0,0,0,0.18)]'
+            : 'border-slate-200/80 bg-white/90 shadow-[0_-18px_36px_rgba(148,163,184,0.18)]'
         }`}
-        style={isDark ? {
+        style={{
           paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-          background: 'var(--nav-bg)'
-        } : {
-          paddingBottom: 'env(safe-area-inset-bottom, 0px)'
+          ...(isDark ? { background: 'var(--nav-bg)' } : {})
         }}
       >
-        <div
-          className={`px-2 py-1.5 backdrop-blur-2xl transition-colors duration-300 ${
-            isDark
-              ? 'shadow-[0_-16px_28px_rgba(0,0,0,0.18)]'
-              : 'bg-white/85 shadow-[0_-18px_36px_rgba(148,163,184,0.18)]'
-          }`}
-        >
+        <div className="px-2 py-1.5">
           <div className="flex justify-around items-center py-2">
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;

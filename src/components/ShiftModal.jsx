@@ -432,6 +432,29 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
           }
         `}</style>
 
+        {/* Chip-tabs navigation (prototype parity) */}
+        <div className="mb-3 -mx-1 flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+          {[
+            { k: 'time', l: t.workTime || 'Время' },
+            { k: 'mileage', l: t.mileage || 'Пробег' },
+            { k: 'tips', l: t.tips || 'Чаевые' },
+            { k: 'expenses', l: t.expenses || 'Расходы' }
+          ].map((s, i) => (
+            <button
+              key={s.k}
+              type="button"
+              onClick={() => document.getElementById(`ss-${s.k}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+              className={`shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-medium tracking-[-0.01em] transition-colors ${
+                i === 0
+                  ? (isDark ? 'bg-slate-100 text-slate-900' : 'bg-slate-900 text-white')
+                  : (isDark ? 'bg-slate-800/60 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200')
+              }`}
+            >
+              {s.l}
+            </button>
+          ))}
+        </div>
+
         {/* Hero total — сверху, чтобы видеть итог сразу */}
         <HeroTotal
           isDark={isDark}
@@ -461,7 +484,7 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
           </div>
 
           {/* Work Time */}
-          <Card className={`shift-form-section p-3.5 ${getSectionClassNames(isDark, workTimeHasError)}`}>
+          <Card id="ss-time" className={`shift-form-section p-3.5 ${getSectionClassNames(isDark, workTimeHasError)}`}>
             <SectionLabel icon={Clock} className="mb-3">{t.workTime}</SectionLabel>
 
             <div className="mb-3 flex gap-2">
@@ -643,7 +666,7 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
 
           {/* Mileage — manual only */}
           {enabledFields.mileage && (
-            <Card className={`shift-form-section p-3.5 ${getSectionClassNames(isDark, mileageHasError)}`}>
+            <Card id="ss-mileage" className={`shift-form-section p-3.5 ${getSectionClassNames(isDark, mileageHasError)}`}>
               <SectionLabel icon={Car} className="mb-3">{t.mileage}</SectionLabel>
 
               <Input
@@ -665,7 +688,7 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
 
           {/* Tips */}
           {(enabledFields.tipsCash || enabledFields.tipsCard) && (
-            <Card className={`shift-form-section p-3.5 ${getSectionClassNames(isDark, tipsHasError)}`}>
+            <Card id="ss-tips" className={`shift-form-section p-3.5 ${getSectionClassNames(isDark, tipsHasError)}`}>
               <SectionLabel icon={Banknote} iconClassName="text-green-400" className="mb-3">{t.tips}</SectionLabel>
 
               <div className="grid grid-cols-2 gap-2.5">
@@ -720,7 +743,7 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
 
           {/* Expenses */}
           {enabledFields.expenses && (
-            <Card className={`shift-form-section p-3.5 ${getSectionClassNames(isDark, expensesHasError)}`}>
+            <Card id="ss-expenses" className={`shift-form-section p-3.5 ${getSectionClassNames(isDark, expensesHasError)}`}>
               <div className="mb-3 flex items-center gap-2">
                 <Receipt className="w-4 h-4 text-red-400" />
                 <span className="theme-text-muted text-[11px] uppercase tracking-[0.14em] font-semibold">{t.expenses}</span>
@@ -837,18 +860,18 @@ const HeroTotal = ({ isDark, netIncome, baseEarnings, totalMinutes, currency, ho
 
       <div className="flex items-end justify-between gap-3">
         <div className="min-w-0">
-          <div className={`text-[28px] font-bold leading-none ${netColor}`}>
+          <div className={`font-display text-[34px] leading-none tabular-nums ${netColor}`}>
             {formatCurrency(netIncome, currency)}
           </div>
           <div className="mt-1 theme-text-muted text-xs">
-            {isHourly ? (t.earnings || t.totalEarnings) : t.earnedAmount}: <span className="theme-text-secondary font-medium">{formatCurrency(baseEarnings, currency)}</span>
+            {isHourly ? (t.earnings || t.totalEarnings) : t.earnedAmount}: <span className="theme-text-secondary font-medium tabular-nums">{formatCurrency(baseEarnings, currency)}</span>
           </div>
         </div>
         <div className="text-right">
           <div className="theme-text-muted text-[11px] uppercase tracking-[0.14em]">
             {t.totalTime || 'Время'}
           </div>
-          <div className="theme-text-primary text-lg font-bold">
+          <div className="theme-text-primary font-mono-data text-lg font-semibold">
             {formatTime(totalMinutes)}
           </div>
         </div>

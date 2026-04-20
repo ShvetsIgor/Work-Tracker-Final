@@ -259,7 +259,7 @@ const StatisticsScreen = () => {
               {isHourly ? t.totalEarnings : t.earnedAmount} · {stats.shiftsCount} {(t.shiftsCount || '').toLowerCase()}
             </SectionLabel>
             <div className="mt-2 flex items-baseline gap-3">
-              <div className="theme-text-primary text-[38px] font-bold leading-none tabular-nums">
+              <div className="theme-text-primary font-display text-[42px] leading-none tabular-nums">
                 {formatCurrency(stats.totalEarnings, currency)}
               </div>
             </div>

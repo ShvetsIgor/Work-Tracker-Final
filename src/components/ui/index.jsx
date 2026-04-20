@@ -79,6 +79,7 @@ export const Input = ({
   
   // Add inputMode for numeric keyboard on mobile
   const inputMode = props.type === 'number' ? 'decimal' : undefined;
+  const isDataNumeric = props.type === 'number' || props.type === 'time';
   
   return (
     <div className={containerClassName}>
@@ -107,6 +108,7 @@ export const Input = ({
             focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent
             ${Icon ? 'pl-10' : ''}
             ${error ? 'border-[#b4877f] focus:ring-[#b4877f]' : ''}
+            ${isDataNumeric ? 'font-mono-data text-lg font-medium' : ''}
             ${className}
           `}
           onWheel={handleWheel}
