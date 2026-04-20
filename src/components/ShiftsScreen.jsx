@@ -47,9 +47,6 @@ const ShiftRow = ({ shift, onExpand, isExpanded, settings, t, isLast }) => {
   const dayNumber = shiftDate.getDate();
   const dow = format(shiftDate, 'EEEEEE', { locale: locales[settings.language] || ru }).toLowerCase();
 
-  const hoursValue = (shift.totalMinutes / 60);
-  const hoursStr = hoursValue % 1 === 0 ? `${hoursValue}` : hoursValue.toFixed(1).replace('.', ',');
-
   const tipsTotal = (shift.tipsCash || 0) + netTipsCard;
 
   return (
@@ -87,15 +84,16 @@ const ShiftRow = ({ shift, onExpand, isExpanded, settings, t, isLast }) => {
             </span>
           )}
         </div>
-        <div className="mt-1 flex flex-wrap gap-x-2.5 gap-y-0.5 text-[11px] theme-text-muted">
-          <span><span className="tabular-nums font-medium">{hoursStr}</span> {t.hoursShort || 'ч'}</span>
-          {tipsTotal > 0 && (
-            <span>{(t.tips || 'чаевые').toLowerCase()} <span className="tabular-nums font-medium">{formatCurrency(tipsTotal, settings.currency)}</span></span>
-          )}
-          {shift.mileage > 0 && (
-            <span><span className="tabular-nums font-medium">{shift.mileage}</span> {t.km || 'км'}</span>
-          )}
-        </div>
+        {(tipsTotal > 0 || shift.mileage > 0) && (
+          <div className="mt-1 flex flex-wrap gap-x-2.5 gap-y-0.5 text-[11px] theme-text-muted">
+            {tipsTotal > 0 && (
+              <span>{(t.tips || 'чаевые').toLowerCase()} <span className="tabular-nums font-medium">{formatCurrency(tipsTotal, settings.currency)}</span></span>
+            )}
+            {shift.mileage > 0 && (
+              <span><span className="tabular-nums font-medium">{shift.mileage}</span> {t.km || 'км'}</span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Earnings */}
