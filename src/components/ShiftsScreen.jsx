@@ -229,6 +229,15 @@ const ShiftDetails = ({ shift, onEdit, onDelete, settings, t }) => {
   );
 };
 
+// Treat the day as ending at 03:00 (not midnight) so a late shift on
+// the last day of a month doesn't accidentally land in the next month.
+// e.g. opening the app on May 1st at 00:15 still shows April.
+const getEffectiveNow = () => {
+  const d = new Date();
+  d.setHours(d.getHours() - 3);
+  return d;
+};
+
 const ShiftsScreen = () => {
   const { t, shifts, settings, deleteShift } = useApp();
   const [showModal, setShowModal] = useState(false);
@@ -238,7 +247,7 @@ const ShiftsScreen = () => {
   const [deleting, setDeleting] = useState(false);
   const [monthsOpen, setMonthsOpen] = useState(false);
   const [selectedMonthKey, setSelectedMonthKey] = useState(() => {
-    const now = new Date();
+    const now = getEffectiveNow();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   });
 
@@ -273,7 +282,7 @@ const ShiftsScreen = () => {
   };
 
   const currentMonthDate = useMemo(() => {
-    const now = new Date();
+    const now = getEffectiveNow();
     return new Date(now.getFullYear(), now.getMonth(), 1);
   }, []);
 
