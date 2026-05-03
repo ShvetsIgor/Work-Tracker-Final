@@ -7,7 +7,7 @@ import {
 import { useApp } from '@/context/AppContext';
 import { EmptyState } from '@/components/ui';
 import { getDateRange, isDateInRange, formatDate } from '@/utils/dateUtils';
-import { calculateStatistics, calculateShiftBaseEarnings } from '@/utils/calculations';
+import { calculateStatistics, calculateShiftBaseEarnings, calculateOtherIncomeTotal } from '@/utils/calculations';
 import { formatCurrency, formatTime } from '@/utils/formatters';
 
 const SectionLabel = ({ children, className = '' }) => (
@@ -190,7 +190,7 @@ const StatisticsScreen = () => {
     const byDate = new Map();
     filteredShifts.forEach(shift => {
       const base = calculateShiftBaseEarnings(shift, settings);
-      const net = base + (shift.tipsCash || 0) + (shift.tipsCard || 0) + (shift.bonus || 0);
+      const net = base + (shift.tipsCash || 0) + (shift.tipsCard || 0) + calculateOtherIncomeTotal(shift);
       byDate.set(shift.date, (byDate.get(shift.date) || 0) + net);
     });
 
@@ -300,8 +300,8 @@ const StatisticsScreen = () => {
             if (sf.mileage !== false && enabledFields.mileage && stats.totalMileage > 0) {
               cells.push(<MiniStat key="km" label={t.totalMileageStats} value={stats.totalMileage} suffix={t.km} isDark={isDark} />);
             }
-            if (enabledFields.bonus && stats.totalBonus > 0) {
-              cells.push(<MiniStat key="bonus" label={t.totalBonus} value={formatCurrency(stats.totalBonus, currency)} color="theme-warm-text" isDark={isDark} />);
+            if (enabledFields.bonus && stats.totalOtherIncome > 0) {
+              cells.push(<MiniStat key="otherIncome" label={t.totalOtherIncome || t.otherIncome} value={formatCurrency(stats.totalOtherIncome, currency)} color="theme-warm-text" isDark={isDark} />);
             }
             if (sf.avgHoursPerShift !== false) {
               cells.push(<MiniStat key="avgh" label={t.avgHoursPerShift} value={formatTime(stats.avgMinutesPerShift)} isDark={isDark} />);
@@ -323,11 +323,11 @@ const StatisticsScreen = () => {
             />
           )}
 
-          {/* Bonus comments */}
-          {enabledFields.bonus && stats.bonusComments && stats.bonusComments.length > 0 && (
+          {/* Other income comments */}
+          {enabledFields.bonus && stats.incomeComments && stats.incomeComments.length > 0 && (
             <CommentsSection
-              title={t.bonusComments || 'Комментарии к бонусам'}
-              comments={stats.bonusComments}
+              title={t.incomeComments || 'Комментарии к доходам'}
+              comments={stats.incomeComments}
               icon={Gift}
               color="theme-warm-text"
               isDark={isDark}
@@ -436,8 +436,14 @@ const ExportButton = ({ shifts, settings, t, isDark, dateFrom, dateTo }) => {
             case 'tipsCard': row[label] = shift.tipsCard || 0; break;
             case 'mileage': row[label] = shift.mileage || 0; break;
             case 'expenses': row[label] = totalExpenses; break;
-            case 'bonus': row[label] = shift.bonus || 0; break;
-            case 'bonusComment': row[label] = shift.bonusComment || ''; break;
+            case 'bonus': row[label] = calculateOtherIncomeTotal(shift); break;
+            case 'bonusComment': {
+              const items = shift.otherIncome && shift.otherIncome.length > 0
+                ? shift.otherIncome
+                : (shift.bonus > 0 ? [{ amount: shift.bonus, comment: shift.bonusComment }] : []);
+              row[label] = items.map(i => i.comment).filter(Boolean).join('; ');
+              break;
+            }
             case 'orders': row[label] = shift.ordersCount || 0; break;
             default: break;
           }
@@ -649,7 +655,10 @@ const ShiftsList = ({ shifts, settings, t, isDark }) => {
       case 'tipsCard': return shift.tipsCard ? formatCurrency(shift.tipsCard, currency) : '−';
       case 'mileage': return shift.mileage ? `${shift.mileage} ${t.km || 'км'}` : '−';
       case 'expenses': return totalExpenses > 0 ? formatCurrency(totalExpenses, currency) : '−';
-      case 'bonus': return shift.bonus ? formatCurrency(shift.bonus, currency) : '−';
+      case 'bonus': {
+        const total = calculateOtherIncomeTotal(shift);
+        return total > 0 ? formatCurrency(total, currency) : '−';
+      }
       case 'orders': return shift.ordersCount || '−';
       default: return '−';
     }

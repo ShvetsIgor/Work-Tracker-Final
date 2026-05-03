@@ -90,17 +90,43 @@ export const calculateTotalExpenses = (expenses) => {
 };
 
 /**
+ * Get the list of "Other income" line items for a shift, with legacy
+ * fallback: a shift saved with the old single-bonus model is presented
+ * as one synthetic item so existing data keeps working.
+ */
+export const getOtherIncomeItems = (shift) => {
+  if (Array.isArray(shift?.otherIncome) && shift.otherIncome.length > 0) {
+    return shift.otherIncome;
+  }
+  if (shift?.bonus && shift.bonus > 0) {
+    return [{
+      id: `legacy-bonus-${shift?.id || shift?.date || 'x'}`,
+      amount: shift.bonus,
+      comment: shift.bonusComment || ''
+    }];
+  }
+  return [];
+};
+
+/**
+ * Total amount across all "Other income" items on a shift
+ */
+export const calculateOtherIncomeTotal = (shift) => {
+  return getOtherIncomeItems(shift).reduce((sum, item) => sum + (item.amount || 0), 0);
+};
+
+/**
  * Calculate net income for a shift
  */
 export const calculateShiftNetIncome = (shift, settings) => {
   const earnings = calculateShiftBaseEarnings(shift, settings);
-  
+
   const tipsCash = shift.tipsCash || 0;
   const netTipsCard = calculateNetTipsCard(shift.tipsCard, settings.tipsCardPercent);
-  const bonus = shift.bonus || 0;
+  const otherIncome = calculateOtherIncomeTotal(shift);
   const expenses = calculateTotalExpenses(shift.expenses);
-  
-  return earnings + tipsCash + netTipsCard + bonus - expenses;
+
+  return earnings + tipsCash + netTipsCard + otherIncome - expenses;
 };
 
 /**
@@ -117,6 +143,7 @@ export const calculateStatistics = (shifts, settings) => {
       totalTipsCash: 0,
       totalTipsCard: 0,
       totalTipsCardGross: 0,
+      totalOtherIncome: 0,
       totalBonus: 0,
       totalExpenses: 0,
       totalEarnings: 0,
@@ -126,10 +153,12 @@ export const calculateStatistics = (shifts, settings) => {
       avgMinutesPerShift: 0,
       avgIncomePerShift: 0,
       avgPerHour: 0,
-      expensesByType: {}
+      expensesByType: {},
+      incomeComments: [],
+      bonusComments: []
     };
   }
-  
+
   const stats = {
     shiftsCount: shifts.length,
     totalMinutes: 0,
@@ -137,43 +166,46 @@ export const calculateStatistics = (shifts, settings) => {
     totalTipsCash: 0,
     totalTipsCard: 0,
     totalTipsCardGross: 0,
-    totalBonus: 0,
+    totalOtherIncome: 0,
     totalExpenses: 0,
     totalEarnings: 0,
     totalOrders: 0,
     totalEarnedAmount: 0,
     netIncome: 0,
     expensesByType: {},
-    bonusComments: [],
+    incomeComments: [],
     expenseComments: []
   };
-  
+
   shifts.forEach(shift => {
     // Time
     stats.totalMinutes += shift.totalMinutes || 0;
-    
+
     // Mileage
     stats.totalMileage += shift.mileage || 0;
-    
+
     // Tips
     stats.totalTipsCash += shift.tipsCash || 0;
     stats.totalTipsCardGross += shift.tipsCard || 0;
     stats.totalTipsCard += calculateNetTipsCard(shift.tipsCard, settings.tipsCardPercent);
-    
-    // Bonus
-    stats.totalBonus += shift.bonus || 0;
-    if (shift.bonus && shift.bonusComment) {
-      stats.bonusComments.push({
-        date: shift.date,
-        amount: shift.bonus,
-        comment: shift.bonusComment
-      });
-    }
-    
+
+    // Other income (with legacy `bonus`/`bonusComment` fallback)
+    const incomeItems = getOtherIncomeItems(shift);
+    incomeItems.forEach(item => {
+      stats.totalOtherIncome += item.amount || 0;
+      if (item.comment) {
+        stats.incomeComments.push({
+          date: shift.date,
+          amount: item.amount,
+          comment: item.comment
+        });
+      }
+    });
+
     // Orders and earned (for piece-work)
     stats.totalOrders += shift.ordersCount || 0;
     stats.totalEarnedAmount += shift.earnedAmount || 0;
-    
+
     // Expenses
     const shiftExpenses = shift.expenses || [];
     shiftExpenses.forEach(exp => {
@@ -188,7 +220,7 @@ export const calculateStatistics = (shifts, settings) => {
         });
       }
     });
-    
+
     // Earnings (hourly or piece-work)
     if (isHourly) {
       stats.totalEarnings += calculateEarnings(shift.totalMinutes, settings, shift.date);
@@ -196,9 +228,13 @@ export const calculateStatistics = (shifts, settings) => {
       stats.totalEarnings += shift.earnedAmount || 0;
     }
   });
-  
+
   // Calculate net income
-  stats.netIncome = stats.totalEarnings + stats.totalTipsCash + stats.totalTipsCard + stats.totalBonus - stats.totalExpenses;
+  stats.netIncome = stats.totalEarnings + stats.totalTipsCash + stats.totalTipsCard + stats.totalOtherIncome - stats.totalExpenses;
+
+  // Backward-compat aliases for legacy consumers (tests, exports)
+  stats.totalBonus = stats.totalOtherIncome;
+  stats.bonusComments = stats.incomeComments;
   
   // Calculate averages
   stats.avgMinutesPerShift = Math.round(stats.totalMinutes / stats.shiftsCount);

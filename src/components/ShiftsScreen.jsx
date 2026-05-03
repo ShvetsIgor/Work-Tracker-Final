@@ -6,7 +6,7 @@ import { useApp } from '@/context/AppContext';
 import { Button, EmptyState } from '@/components/ui';
 import Modal from '@/components/ui/Modal';
 import { formatDate, isToday, isYesterday } from '@/utils/dateUtils';
-import { calculateShiftBaseEarnings, calculateNetTipsCard, calculateTotalExpenses, calculateShiftNetIncome, calculateStatistics } from '@/utils/calculations';
+import { calculateShiftBaseEarnings, calculateNetTipsCard, calculateTotalExpenses, calculateShiftNetIncome, calculateStatistics, calculateOtherIncomeTotal, getOtherIncomeItems } from '@/utils/calculations';
 import { formatCurrency, formatTime } from '@/utils/formatters';
 
 const ShiftModal = lazy(() => import('@/components/ShiftModal'));
@@ -41,7 +41,7 @@ const ShiftRow = ({ shift, onExpand, isExpanded, settings, t, isLast }) => {
   const isDark = settings.theme !== 'light';
   const netTipsCard = calculateNetTipsCard(shift.tipsCard, settings.tipsCardPercent);
   const totalExpenses = calculateTotalExpenses(shift.expenses);
-  const totalEarnings = baseEarnings + (shift.tipsCash || 0) + netTipsCard + (shift.bonus || 0);
+  const totalEarnings = baseEarnings + (shift.tipsCash || 0) + netTipsCard + calculateOtherIncomeTotal(shift);
 
   const shiftDate = parseISO(shift.date);
   const dayNumber = shiftDate.getDate();
@@ -156,8 +156,14 @@ const ShiftDetails = ({ shift, onEdit, onDelete, settings, t }) => {
         : null
     });
   }
-  if (enabledFields.bonus && shift.bonus > 0) {
-    breakdown.push({ label: t.bonus, value: shift.bonus, tone: 'positive' });
+  if (enabledFields.bonus) {
+    getOtherIncomeItems(shift).forEach((item) => {
+      breakdown.push({
+        label: item.comment?.trim() || (t.otherIncome || 'Доход'),
+        value: item.amount || 0,
+        tone: 'positive'
+      });
+    });
   }
   if (enabledFields.expenses && totalExpenses > 0) {
     breakdown.push({ label: t.expenses, value: totalExpenses, tone: 'negative' });

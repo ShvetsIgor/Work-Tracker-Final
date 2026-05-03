@@ -70,9 +70,13 @@ export const translations = {
     addExpense: 'Добавить затрату',
     noExpenses: 'Нет затрат',
     
-    // Bonus
+    // Other income (legacy keys: bonus / bonusComment)
     bonus: 'Бонусы',
     bonusComment: 'Комментарий к бонусу',
+    otherIncome: 'Другие доходы',
+    addIncome: 'Добавить доход',
+    incomeDescription: 'Описание',
+    noOtherIncome: 'Нет дополнительных доходов',
     
     // Work type
     workType: 'Тип работы',
@@ -112,7 +116,7 @@ export const translations = {
     fieldTipsCash: 'Чаевые (нал)',
     fieldTipsCard: 'Чаевые (б/н)',
     fieldExpenses: 'Затраты',
-    fieldBonus: 'Бонусы',
+    fieldBonus: 'Другие доходы',
     fieldTotalHours: 'Всего часов',
     fieldTotalEarnings: 'Заработок',
     fieldAvgPerHour: 'Средний/час',
@@ -141,6 +145,7 @@ export const translations = {
     totalMileageStats: 'Пробег',
     totalExpenses: 'Затраты',
     totalBonus: 'Бонусы',
+    totalOtherIncome: 'Доп. доходы',
     netIncome: 'Чистый доход',
     grossIncome: 'Валовый доход',
     baseEarnings: 'За часы',
@@ -150,6 +155,7 @@ export const translations = {
     expenseDetails: 'Детализация затрат',
     deduction: 'Вычет',
     bonusComments: 'Комментарии к бонусам',
+    incomeComments: 'Комментарии к доходам',
     expenseComments: 'Комментарии к затратам',
     selectColumns: 'Выбрать колонки',
     earnings: 'Доход',
@@ -255,9 +261,13 @@ export const translations = {
     addExpense: 'Add Expense',
     noExpenses: 'No expenses',
     
-    // Bonus
+    // Other income (legacy keys: bonus / bonusComment)
     bonus: 'Bonus',
     bonusComment: 'Bonus Comment',
+    otherIncome: 'Other Income',
+    addIncome: 'Add Income',
+    incomeDescription: 'Description',
+    noOtherIncome: 'No additional income',
     
     // Work type
     workType: 'Work Type',
@@ -297,7 +307,7 @@ export const translations = {
     fieldTipsCash: 'Tips (cash)',
     fieldTipsCard: 'Tips (card)',
     fieldExpenses: 'Expenses',
-    fieldBonus: 'Bonus',
+    fieldBonus: 'Other Income',
     fieldTotalHours: 'Total Hours',
     fieldTotalEarnings: 'Earnings',
     fieldAvgPerHour: 'Avg/Hour',
@@ -324,6 +334,7 @@ export const translations = {
     totalMileageStats: 'Total Mileage',
     totalExpenses: 'Total Expenses',
     totalBonus: 'Total Bonus',
+    totalOtherIncome: 'Other Income',
     netIncome: 'Net Income',
     grossIncome: 'Gross Income',
     shiftsCount: 'Shifts Count',
@@ -333,6 +344,7 @@ export const translations = {
     showShiftsList: 'Shifts List',
     hideShiftsList: 'Hide Shifts',
     bonusComments: 'Bonus Comments',
+    incomeComments: 'Income Comments',
     expenseComments: 'Expense Comments',
     selectColumns: 'Select Columns',
     earnings: 'Earnings',
@@ -438,9 +450,13 @@ export const translations = {
     addExpense: 'הוסף הוצאה',
     noExpenses: 'אין הוצאות',
     
-    // Bonus
+    // Other income (legacy keys: bonus / bonusComment)
     bonus: 'בונוס',
     bonusComment: 'הערה לבונוס',
+    otherIncome: 'הכנסות נוספות',
+    addIncome: 'הוסף הכנסה',
+    incomeDescription: 'תיאור',
+    noOtherIncome: 'אין הכנסות נוספות',
     
     // Work type
     workType: 'סוג עבודה',
@@ -480,7 +496,7 @@ export const translations = {
     fieldTipsCash: 'טיפים (מזומן)',
     fieldTipsCard: 'טיפים (אשראי)',
     fieldExpenses: 'הוצאות',
-    fieldBonus: 'בונוס',
+    fieldBonus: 'הכנסות נוספות',
     fieldTotalHours: 'סה"כ שעות',
     fieldTotalEarnings: 'הכנסות',
     fieldAvgPerHour: 'ממוצע/שעה',
@@ -507,6 +523,7 @@ export const translations = {
     totalMileageStats: 'סה"כ קילומטרים',
     totalExpenses: 'סה"כ הוצאות',
     totalBonus: 'סה"כ בונוסים',
+    totalOtherIncome: 'הכנסות נוספות',
     netIncome: 'הכנסה נטו',
     grossIncome: 'הכנסה ברוטו',
     shiftsCount: 'מספר משמרות',
@@ -516,6 +533,7 @@ export const translations = {
     showShiftsList: 'רשימת משמרות',
     hideShiftsList: 'הסתר משמרות',
     bonusComments: 'הערות לבונוסים',
+    incomeComments: 'הערות להכנסות',
     expenseComments: 'הערות להוצאות',
     selectColumns: 'בחר עמודות',
     earnings: 'הכנסות',

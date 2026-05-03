@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Car, Banknote, CreditCard, Receipt, Package, Clock } from 'lucide-react';
+import { Plus, Trash2, Car, Banknote, CreditCard, Receipt, Package, Clock, Gift } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import Modal from '@/components/ui/Modal';
 import { Button, Input, Select, Toggle, Card } from '@/components/ui';
 import { getEffectiveDate } from '@/utils/dateUtils';
-import { calculateEarnings, calculateNetTipsCard } from '@/utils/calculations';
+import { calculateEarnings, calculateNetTipsCard, getOtherIncomeItems } from '@/utils/calculations';
 import { formatCurrency, formatTime } from '@/utils/formatters';
 import { expenseTypes } from '@/config/defaults';
 
@@ -40,6 +40,11 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
   const [newExpenseType, setNewExpenseType] = useState('fuel');
   const [newExpenseAmount, setNewExpenseAmount] = useState('');
   const [newExpenseComment, setNewExpenseComment] = useState('');
+
+  // Other income (replaces single bonus + bonusComment)
+  const [otherIncomeItems, setOtherIncomeItems] = useState([]);
+  const [newIncomeAmount, setNewIncomeAmount] = useState('');
+  const [newIncomeComment, setNewIncomeComment] = useState('');
 
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
@@ -118,6 +123,11 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
           message = getErrorText('errorExpenseAmountPositive', 'Expense amount must be greater than 0');
         }
         break;
+      case 'newIncomeAmount':
+        if (!numState.empty && (numState.invalid || numState.value <= 0)) {
+          message = getErrorText('errorIncomeAmountPositive', 'Amount must be greater than 0');
+        }
+        break;
       default:
         break;
     }
@@ -185,6 +195,7 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
       setTipsCash(toStr(shift.tipsCash));
       setTipsCard(toStr(shift.tipsCard));
       setExpenses(shift.expenses || []);
+      setOtherIncomeItems(getOtherIncomeItems(shift));
     } else {
       resetForm();
     }
@@ -210,6 +221,9 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
     setNewExpenseType('fuel');
     setNewExpenseAmount('');
     setNewExpenseComment('');
+    setOtherIncomeItems([]);
+    setNewIncomeAmount('');
+    setNewIncomeComment('');
   };
 
   const calculatedMileage = parseFloat(mileage) || 0;
@@ -220,11 +234,12 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
     ? calculateEarnings(previewTotalMinutes, settings, date)
     : (parseFloat(earnedAmount) || 0);
   const previewExpenses = expenses.reduce((sum, expense) => sum + (expense.amount || 0), 0);
+  const previewOtherIncome = otherIncomeItems.reduce((sum, item) => sum + (item.amount || 0), 0);
   const previewNetIncome =
     previewBaseEarnings +
     (parseFloat(tipsCash) || 0) +
     netTipsCard +
-    (shift?.bonus || 0) -
+    previewOtherIncome -
     previewExpenses;
 
   const workTimeHasError = Boolean(errors.totalMinutes || errors.hours || errors.minutes || errors.startTime || errors.endTime || errors.breakMinutes);
@@ -232,6 +247,7 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
   const mileageHasError = Boolean(errors.mileage);
   const tipsHasError = Boolean(errors.tipsCash || errors.tipsCard);
   const expensesHasError = Boolean(errors.newExpenseAmount);
+  const otherIncomeHasError = Boolean(errors.newIncomeAmount);
 
   const addExpense = () => {
     const amountState = parseNumber(newExpenseAmount);
@@ -261,6 +277,35 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
 
   const removeExpense = (id) => {
     setExpenses(expenses.filter(e => e.id !== id));
+  };
+
+  const addIncomeItem = () => {
+    const amountState = parseNumber(newIncomeAmount);
+
+    if (amountState.invalid || amountState.value <= 0) {
+      setErrors(prev => ({
+        ...prev,
+        newIncomeAmount: getErrorText('errorIncomeAmountPositive', 'Amount must be greater than 0')
+      }));
+      return;
+    }
+
+    setOtherIncomeItems([...otherIncomeItems, {
+      id: Date.now().toString(),
+      amount: amountState.value,
+      comment: newIncomeComment.trim()
+    }]);
+    setNewIncomeAmount('');
+    setNewIncomeComment('');
+    setErrors(prev => ({
+      ...prev,
+      newIncomeAmount: undefined,
+      general: undefined
+    }));
+  };
+
+  const removeIncomeItem = (id) => {
+    setOtherIncomeItems(otherIncomeItems.filter(i => i.id !== id));
   };
 
   const handleSave = async () => {
@@ -355,8 +400,11 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
       tipsCash: tipsCashState.value,
       tipsCard: tipsCardState.value,
       expenses,
-      bonus: shift?.bonus || 0,
-      bonusComment: shift?.bonusComment || ''
+      otherIncome: otherIncomeItems,
+      // Clear legacy single-bonus fields once a shift gets persisted via the
+      // new flow so totals never double-count.
+      bonus: 0,
+      bonusComment: ''
     };
 
     try {
@@ -438,6 +486,7 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
             { k: 'time', l: t.workTime || 'Время' },
             { k: 'mileage', l: t.mileage || 'Пробег' },
             { k: 'tips', l: t.tips || 'Чаевые' },
+            ...(enabledFields.bonus ? [{ k: 'income', l: t.otherIncome || 'Доходы' }] : []),
             { k: 'expenses', l: t.expenses || 'Расходы' }
           ].map((s, i) => (
             <button
@@ -737,6 +786,87 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
                     )}
                   </div>
                 )}
+              </div>
+            </Card>
+          )}
+
+          {/* Other income */}
+          {enabledFields.bonus && (
+            <Card id="ss-income" className={`shift-form-section p-3.5 ${getSectionClassNames(isDark, otherIncomeHasError)}`}>
+              <div className="mb-3 flex items-center gap-2">
+                <Gift className="w-4 h-4 text-amber-400" />
+                <span className="theme-text-muted text-[11px] uppercase tracking-[0.14em] font-semibold">{t.otherIncome || 'Другие доходы'}</span>
+                {previewOtherIncome > 0 && (
+                  <span className={`ml-auto rounded-full px-2.5 py-1 text-xs font-medium ${isDark ? 'bg-slate-800/75 text-slate-200' : 'bg-white/85 text-slate-700'}`}>
+                    {formatCurrency(previewOtherIncome, settings.currency)}
+                  </span>
+                )}
+              </div>
+
+              {otherIncomeItems.length > 0 && (
+                <div className="mb-3 space-y-1.5">
+                  {otherIncomeItems.map((item) => (
+                    <div
+                      key={item.id}
+                      className={`flex items-center justify-between rounded-lg p-2 ${
+                        isDark ? 'bg-slate-600/50' : 'bg-slate-200/50'
+                      }`}
+                    >
+                      <div className="min-w-0 flex items-center gap-2">
+                        <Gift className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                        <span className="theme-text-secondary truncate">
+                          {item.comment || (t.otherIncome || 'Доход')}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-amber-400 font-medium tabular-nums">
+                          +{formatCurrency(item.amount, settings.currency)}
+                        </span>
+                        <button
+                          onClick={() => removeIncomeItem(item.id)}
+                          className="text-red-400 hover:text-red-300"
+                          aria-label={t.delete}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="grid grid-cols-[104px,minmax(0,1fr),44px] items-end gap-2">
+                <Input
+                  type="number"
+                  value={newIncomeAmount}
+                  onChange={(e) => {
+                    setNewIncomeAmount(e.target.value);
+                    validateFieldOnChange('newIncomeAmount', e.target.value);
+                  }}
+                  placeholder="0"
+                  label={t.amount}
+                  error={errors.newIncomeAmount}
+                  hideErrorText
+                  floatingError={activeErrorField === 'newIncomeAmount'}
+                  errorClassName={activeErrorField === 'newIncomeAmount' ? 'field-shake' : ''}
+                />
+                <Input
+                  type="text"
+                  value={newIncomeComment}
+                  onChange={(e) => setNewIncomeComment(e.target.value)}
+                  placeholder={t.incomeDescription || t.comment}
+                  label={t.incomeDescription || t.comment}
+                />
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={addIncomeItem}
+                  icon={Plus}
+                  className="h-[42px] w-11 self-end px-0"
+                  disabled={!newIncomeAmount}
+                  title={t.addIncome}
+                  aria-label={t.addIncome}
+                />
               </div>
             </Card>
           )}
