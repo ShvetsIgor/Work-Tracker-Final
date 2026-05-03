@@ -24,6 +24,10 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
   const [hasBreak, setHasBreak] = useState(false);
   const [breakMinutes, setBreakMinutes] = useState('');
 
+  // Committed time intervals (above the editable draft inputs).
+  // Each item: { id, mode, totalMinutes, hours?, minutes?, startTime?, endTime?, breakMinutes? }
+  const [timeSegments, setTimeSegments] = useState([]);
+
   // Piece-work fields
   const [ordersCount, setOrdersCount] = useState('');
   const [earnedAmount, setEarnedAmount] = useState('');
@@ -167,12 +171,59 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
     };
   };
 
-  const getTotalMinutes = () => {
+  const getDraftMinutes = () => {
     if (timeMode === 'range') {
       const { hours: h, minutes: m } = calculateTimeFromRange();
       return h * 60 + m;
     }
     return (parseInt(hours) || 0) * 60 + (parseInt(minutes) || 0);
+  };
+
+  const segmentsTotalMinutes = timeSegments.reduce((sum, s) => sum + (s.totalMinutes || 0), 0);
+
+  const getTotalMinutes = () => segmentsTotalMinutes + getDraftMinutes();
+
+  const commitTimeSegment = () => {
+    const draftMinutes = getDraftMinutes();
+    if (draftMinutes <= 0) return;
+
+    const baseSegment = {
+      id: Date.now().toString(),
+      mode: timeMode,
+      totalMinutes: draftMinutes
+    };
+
+    const segment = timeMode === 'range'
+      ? {
+          ...baseSegment,
+          startTime,
+          endTime,
+          hasBreak,
+          breakMinutes: parseInt(breakMinutes) || 0
+        }
+      : {
+          ...baseSegment,
+          hours: parseInt(hours) || 0,
+          minutes: parseInt(minutes) || 0
+        };
+
+    setTimeSegments(prev => [...prev, segment]);
+
+    // Reset draft so the next interval can be entered
+    if (timeMode === 'range') {
+      setStartTime('');
+      setEndTime('');
+      setHasBreak(false);
+      setBreakMinutes('');
+    } else {
+      setHours('');
+      setMinutes('');
+    }
+    clearError('totalMinutes');
+  };
+
+  const removeTimeSegment = (id) => {
+    setTimeSegments(prev => prev.filter(s => s.id !== id));
   };
 
   useEffect(() => {
@@ -196,6 +247,25 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
       setTipsCard(toStr(shift.tipsCard));
       setExpenses(shift.expenses || []);
       setOtherIncomeItems(getOtherIncomeItems(shift));
+      // Multi-segment shifts persist all-but-last as committed chips and put
+      // the last segment back into the editable draft so editing feels
+      // natural even on legacy single-segment shifts.
+      const persistedSegments = Array.isArray(shift.timeSegments) ? shift.timeSegments : [];
+      if (persistedSegments.length > 1) {
+        setTimeSegments(persistedSegments.slice(0, -1));
+        const draft = persistedSegments[persistedSegments.length - 1];
+        if (draft.mode === 'range') {
+          setStartTime(draft.startTime || '');
+          setEndTime(draft.endTime || '');
+          setHasBreak(!!draft.hasBreak);
+          setBreakMinutes(toStr(draft.breakMinutes));
+        } else {
+          setHours(toStr(draft.hours));
+          setMinutes(toStr(draft.minutes));
+        }
+      } else {
+        setTimeSegments([]);
+      }
     } else {
       resetForm();
     }
@@ -224,6 +294,7 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
     setOtherIncomeItems([]);
     setNewIncomeAmount('');
     setNewIncomeComment('');
+    setTimeSegments([]);
   };
 
   const calculatedMileage = parseFloat(mileage) || 0;
@@ -320,30 +391,38 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
     const tipsCashState = parseNumber(tipsCash);
     const tipsCardState = parseNumber(tipsCard);
     const calculatedTime = timeMode === 'range' ? calculateTimeFromRange() : null;
-    const totalMinutes = timeMode === 'range'
+    const draftMinutes = timeMode === 'range'
       ? calculatedTime.hours * 60 + calculatedTime.minutes
       : (hoursState.value * 60 + minutesState.value);
+    const draftHasInput = timeMode === 'range'
+      ? Boolean(startTime || endTime)
+      : (hours !== '' || minutes !== '');
+    const totalMinutes = segmentsTotalMinutes + draftMinutes;
 
     if (!dateValue) {
       nextErrors.date = getErrorText('errorShiftDateRequired', 'Date is required');
     }
 
-    if (timeMode === 'manual') {
-      if (hoursState.invalid || hoursState.value < 0) {
-        nextErrors.hours = getErrorText('errorHoursInvalid', 'Hours must be 0 or greater');
-      }
-      if (minutesState.invalid || minutesState.value < 0 || minutesState.value > 59) {
-        nextErrors.minutes = getErrorText('errorMinutesInvalid', 'Minutes must be between 0 and 59');
-      }
-    } else {
-      if (!startTime) {
-        nextErrors.startTime = getErrorText('errorStartTimeRequired', 'Start time is required');
-      }
-      if (!endTime) {
-        nextErrors.endTime = getErrorText('errorEndTimeRequired', 'End time is required');
-      }
-      if (breakState.invalid || breakState.value < 0) {
-        nextErrors.breakMinutes = getErrorText('errorBreakInvalid', 'Break must be 0 or greater');
+    // Only validate draft inputs if user actually filled them, OR if there
+    // are no committed segments yet (need at least one source of time).
+    if (draftHasInput || timeSegments.length === 0) {
+      if (timeMode === 'manual') {
+        if (hoursState.invalid || hoursState.value < 0) {
+          nextErrors.hours = getErrorText('errorHoursInvalid', 'Hours must be 0 or greater');
+        }
+        if (minutesState.invalid || minutesState.value < 0 || minutesState.value > 59) {
+          nextErrors.minutes = getErrorText('errorMinutesInvalid', 'Minutes must be between 0 and 59');
+        }
+      } else {
+        if (timeSegments.length === 0 && !startTime) {
+          nextErrors.startTime = getErrorText('errorStartTimeRequired', 'Start time is required');
+        }
+        if (timeSegments.length === 0 && !endTime) {
+          nextErrors.endTime = getErrorText('errorEndTimeRequired', 'End time is required');
+        }
+        if (breakState.invalid || breakState.value < 0) {
+          nextErrors.breakMinutes = getErrorText('errorBreakInvalid', 'Break must be 0 or greater');
+        }
       }
     }
 
@@ -381,16 +460,50 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
 
     setSaving(true);
 
+    // Build the final segments list: all committed chips + the current draft
+    // (only when the draft contains time). For single-segment shifts the
+    // array still holds exactly one item, so legacy fields stay aligned.
+    const allSegments = [...timeSegments];
+    if (draftMinutes > 0) {
+      const draftSegment = timeMode === 'range'
+        ? {
+            id: `draft-${Date.now()}`,
+            mode: 'range',
+            totalMinutes: draftMinutes,
+            startTime,
+            endTime,
+            hasBreak,
+            breakMinutes: breakState.value
+          }
+        : {
+            id: `draft-${Date.now()}`,
+            mode: 'manual',
+            totalMinutes: draftMinutes,
+            hours: hoursState.value,
+            minutes: minutesState.value
+          };
+      allSegments.push(draftSegment);
+    }
+
+    // Backward-compat: keep legacy top-level time fields populated from the
+    // first segment so older readers (Excel export, etc.) keep working.
+    const firstSegment = allSegments[0] || {};
+
     const shiftData = {
       date: dateValue,
       timeMode,
-      startTime,
-      endTime,
-      hours: timeMode === 'range' ? calculatedTime.hours : hoursState.value,
-      minutes: timeMode === 'range' ? calculatedTime.minutes : minutesState.value,
+      startTime: firstSegment.startTime || startTime,
+      endTime: firstSegment.endTime || endTime,
+      hours: firstSegment.mode === 'range'
+        ? Math.floor((firstSegment.totalMinutes || 0) / 60)
+        : (firstSegment.hours ?? hoursState.value),
+      minutes: firstSegment.mode === 'range'
+        ? (firstSegment.totalMinutes || 0) % 60
+        : (firstSegment.minutes ?? minutesState.value),
       totalMinutes,
-      hasBreak,
-      breakMinutes: breakState.value,
+      hasBreak: firstSegment.hasBreak ?? hasBreak,
+      breakMinutes: firstSegment.breakMinutes ?? breakState.value,
+      timeSegments: allSegments,
       ordersCount: ordersState.value,
       earnedAmount: earnedState.value,
       mileageMode: 'manual',
@@ -540,21 +653,65 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
               <Button
                 variant={timeMode === 'manual' ? 'primary' : 'secondary'}
                 size="sm"
-                onClick={() => setTimeMode('manual')}
+                onClick={() => {
+                  if (timeMode !== 'manual') setTimeSegments([]);
+                  setTimeMode('manual');
+                }}
               >
                 {t.manualTime || 'Вручную'}
               </Button>
               <Button
                 variant={timeMode === 'range' ? 'primary' : 'secondary'}
                 size="sm"
-                onClick={() => setTimeMode('range')}
+                onClick={() => {
+                  if (timeMode !== 'range') setTimeSegments([]);
+                  setTimeMode('range');
+                }}
               >
                 {t.timeRange || 'По времени'}
               </Button>
             </div>
 
+            {timeSegments.length > 0 && (
+              <div className="mb-3 space-y-1.5">
+                {timeSegments.map((seg, idx) => {
+                  const label = seg.mode === 'range'
+                    ? `${seg.startTime || '—'} — ${seg.endTime || '—'}`
+                    : `${seg.hours || 0}${t.hoursShort || 'ч'} ${String(seg.minutes || 0).padStart(2, '0')}${t.minutesShort || 'м'}`;
+                  return (
+                    <div
+                      key={seg.id}
+                      className={`flex items-center justify-between rounded-lg p-2 ${
+                        isDark ? 'bg-slate-600/50' : 'bg-slate-200/50'
+                      }`}
+                    >
+                      <div className="min-w-0 flex items-center gap-2">
+                        <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold ${isDark ? 'bg-slate-500/60 text-slate-100' : 'bg-white text-slate-700'}`}>
+                          {idx + 1}
+                        </span>
+                        <span className="theme-text-secondary truncate">{label}</span>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="theme-text-primary font-medium tabular-nums">
+                          {formatTime(seg.totalMinutes || 0)}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => removeTimeSegment(seg.id)}
+                          className="text-red-400 hover:text-red-300"
+                          aria-label={t.delete}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
             {timeMode === 'manual' ? (
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_44px] items-end gap-2.5">
                 <Input
                   type="number"
                   value={hours}
@@ -588,6 +745,16 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
                   hideErrorText
                   floatingError={activeErrorField === 'minutes'}
                   errorClassName={activeErrorField === 'minutes' ? 'field-shake' : ''}
+                />
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={commitTimeSegment}
+                  icon={Plus}
+                  className="h-[42px] w-11 self-end px-0"
+                  disabled={getDraftMinutes() <= 0}
+                  title={t.addInterval || 'Добавить промежуток'}
+                  aria-label={t.addInterval || 'Добавить промежуток'}
                 />
               </div>
             ) : (
@@ -669,7 +836,26 @@ const ShiftModal = ({ isOpen, onClose, shift = null }) => {
                     <span className="text-purple-400 font-bold">{displayCalculatedTime()}</span>
                   </div>
                 )}
+
+                <div className="mt-2 flex justify-end">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={commitTimeSegment}
+                    icon={Plus}
+                    disabled={getDraftMinutes() <= 0}
+                  >
+                    {t.addInterval || 'Добавить промежуток'}
+                  </Button>
+                </div>
               </>
+            )}
+
+            {timeSegments.length > 0 && (
+              <div className={`mt-3 rounded-lg border p-2 text-center text-xs ${isDark ? 'border-slate-700/60 bg-slate-800/55' : 'border-slate-200 bg-white/80'}`}>
+                <span className="theme-text-muted">{t.totalTime || 'Итого'}: </span>
+                <span className="theme-text-primary font-semibold tabular-nums">{formatTime(getTotalMinutes())}</span>
+              </div>
             )}
           </Card>
 
