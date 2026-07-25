@@ -17,6 +17,7 @@ A mobile-first shift and income tracker for hourly and piece-work jobs with Fire
 - Record cash tips and card tips with deduction support
 - Support both hourly pay and piece-work income
 - Keep comments and extra details per shift
+- Hourly rate is locked per shift at creation time — changing the rate in settings does not affect historical data
 
 ### Statistics / Статистика
 - Filter by today, this week, this month, or a custom period
@@ -204,6 +205,8 @@ const CACHE_NAME = 'shifts-v22';
 - Overtime rules are tailored for hourly work and can be configured in settings
 - Card tips can be shown as net values after employer deduction
 - All user data is stored under the authenticated user's private Firestore path
+- Hourly rate is saved per shift at creation time; existing shifts without a stored rate fall back to the current settings rate
+- The app respects `prefers-reduced-motion` — all animations are disabled for users who opt out of motion
 
 ## Security / Безопасность
 
