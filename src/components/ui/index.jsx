@@ -15,7 +15,7 @@ export const Button = ({
 }) => {
   const variants = {
     primary: 'text-[var(--accent-text)]',
-    secondary: 'theme-bg-input theme-text-primary theme-border hover:border-white/10 hover:bg-[#2f3137]',
+    secondary: 'theme-bg-input theme-text-primary theme-border hover:border-white/10 theme-secondary-hover',
     danger: 'bg-[#b4877f]/14 hover:bg-[#b4877f]/20 text-[#e2c3bc] border border-[#b4877f]/16',
     ghost: 'bg-transparent hover:bg-white/[0.04] theme-text-muted hover:theme-text-primary',
     outline: 'bg-transparent theme-border theme-text-secondary hover:border-white/10 hover:text-[#f4efe8]'
@@ -39,8 +39,8 @@ export const Button = ({
         ${variants[variant]}
         ${sizes[size]}
         ${fullWidth ? 'w-full' : ''}
-        font-semibold rounded-lg transition-all duration-200 
-        disabled:opacity-50 disabled:cursor-not-allowed
+        font-semibold rounded-lg transition-all duration-200
+        cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed
         flex items-center justify-center gap-2
         active:scale-[0.98]
         ${className}

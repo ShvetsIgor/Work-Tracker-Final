@@ -25,7 +25,7 @@ const Navigation = ({ activeTab, setActiveTab }) => {
         >
           <div className="mb-6 px-2 pt-2">
             <div className="theme-text-muted text-[11px] uppercase tracking-[0.18em]">
-              Workspace
+              {t.workspace}
             </div>
             <div className="theme-text-primary mt-2 text-xl font-bold">
               {t.appName}

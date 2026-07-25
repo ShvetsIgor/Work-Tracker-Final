@@ -2,7 +2,8 @@ export const translations = {
   ru: {
     // App
     appName: 'Shifts',
-    
+    workspace: 'Рабочее место',
+
     // Auth
     login: 'Вход',
     register: 'Регистрация',
@@ -65,6 +66,7 @@ export const translations = {
     parking: 'Парковка',
     food: 'Еда',
     other: 'Другое',
+    additional: 'Дополнительно',
     amount: 'Сумма',
     comment: 'Комментарий',
     addExpense: 'Добавить затрату',
@@ -187,7 +189,8 @@ export const translations = {
   en: {
     // App
     appName: 'Shifts',
-    
+    workspace: 'Workspace',
+
     // Auth
     login: 'Login',
     register: 'Register',
@@ -250,6 +253,7 @@ export const translations = {
     parking: 'Parking',
     food: 'Food',
     other: 'Other',
+    additional: 'Additional',
     amount: 'Amount',
     comment: 'Comment',
     addExpense: 'Add Expense',
@@ -370,7 +374,8 @@ export const translations = {
   he: {
     // App
     appName: 'Shifts',
-    
+    workspace: 'סביבת עבודה',
+
     // Auth
     login: 'התחברות',
     register: 'הרשמה',
@@ -433,6 +438,7 @@ export const translations = {
     parking: 'חניה',
     food: 'אוכל',
     other: 'אחר',
+    additional: 'נוסף',
     amount: 'סכום',
     comment: 'הערה',
     addExpense: 'הוסף הוצאה',

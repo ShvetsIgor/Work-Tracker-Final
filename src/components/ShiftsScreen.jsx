@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useState, useMemo } from 'react';
+import React, { lazy, Suspense, useState, useMemo, memo } from 'react';
 import { Plus, Clock, Car, Banknote, CreditCard, Gift, Receipt, Trash2, Edit3, ClipboardList, Package, DollarSign, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { Button, Card, EmptyState } from '@/components/ui';
@@ -10,7 +10,7 @@ import { formatCurrency, formatTime } from '@/utils/formatters';
 const ShiftModal = lazy(() => import('@/components/ShiftModal'));
 
 // Compact shift row
-const ShiftRow = ({ shift, onExpand, isExpanded, settings, t }) => {
+const ShiftRow = memo(({ shift, onExpand, isExpanded, settings, t }) => {
   const baseEarnings = calculateShiftBaseEarnings(shift, settings);
   const isDark = settings.theme !== 'light';
   const isHourly = settings.workType !== 'pieceWork';
@@ -51,7 +51,7 @@ const ShiftRow = ({ shift, onExpand, isExpanded, settings, t }) => {
       </div>
     </div>
   );
-};
+});
 
 // Expanded shift details
 const ShiftDetails = ({ shift, onEdit, onDelete, settings, t }) => {
@@ -153,7 +153,7 @@ const ShiftDetails = ({ shift, onEdit, onDelete, settings, t }) => {
       <div className={`mb-2.5 rounded-lg border p-2.5 ${isDark ? 'border-white/[0.05] bg-[#232428]' : 'border-slate-200 bg-white/80'}`}>
         <div className="mb-2 flex items-center justify-between">
           <span className="theme-text-primary text-sm font-bold">{t.netIncome}</span>
-          <span className="text-[#d8cec1] text-xl font-bold">{formatCurrency(netIncome, settings.currency)}</span>
+          <span className="theme-income-text text-xl font-bold">{formatCurrency(netIncome, settings.currency)}</span>
         </div>
         <div className="space-y-2">
           {breakdown.map((item, index) => {
@@ -186,9 +186,7 @@ const ShiftDetails = ({ shift, onEdit, onDelete, settings, t }) => {
       {summaryStats.length > 0 && (
         <div className={`mb-2.5 rounded-lg border p-2.5 ${isDark ? 'border-white/[0.05] bg-[#202125]' : 'border-slate-200 bg-white/70'}`}>
             <div className="mb-2 text-sm font-bold theme-text-primary">
-              {settings.language === 'ru' && 'Дополнительно'}
-              {settings.language === 'en' && 'Additional'}
-              {settings.language === 'he' && 'נוסף'}
+              {t.additional}
             </div>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {summaryStats.map((stat, index) => {

@@ -308,6 +308,21 @@ input[type="time"] {
   background: var(--bg-card-strong);
 }
 
+.theme-secondary-hover:hover {
+  background: var(--control-hover);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-slide-up,
+  .animate-pulse-glow {
+    animation: none;
+  }
+  * {
+    transition-duration: 0.01ms !important;
+  }
+}
+
 .theme-accent-text {
   color: var(--accent-secondary);
 }

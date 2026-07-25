@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { 
   onAuthStateChanged, 
   signInWithEmailAndPassword, 
@@ -54,8 +54,8 @@ export const AppProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   
   // Derived state
-  const t = getTranslation(settings.language);
-  const rtl = isRTL(settings.language);
+  const t = useMemo(() => getTranslation(settings.language), [settings.language]);
+  const rtl = useMemo(() => isRTL(settings.language), [settings.language]);
 
   const cleanupShiftsSubscription = useCallback(() => {
     if (shiftsUnsubscribeRef.current) {
@@ -381,7 +381,7 @@ export const AppProvider = ({ children }) => {
   };
   
   // Context value
-  const value = {
+  const value = useMemo(() => ({
     // Auth
     user,
     authLoading,
@@ -393,27 +393,28 @@ export const AppProvider = ({ children }) => {
     logout,
     resetPassword,
     updateProfile,
-    
+
     // Settings
     settings,
     updateSettings,
     settingsSaving,
     settingsSaveError,
     settingsLastSavedAt,
-    
+
     // Shifts
     shifts,
     addShift,
     updateShift,
     deleteShift,
-    
+
     // Loading
     loading,
-    
+
     // Translations
     t,
     rtl
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [user, authLoading, authError, settings, updateSettings, settingsSaving, settingsSaveError, settingsLastSavedAt, shifts, loading, t, rtl]);
   
   return (
     <AppContext.Provider value={value}>

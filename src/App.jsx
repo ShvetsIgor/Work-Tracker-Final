@@ -110,7 +110,7 @@ const App = () => {
   // Main app
   return (
     <div 
-      className={`min-h-screen transition-colors duration-300 ${
+      className={`min-h-dvh transition-colors duration-300 ${
         isDark 
           ? 'bg-[radial-gradient(circle_at_top_left,var(--glow-one),transparent_20%),radial-gradient(circle_at_bottom_right,var(--glow-two),transparent_24%),linear-gradient(145deg,var(--bg-primary)_0%,var(--bg-secondary)_50%,var(--bg-end)_100%)]'
           : 'bg-[radial-gradient(circle_at_top_left,var(--glow-one),transparent_24%),radial-gradient(circle_at_bottom_right,var(--glow-two),transparent_26%),linear-gradient(145deg,var(--bg-primary)_0%,var(--bg-secondary)_48%,var(--bg-end)_100%)]'
@@ -120,15 +120,9 @@ const App = () => {
     >
       {/* Background decorations */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className={`absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl ${
-          isDark ? 'bg-[var(--decor-one)]' : 'bg-[var(--decor-one)]'
-        }`} />
-        <div className={`absolute bottom-1/4 right-0 w-96 h-96 rounded-full blur-3xl ${
-          isDark ? 'bg-[var(--decor-two)]' : 'bg-[var(--decor-two)]'
-        }`} />
-        <div className={`absolute inset-x-0 top-0 h-48 ${
-          isDark ? 'bg-[linear-gradient(to_bottom,var(--top-veil),transparent)]' : 'bg-[linear-gradient(to_bottom,var(--top-veil),transparent)]'
-        }`} />
+        <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl bg-[var(--decor-one)]" />
+        <div className="absolute bottom-1/4 right-0 w-96 h-96 rounded-full blur-3xl bg-[var(--decor-two)]" />
+        <div className="absolute inset-x-0 top-0 h-48 bg-[linear-gradient(to_bottom,var(--top-veil),transparent)]" />
       </div>
       
       <Header onOpenAccount={() => setActiveTab('account')} />
