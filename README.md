@@ -1,69 +1,69 @@
-# 📊 Shift Manager / Менеджер Смен
+# Shift Manager / Менеджер Смен
 
-A comprehensive shift management application for hourly workers with expense tracking, tips management, and detailed statistics.
+A mobile-first shift and income tracker for hourly and piece-work jobs with Firebase auth, expense tracking, tips, and detailed statistics.
 
-Комплексное приложение для управления сменами почасовых работников с отслеживанием затрат, чаевых и детальной статистикой.
+Мобильное приложение для учета смен и дохода при почасовой и сдельной работе: с Firebase-авторизацией, расходами, чаевыми и подробной статистикой.
 
-![Shift Manager](https://img.shields.io/badge/React-18-blue) ![Firebase](https://img.shields.io/badge/Firebase-10-orange) ![Tailwind](https://img.shields.io/badge/Tailwind-3-teal)
+![React](https://img.shields.io/badge/React-18-blue)
+![Firebase](https://img.shields.io/badge/Firebase-12-orange)
+![Tailwind](https://img.shields.io/badge/Tailwind-3-teal)
+![Vite](https://img.shields.io/badge/Vite-6-purple)
 
-## ✨ Features / Возможности
+## Features / Возможности
 
-### 📝 Shift Tracking / Отслеживание смен
-- Record work hours with automatic date handling for overnight shifts
-- Add breaks with start/end times
-- Track mileage (manual or odometer readings)
-- Record cash and card tips
-- Log expenses with categories (fuel, repairs, parking, etc.)
-- Add bonuses with comments
+### Shift Tracking / Учет смен
+- Create and edit shifts with automatic handling of overnight work
+- Track work duration, breaks, mileage, bonuses, and expenses
+- Record cash tips and card tips with deduction support
+- Support both hourly pay and piece-work income
+- Keep comments and extra details per shift
 
-### 📊 Statistics / Статистика
-- View statistics for today, this week, this month, or custom periods
-- Total hours, earnings, tips, mileage, expenses
-- Net income calculation
-- Average hours and income per shift
-- Expense breakdown by category
+### Statistics / Статистика
+- Filter by today, this week, this month, or a custom period
+- View net income, total time, earnings, tips, mileage, expenses, and bonuses
+- See averages per shift and per hour
+- Review expense breakdown by category
 
-### ⚙️ Settings / Настройки
-- **Languages**: Russian, English, Hebrew (with RTL support)
-- **Currencies**: ILS, USD, EUR, RUB, GBP, UAH
-- **Hourly rate** with overtime calculation (125%/150%)
-- **Unpaid lunch** deduction
-- **Card tips deduction** percentage
-- **Toggle fields** on/off based on your needs
+### Account And Settings / Аккаунт и настройки
+- Email/password authentication and Google sign-in
+- Languages: Russian, English, Hebrew with RTL support
+- Currencies: ILS, USD, EUR, RUB, GBP, UAH
+- Theme selection and color palette selection
+- Overtime rules, unpaid lunch, and card tips deduction settings
+- Toggle individual input fields and statistics cards on or off
 
-## 🚀 Getting Started / Начало работы
+## Tech Stack
+
+- React 18
+- Vite 6
+- Firebase Auth + Firestore
+- Tailwind CSS
+- Vitest
+
+## Getting Started / Начало работы
 
 ### Prerequisites / Требования
 - Node.js 18+
-- npm or yarn
+- npm
 - Firebase project
 
 ### Installation / Установка
 
 1. Clone the repository / Клонируйте репозиторий:
+
 ```bash
-git clone https://github.com/yourusername/shift-manager.git
-cd shift-manager
+git clone https://github.com/ShvetsIgor/Work-Tracker-Final.git
+cd Work-Tracker-Final
 ```
 
 2. Install dependencies / Установите зависимости:
+
 ```bash
 npm install
 ```
 
-3. Create Firebase project / Создайте проект Firebase:
-   - Go to [Firebase Console](https://console.firebase.google.com/)
-   - Create a new project
-   - Enable Authentication (Email/Password)
-   - Create Firestore database
-   - Get your config from Project Settings
+3. Create a `.env` file in the project root / Создайте файл `.env` в корне проекта:
 
-4. Configure environment / Настройте окружение:
-```bash
-cp .env.example .env
-```
-
-Edit `.env` with your Firebase credentials:
 ```env
 VITE_FIREBASE_API_KEY=your_api_key
 VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
@@ -71,9 +71,22 @@ VITE_FIREBASE_PROJECT_ID=your_project_id
 VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 VITE_FIREBASE_APP_ID=your_app_id
+VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
 ```
 
-5. Set up Firestore Security Rules / Настройте правила безопасности Firestore:
+`VITE_FIREBASE_MEASUREMENT_ID` can be left empty if Analytics is not used.
+
+`VITE_FIREBASE_MEASUREMENT_ID` можно оставить пустым, если Firebase Analytics не используется.
+
+4. Set up Firebase / Настройте Firebase:
+- Create a Firebase project
+- Enable Authentication
+- Enable Email/Password sign-in
+- Enable Google sign-in if you want Google auth in the app
+- Create a Firestore database
+
+5. Add Firestore Security Rules / Добавьте правила безопасности Firestore:
+
 ```javascript
 rules_version = '2';
 service cloud.firestore {
@@ -85,125 +98,119 @@ service cloud.firestore {
 }
 ```
 
-6. Start development server / Запустите сервер разработки:
+6. Start the development server / Запустите сервер разработки:
+
 ```bash
 npm run dev
 ```
 
-## 📁 Project Structure / Структура проекта
+## Project Structure / Структура проекта
 
-```
-shift-manager/
+```text
+Work-Tracker-Final/
 ├── public/
-│   └── favicon.svg
+│   ├── icons/
+│   ├── apple-touch-icon.svg
+│   ├── favicon.svg
+│   ├── manifest.json
+│   └── sw.js
 ├── src/
 │   ├── components/
 │   │   ├── ui/
-│   │   │   ├── index.jsx        # Reusable UI components
-│   │   │   └── Modal.jsx        # Modal component
-│   │   ├── AuthScreen.jsx       # Login/Register screen
-│   │   ├── Header.jsx           # App header
-│   │   ├── Navigation.jsx       # Bottom navigation
-│   │   ├── ShiftModal.jsx       # Add/Edit shift modal
-│   │   ├── ShiftsScreen.jsx     # Shifts list screen
-│   │   ├── StatisticsScreen.jsx # Statistics screen
-│   │   └── SettingsScreen.jsx   # Settings screen
+│   │   │   ├── index.jsx
+│   │   │   └── Modal.jsx
+│   │   ├── AccountScreen.jsx
+│   │   ├── AuthScreen.jsx
+│   │   ├── ErrorBoundary.jsx
+│   │   ├── Header.jsx
+│   │   ├── Navigation.jsx
+│   │   ├── SettingsScreen.jsx
+│   │   ├── ShiftModal.jsx
+│   │   ├── ShiftsScreen.jsx
+│   │   └── StatisticsScreen.jsx
 │   ├── config/
-│   │   ├── firebase.js          # Firebase configuration
-│   │   ├── currencies.js        # Currency definitions
-│   │   └── defaults.js          # Default settings
+│   │   ├── colorPalettes.js
+│   │   ├── currencies.js
+│   │   ├── defaults.js
+│   │   └── firebase.js
 │   ├── context/
-│   │   └── AppContext.jsx       # Global app context
+│   │   └── AppContext.jsx
 │   ├── i18n/
-│   │   └── translations.js      # Translations (RU/EN/HE)
+│   │   └── translations.js
 │   ├── styles/
-│   │   └── index.css            # Global styles & Tailwind
+│   │   └── index.css
 │   ├── utils/
-│   │   ├── calculations.js      # Earnings calculations
-│   │   ├── dateUtils.js         # Date utilities
-│   │   └── formatters.js        # Formatting utilities
-│   ├── App.jsx                  # Main app component
-│   └── main.jsx                 # Entry point
+│   │   ├── calculations.js
+│   │   ├── calculations.test.js
+│   │   ├── dateUtils.js
+│   │   ├── dateUtils.test.js
+│   │   ├── formatters.js
+│   │   └── formatters.test.js
+│   ├── App.jsx
+│   └── main.jsx
+├── firebase.json
 ├── index.html
 ├── package.json
-├── vite.config.js
 ├── tailwind.config.js
-├── postcss.config.js
-├── .env.example
+├── vite.config.mjs
+├── vitest.config.mjs
 └── README.md
 ```
 
-## 🔧 Scripts / Команды
+## Main App Flow / Основной сценарий
+
+- `AuthScreen` handles login, registration, password reset, and Google sign-in
+- `AppContext` manages auth state, settings, Firestore subscriptions, and CRUD operations
+- `ShiftsScreen` is the main workspace for listing, grouping, creating, editing, and deleting shifts
+- `StatisticsScreen` aggregates selected-period metrics and expense breakdowns
+- `AccountScreen` combines profile management with embedded app settings
+
+## Available Scripts / Команды
 
 ```bash
 npm run dev       # Start development server
 npm run build     # Build for production
-npm run preview   # Preview production build
-npm run lint      # Check code with ESLint
-npm run lint:fix  # Auto-fix lint issues
-npm run format    # Format code with Prettier
-npm run test      # Run tests
+npm run preview   # Preview the production build
+npm run lint      # Run ESLint for src/
+npm run lint:fix  # Auto-fix ESLint issues in src/
+npm run format    # Run Prettier for src/
+npm run test      # Run Vitest
 ```
 
-## 🚢 Deployment / Деплой
+## Deployment / Деплой
 
-The app is deployed to Firebase Hosting.
+The app is configured for Firebase Hosting.
+
+Приложение настроено для деплоя на Firebase Hosting.
 
 ```bash
 npm run build
 npx firebase-tools deploy
 ```
 
-### PWA Cache Update / Обновление кэша PWA
+### PWA Cache Update / Обновление PWA-кэша
 
-After each release, increment the cache version in `public/sw.js` so users with the installed PWA receive the updated app:
+When shipping a new release, update the cache version in `public/sw.js` so installed users receive the fresh bundle.
+
+При новом релизе обновляйте версию кэша в `public/sw.js`, чтобы пользователи PWA получили новую сборку.
 
 ```js
-// public/sw.js
-const CACHE_NAME = 'shifts-v22'; // bump this on every deploy
+const CACHE_NAME = 'shifts-v22';
 ```
 
-The service worker will automatically delete the old cache and load the new version on the user's next visit.
+## Notes / Примечания
 
-## 💡 Usage Tips / Советы по использованию
+- Overnight shifts are automatically assigned correctly when a shift crosses midnight
+- Overtime rules are tailored for hourly work and can be configured in settings
+- Card tips can be shown as net values after employer deduction
+- All user data is stored under the authenticated user's private Firestore path
 
-### Overnight Shifts / Ночные смены
-The app automatically handles shifts that end after midnight. If you add a shift between 00:00-03:00, it will be assigned to the previous day.
+## Security / Безопасность
 
-### Overtime Calculation / Расчёт сверхурочных
-Based on Israeli labor law:
-- First 8 hours: 100% rate
-- Hours 9-10: 125% rate
-- Hours 11+: 150% rate
+- Firebase Authentication is used for access control
+- Firestore rules isolate each user's data
+- App data is stored in per-user collections under `users/{userId}`
 
-### Card Tips Deduction / Вычет с карточных чаевых
-Some employers deduct a percentage from card tips. Configure this in Settings to see accurate net income.
+## License
 
-## 🌐 Localization / Локализация
-
-The app supports:
-- 🇷🇺 Russian (Русский)
-- 🇺🇸 English
-- 🇮🇱 Hebrew (עברית) with RTL layout
-
-## 📱 Mobile-First Design
-
-The app is optimized for mobile devices with:
-- Responsive layout
-- Touch-friendly controls
-- Native-like navigation
-- Safe area support for notched devices
-
-## 🔐 Security
-
-- All data is stored in user's private Firestore collection
-- Firebase Authentication for secure login
-- Firestore security rules prevent unauthorized access
-
-## 📄 License
-
-MIT License - see LICENSE file for details.
-
----
-
-Made with ❤️ for hourly workers everywhere.
+MIT License
