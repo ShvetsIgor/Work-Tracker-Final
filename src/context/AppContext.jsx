@@ -327,6 +327,7 @@ export const AppProvider = ({ children }) => {
       const shiftsRef = collection(db, 'users', user.id, 'shifts');
       const docRef = await addDoc(shiftsRef, {
         ...shiftData,
+        hourlyRate: settings.hourlyRate,
         createdAt: new Date().toISOString()
       });
       return docRef.id;

@@ -76,9 +76,11 @@ export const calculateNetTipsCard = (tipsCard, tipsCardPercent) => {
  */
 export const calculateShiftBaseEarnings = (shift, settings) => {
   const isHourly = settings.workType !== 'pieceWork';
-  return isHourly
-    ? calculateEarnings(shift.totalMinutes, settings, shift.date)
-    : (shift.earnedAmount || 0);
+  if (!isHourly) return shift.earnedAmount || 0;
+  const effectiveSettings = shift.hourlyRate
+    ? { ...settings, hourlyRate: shift.hourlyRate }
+    : settings;
+  return calculateEarnings(shift.totalMinutes, effectiveSettings, shift.date);
 };
 
 /**
@@ -190,11 +192,7 @@ export const calculateStatistics = (shifts, settings) => {
     });
     
     // Earnings (hourly or piece-work)
-    if (isHourly) {
-      stats.totalEarnings += calculateEarnings(shift.totalMinutes, settings, shift.date);
-    } else {
-      stats.totalEarnings += shift.earnedAmount || 0;
-    }
+    stats.totalEarnings += calculateShiftBaseEarnings(shift, settings);
   });
   
   // Calculate net income
