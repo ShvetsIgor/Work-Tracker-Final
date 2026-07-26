@@ -13,6 +13,7 @@ const AccountScreen = lazy(() => import('@/components/AccountScreen'));
 const App = () => {
   const { user, authLoading, rtl, settings } = useApp();
   const [activeTab, setActiveTab] = useState('shifts');
+  const [accountSection, setAccountSection] = useState('profile');
   
   // Apply theme to document
   useEffect(() => {
@@ -125,9 +126,18 @@ const App = () => {
         <div className="absolute inset-x-0 top-0 h-48 bg-[linear-gradient(to_bottom,var(--top-veil),transparent)]" />
       </div>
       
-      <Header onOpenAccount={() => setActiveTab('account')} />
-      
-      <main className="relative mx-auto max-w-7xl px-4 py-5 pb-32 lg:px-8 lg:pl-[20rem] lg:pr-8 lg:py-6">
+      <Header
+        onOpenAccount={() => {
+          setAccountSection('profile');
+          setActiveTab('account');
+        }}
+        onOpenSettings={() => {
+          setAccountSection('settings');
+          setActiveTab('account');
+        }}
+      />
+
+      <main className="relative mx-auto max-w-7xl px-4 py-5 pb-32 lg:pl-[17rem] lg:pr-8 lg:py-6">
         {activeTab === 'shifts' && <ShiftsScreen />}
         {activeTab === 'statistics' && (
           <Suspense fallback={secondaryScreenFallback}>
@@ -136,7 +146,7 @@ const App = () => {
         )}
         {activeTab === 'account' && (
           <Suspense fallback={secondaryScreenFallback}>
-            <AccountScreen />
+            <AccountScreen initialSection={accountSection} />
           </Suspense>
         )}
       </main>

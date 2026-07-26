@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Clock, ChevronDown, User, LogOut } from 'lucide-react';
+import { Clock, ChevronDown, User, LogOut, Settings } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 
-const Header = ({ onOpenAccount }) => {
+const Header = ({ onOpenAccount, onOpenSettings }) => {
   const { t, user, logout, settings, rtl } = useApp();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
@@ -37,19 +37,14 @@ const Header = ({ onOpenAccount }) => {
   
   return (
     <header
-      className={`sticky top-0 z-[70] border-b px-0 lg:border-b-0 lg:px-8 lg:pt-6 ${
+      className={`sticky top-0 z-[70] border-b ${
         isDark ? 'theme-bg-header border-white/[0.05]' : 'theme-bg-header border-slate-200/80'
       }`}
       style={{ paddingTop: mobileSafeTop }}
     >
-      <div className="mx-auto flex justify-between items-center lg:max-w-7xl lg:pl-[18rem]">
+      <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-3.5 py-2.5 lg:h-16 lg:py-0 lg:pl-[17rem] lg:pr-8">
         {/* Logo */}
-        <div className={`w-full flex items-center justify-between gap-3 px-3.5 py-2.5 transition-colors duration-300 lg:rounded-[16px] lg:border ${
-          isDark
-            ? 'theme-bg-header lg:border-white/[0.05] lg:shadow-[0_14px_28px_rgba(0,0,0,0.18)]'
-            : 'theme-bg-header lg:border-white/70 lg:shadow-[0_16px_34px_rgba(148,163,184,0.18)]'
-        }`}>
-          <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-3 min-w-0">
           <div
             className="flex h-9 w-9 items-center justify-center rounded-lg shadow-[0_10px_22px_rgba(0,0,0,0.1)]"
             style={{ background: 'var(--chip-bg)', color: 'var(--chip-text)' }}
@@ -62,11 +57,27 @@ const Header = ({ onOpenAccount }) => {
               Daily shift journal
             </div>
           </div>
-          </div>
-        
+        </div>
+
         {/* User menu */}
         {user && (
-          <div className="relative" ref={menuRef}>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onOpenSettings}
+              aria-label={t.settings}
+              title={t.settings}
+              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors cursor-pointer ${
+                isDark
+                  ? 'border border-white/[0.05] hover:bg-[var(--control-hover)]'
+                  : 'bg-white/70 hover:bg-white border border-slate-200/80'
+              }`}
+              style={isDark ? { backgroundColor: 'var(--control-bg)' } : undefined}
+            >
+              <Settings className="h-4 w-4 theme-text-secondary" />
+            </button>
+
+            <div className="relative" ref={menuRef}>
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 transition-colors ${
@@ -133,9 +144,9 @@ const Header = ({ onOpenAccount }) => {
                 </div>
               </div>
             )}
+            </div>
           </div>
         )}
-        </div>
       </div>
     </header>
   );

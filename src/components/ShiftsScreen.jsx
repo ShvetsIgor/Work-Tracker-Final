@@ -316,8 +316,39 @@ const ShiftsScreen = () => {
         </Button>
       </div>
       
-      <div className="lg:grid lg:grid-cols-[minmax(0,1.7fr)_minmax(320px,0.9fr)] lg:gap-6 lg:items-start">
-        <div className="min-w-0">
+      <div className="flex flex-col lg:grid lg:grid-cols-[minmax(0,1.7fr)_minmax(320px,0.9fr)] lg:gap-6 lg:items-start">
+        <div className="order-first mb-3 lg:order-2 lg:mb-0 lg:sticky lg:top-20">
+          {visibleShifts.length > 0 && (
+            <div className="grid grid-cols-3 gap-2 lg:grid-cols-1 lg:space-y-3 lg:gap-0">
+              <Card className="p-3 lg:p-3.5 lg:mb-3">
+                <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
+                  {t.shiftsCount}
+                </div>
+                <div className="theme-text-primary text-base font-bold lg:text-xl">
+                  {visibleStats.shiftsCount}
+                </div>
+              </Card>
+              <Card className="p-3 lg:p-3.5 lg:mb-3">
+                <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
+                  {t.totalHours}
+                </div>
+                <div className="theme-text-primary text-base font-bold lg:text-xl">
+                  {formatTime(visibleStats.totalMinutes)}
+                </div>
+              </Card>
+              <Card className="p-3 lg:p-3.5">
+                <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
+                  {settings.workType !== 'pieceWork' ? t.totalEarnings : t.earnedAmount}
+                </div>
+                <div className="theme-income-text text-base font-bold lg:text-xl">
+                  {formatCurrency(visibleStats.totalEarnings, settings.currency)}
+                </div>
+              </Card>
+            </div>
+          )}
+        </div>
+
+        <div className="min-w-0 lg:order-1">
           <Card className="relative z-20 mb-3 overflow-visible p-2.5 lg:p-3.5">
             <button
               type="button"
@@ -414,39 +445,8 @@ const ShiftsScreen = () => {
             </Card>
           )}
         </div>
-
-        <div className="mt-3 space-y-3 lg:sticky lg:top-28 lg:mt-0">
-          {visibleShifts.length > 0 && (
-            <div className="grid grid-cols-3 gap-2 lg:grid-cols-1">
-              <Card className="p-3 lg:p-3.5">
-                <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
-                  {t.shiftsCount}
-                </div>
-                <div className="theme-text-primary text-base font-bold lg:text-xl">
-                  {visibleStats.shiftsCount}
-                </div>
-              </Card>
-              <Card className="p-3 lg:p-3.5">
-                <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
-                  {t.totalHours}
-                </div>
-                <div className="theme-text-primary text-base font-bold lg:text-xl">
-                  {formatTime(visibleStats.totalMinutes)}
-                </div>
-              </Card>
-              <Card className="p-3 lg:p-3.5">
-                <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
-                  {settings.workType !== 'pieceWork' ? t.totalEarnings : t.earnedAmount}
-                </div>
-                <div className="theme-income-text text-base font-bold lg:text-xl">
-                  {formatCurrency(visibleStats.totalEarnings, settings.currency)}
-                </div>
-              </Card>
-            </div>
-          )}
-        </div>
       </div>
-      
+
       {/* Modal */}
       {showModal && (
         <Suspense fallback={null}>

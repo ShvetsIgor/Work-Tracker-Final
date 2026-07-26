@@ -118,6 +118,7 @@ html {
 
 body {
   font-family: "Avenir Next", "Segoe UI Variable", "Trebuchet MS", sans-serif;
+  font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;

@@ -5,12 +5,12 @@ import { Button, Card, Input, FullScreenLoader } from '@/components/ui';
 
 const SettingsScreen = lazy(() => import('@/components/SettingsScreen'));
 
-const AccountScreen = () => {
+const AccountScreen = ({ initialSection = 'profile' }) => {
   const { t, user, updateProfile, settings } = useApp();
   const [name, setName] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [activeSection, setActiveSection] = useState('profile');
+  const [activeSection, setActiveSection] = useState(initialSection);
 
   useEffect(() => {
     if (!user) return;
@@ -58,7 +58,7 @@ const AccountScreen = () => {
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[280px,minmax(0,1fr)]">
-        <Card className="h-fit p-3 lg:sticky lg:top-28">
+        <Card className="h-fit p-3 lg:sticky lg:top-20">
           <div className="grid gap-2">
             <button
               type="button"
