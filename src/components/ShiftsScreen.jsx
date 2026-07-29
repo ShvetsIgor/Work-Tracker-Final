@@ -1,6 +1,6 @@
 import React, { lazy, Suspense, useState, useMemo, memo } from 'react';
 import { Plus, Clock, Car, Banknote, CreditCard, Gift, Receipt, Trash2, Edit3, ClipboardList, Package, DollarSign, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react';
-import { parseISO, startOfWeek, format } from 'date-fns';
+import { parseISO, startOfWeek, endOfWeek, format } from 'date-fns';
 import { ru, enUS, he } from 'date-fns/locale';
 import { useApp } from '@/context/AppContext';
 import { Button, Card, EmptyState } from '@/components/ui';
@@ -12,7 +12,7 @@ import { formatCurrency, formatTime } from '@/utils/formatters';
 const ShiftModal = lazy(() => import('@/components/ShiftModal'));
 
 const locales = { ru, en: enUS, he };
-const weekLabels = { ru: 'Неделя', en: 'Week of', he: 'שבוע של' };
+const weekLabels = { ru: 'Неделя', en: 'Week', he: 'שבוע' };
 const shiftCountLabels = { ru: 'смен', en: 'shifts', he: 'משמרות' };
 const parseShiftDate = (date) => (
   typeof date === 'string' ? parseISO(date) : new Date(date)
@@ -37,7 +37,11 @@ const groupShiftsByWeek = (shifts, language = 'ru') => {
     .sort((a, b) => b.weekStart - a.weekStart)
     .map(({ weekStart, shifts: weekShifts }) => ({
       weekStart,
-      label: format(weekStart, 'd MMM', { locale }),
+      label: `${format(weekStart, 'd MMM', { locale })} – ${format(
+        endOfWeek(weekStart, { weekStartsOn: 1 }),
+        'd MMM',
+        { locale }
+      )}`,
       shifts: weekShifts
     }));
 };
@@ -55,10 +59,7 @@ const ShiftRow = memo(({ shift, onExpand, isExpanded, settings, t, isLast = fals
   const dayOfWeek = format(shiftDate, 'EEEEEE', {
     locale: locales[settings.language] || ru
   }).toLowerCase();
-  const hoursValue = (shift.totalMinutes || 0) / 60;
-  const hoursLabel = hoursValue % 1 === 0
-    ? `${hoursValue}`
-    : hoursValue.toFixed(1).replace('.', settings.language === 'en' ? '.' : ',');
+  const durationLabel = formatTime(shift.totalMinutes);
   const tipsTotal = (shift.tipsCash || 0) + netTipsCard;
   
   const getDateLabel = () => {
@@ -89,8 +90,8 @@ const ShiftRow = memo(({ shift, onExpand, isExpanded, settings, t, isLast = fals
           </div>
         </div>
 
-        <div className="min-w-0 flex-1">
-          <div className="flex items-baseline gap-1.5 text-sm font-medium theme-text-primary">
+        <div className="grid min-w-0 flex-1 grid-cols-[40px_minmax(0,1fr)_48px_64px] items-baseline gap-y-1">
+          <div className="col-span-3 row-start-1 flex min-w-0 items-baseline gap-1.5 text-sm font-medium theme-text-primary">
             {shift.timeMode === 'range' && shift.startTime && shift.endTime ? (
               <>
                 <span className="tabular-nums">{shift.startTime}</span>
@@ -106,32 +107,31 @@ const ShiftRow = memo(({ shift, onExpand, isExpanded, settings, t, isLast = fals
               </span>
             )}
           </div>
-          <div className="theme-text-muted mt-1 flex flex-wrap gap-x-2.5 gap-y-0.5 text-[11px]">
-            <span>
-              <span className="font-medium tabular-nums">{hoursLabel}</span> {t.hoursShort || 'h'}
-            </span>
-            {tipsTotal > 0 && (
-              <span>
-                {(t.tips || 'tips').toLowerCase()}{' '}
-                <span className="font-medium tabular-nums">
-                  {formatCurrency(tipsTotal, settings.currency)}
-                </span>
-              </span>
-            )}
-            {shift.mileage > 0 && (
-              <span>
-                <span className="font-medium tabular-nums">{shift.mileage}</span> {t.km || 'km'}
-              </span>
-            )}
-          </div>
-        </div>
-
-        <div className="shrink-0 text-right">
-          <div className="theme-text-primary text-sm font-bold tabular-nums">
+          <div className="col-start-4 row-start-1 text-right text-sm font-bold tabular-nums theme-text-primary">
             {formatCurrency(grossEarnings, settings.currency)}
           </div>
+
+          <div className="col-start-1 row-start-2 text-[11px] theme-text-muted">
+            <span className="font-medium tabular-nums">{durationLabel}</span>
+          </div>
+
+          {tipsTotal > 0 && (
+            <div className="col-start-2 row-start-2 min-w-0 truncate px-1 text-[11px] theme-text-muted">
+              {(t.tips || 'tips').toLowerCase()}{' '}
+              <span className="font-medium tabular-nums">
+                {formatCurrency(tipsTotal, settings.currency)}
+              </span>
+            </div>
+          )}
+
+          {shift.mileage > 0 && (
+            <div className="col-start-3 row-start-2 whitespace-nowrap text-center text-[11px] theme-text-muted">
+              <span className="font-medium tabular-nums">{shift.mileage}</span> {t.km || 'km'}
+            </div>
+          )}
+
           {totalExpenses > 0 && (
-            <div className="theme-danger-text mt-0.5 text-[11px] font-medium tabular-nums">
+            <div className="col-start-4 row-start-2 text-right text-[11px] font-medium tabular-nums theme-danger-text">
               −{formatCurrency(totalExpenses, settings.currency)}
             </div>
           )}

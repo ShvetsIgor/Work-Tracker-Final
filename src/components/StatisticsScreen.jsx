@@ -64,6 +64,7 @@ const MobilePeriodPill = ({ options, value, onChange, isDark }) => (
 const MobileMiniStat = ({
   label,
   value,
+  valueSecondLine,
   suffix,
   color = 'theme-text-primary',
   subValue,
@@ -74,11 +75,16 @@ const MobileMiniStat = ({
   }`}>
     <div className="theme-text-muted mb-1 truncate text-[11px]">{label}</div>
     <div className="flex min-w-0 items-baseline gap-1">
-      <span className={`min-w-0 truncate font-bold leading-tight tabular-nums ${
+      <div className={`min-w-0 font-bold leading-tight tabular-nums ${
         subValue ? 'text-sm' : 'text-base'
       } ${color}`}>
-        {value}
-      </span>
+        <div className={valueSecondLine ? 'whitespace-nowrap' : 'truncate'}>
+          {value}
+        </div>
+        {valueSecondLine && (
+          <div className="mt-0.5 whitespace-nowrap">{valueSecondLine}</div>
+        )}
+      </div>
       {suffix && <span className="theme-text-muted shrink-0 text-[11px]">{suffix}</span>}
     </div>
     {subValue && (
@@ -295,14 +301,15 @@ const StatisticsScreen = () => {
     return formatCurrency(stats.totalTipsCard, currency);
   };
 
-  const formatMobileTipsCardValue = () => {
+  const mobileTipsCardValue = (() => {
     if (settings.tipsCardPercent > 0 && stats.totalTipsCardGross > 0) {
-      const gross = formatCurrency(stats.totalTipsCardGross, currency);
-      const [, ...netParts] = formatCurrency(stats.totalTipsCard, currency).split(' ');
-      return `${gross.replace(' ', '')}→${netParts.join('')}`;
+      return {
+        value: formatCurrency(stats.totalTipsCardGross, currency),
+        valueSecondLine: `→ ${formatCurrency(stats.totalTipsCard, currency)}`
+      };
     }
-    return formatCurrency(stats.totalTipsCard, currency);
-  };
+    return { value: formatCurrency(stats.totalTipsCard, currency) };
+  })();
 
   const activeRangeLabel = useMemo(() => {
     const from = formatDate(activeDateRange.startDate, settings.language);
@@ -477,7 +484,8 @@ const StatisticsScreen = () => {
                   <MobileMiniStat
                     key="tips-card"
                     label={t.totalTipsCard}
-                    value={formatMobileTipsCardValue()}
+                    value={mobileTipsCardValue.value}
+                    valueSecondLine={mobileTipsCardValue.valueSecondLine}
                     color="theme-info-text"
                     subValue={settings.tipsCardPercent > 0
                       ? `${t.deduction}: ${settings.tipsCardPercent}%`
