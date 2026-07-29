@@ -316,51 +316,82 @@ const ShiftsScreen = () => {
         </Button>
       </div>
       
-      <div className="lg:grid lg:grid-cols-[minmax(0,1.7fr)_minmax(320px,0.9fr)] lg:gap-6 lg:items-start">
-        <div className="min-w-0">
-          <Card className="relative z-20 mb-3 overflow-visible p-2.5 lg:p-3.5">
-            <button
-              type="button"
-              onClick={() => setMonthsOpen(prev => !prev)}
-              className="flex w-full items-center justify-between gap-3 rounded-xl text-left"
-            >
-              <div className="theme-text-primary text-base font-semibold capitalize">
-                {visibleMonthLabel}
-              </div>
-              {monthsOpen ? (
-                <ChevronUp className="h-4.5 w-4.5 theme-text-muted" />
-              ) : (
-                <ChevronDown className="h-4.5 w-4.5 theme-text-muted" />
-              )}
-            </button>
-            {monthsOpen && (
-              <div className="absolute left-2.5 right-2.5 top-[calc(100%-0.25rem)] space-y-2 rounded-2xl border theme-border theme-surface-strong p-2.5 shadow-[0_18px_40px_rgba(0,0,0,0.28)] animate-fade-in lg:left-3.5 lg:right-3.5">
-                {monthOptions.map((option) => {
-                  const isActive = selectedMonthKey === option.value;
-
-                  return (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() => {
-                        setSelectedMonthKey(option.value);
-                        setExpandedId(null);
-                        setMonthsOpen(false);
-                      }}
-                      className={`w-full rounded-xl border px-3.5 py-3 text-left capitalize transition-all ${
-                        isActive
-                          ? 'theme-bg-input theme-text-primary border-white/10 shadow-[0_10px_24px_rgba(0,0,0,0.16)]'
-                          : 'theme-text-secondary border-transparent bg-white/[0.03] hover:border-white/8 hover:bg-white/[0.05]'
-                      }`}
-                    >
-                      <span className="block text-sm font-semibold">{option.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
+      <div className="flex flex-col lg:grid lg:grid-cols-[minmax(0,1.7fr)_minmax(320px,0.9fr)] lg:items-start lg:gap-x-6">
+        <Card className="relative z-20 order-1 mb-4 overflow-visible p-4 lg:order-none lg:col-start-1 lg:row-start-1">
+          <button
+            type="button"
+            onClick={() => setMonthsOpen(prev => !prev)}
+            className="flex w-full items-center justify-between gap-3 rounded-xl text-left"
+          >
+            <div className="theme-text-primary text-base font-semibold capitalize">
+              {visibleMonthLabel}
+            </div>
+            {monthsOpen ? (
+              <ChevronUp className="h-4.5 w-4.5 theme-text-muted" />
+            ) : (
+              <ChevronDown className="h-4.5 w-4.5 theme-text-muted" />
             )}
-          </Card>
+          </button>
+          {monthsOpen && (
+            <div className="absolute left-4 right-4 top-[calc(100%-0.25rem)] space-y-2 rounded-2xl border theme-border theme-surface-strong p-2.5 shadow-[0_18px_40px_rgba(0,0,0,0.28)] animate-fade-in">
+              {monthOptions.map((option) => {
+                const isActive = selectedMonthKey === option.value;
 
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => {
+                      setSelectedMonthKey(option.value);
+                      setExpandedId(null);
+                      setMonthsOpen(false);
+                    }}
+                    className={`w-full rounded-xl border px-3.5 py-3 text-left capitalize transition-all ${
+                      isActive
+                        ? 'theme-bg-input theme-text-primary border-white/10 shadow-[0_10px_24px_rgba(0,0,0,0.16)]'
+                        : 'theme-text-secondary border-transparent bg-white/[0.03] hover:border-white/8 hover:bg-white/[0.05]'
+                    }`}
+                  >
+                    <span className="block text-sm font-semibold">{option.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </Card>
+
+        {visibleShifts.length > 0 && (
+          <div className="order-2 mb-4 lg:sticky lg:top-28 lg:order-none lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mb-0">
+            <div className="grid grid-cols-3 gap-2 lg:grid-cols-1 lg:gap-3">
+              <Card className="p-3 lg:p-3.5">
+                <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
+                  {t.shiftsCount}
+                </div>
+                <div className="theme-text-primary text-lg font-bold lg:text-xl">
+                  {visibleStats.shiftsCount}
+                </div>
+              </Card>
+              <Card className="p-3 lg:p-3.5">
+                <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
+                  {t.totalHours}
+                </div>
+                <div className="theme-text-primary text-lg font-bold lg:text-xl">
+                  {formatTime(visibleStats.totalMinutes)}
+                </div>
+              </Card>
+              <Card className="p-3 lg:p-3.5">
+                <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
+                  {settings.workType !== 'pieceWork' ? t.totalEarnings : t.earnedAmount}
+                </div>
+                <div className="theme-income-text text-lg font-bold lg:text-xl">
+                  {formatCurrency(visibleStats.totalEarnings, settings.currency)}
+                </div>
+              </Card>
+            </div>
+          </div>
+        )}
+
+        <div className="order-3 min-w-0 lg:order-none lg:col-start-1 lg:row-start-2">
           {visibleShifts.length === 0 ? (
             <EmptyState
               icon={ClipboardList}
@@ -412,37 +443,6 @@ const ShiftsScreen = () => {
                 ))}
               </div>
             </Card>
-          )}
-        </div>
-
-        <div className="mt-3 space-y-3 lg:sticky lg:top-28 lg:mt-0">
-          {visibleShifts.length > 0 && (
-            <div className="grid grid-cols-3 gap-2 lg:grid-cols-1">
-              <Card className="p-3 lg:p-3.5">
-                <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
-                  {t.shiftsCount}
-                </div>
-                <div className="theme-text-primary text-base font-bold lg:text-xl">
-                  {visibleStats.shiftsCount}
-                </div>
-              </Card>
-              <Card className="p-3 lg:p-3.5">
-                <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
-                  {t.totalHours}
-                </div>
-                <div className="theme-text-primary text-base font-bold lg:text-xl">
-                  {formatTime(visibleStats.totalMinutes)}
-                </div>
-              </Card>
-              <Card className="p-3 lg:p-3.5">
-                <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
-                  {settings.workType !== 'pieceWork' ? t.totalEarnings : t.earnedAmount}
-                </div>
-                <div className="theme-income-text text-base font-bold lg:text-xl">
-                  {formatCurrency(visibleStats.totalEarnings, settings.currency)}
-                </div>
-              </Card>
-            </div>
           )}
         </div>
       </div>
