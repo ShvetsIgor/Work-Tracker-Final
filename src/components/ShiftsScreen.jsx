@@ -1,5 +1,5 @@
 import React, { lazy, Suspense, useState, useMemo, memo } from 'react';
-import { Plus, Clock, Car, Banknote, CreditCard, Gift, Receipt, Trash2, Edit3, ClipboardList, Package, DollarSign, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react';
+import { Plus, Clock, Car, Banknote, CreditCard, Gift, Receipt, Trash2, Edit3, ClipboardList, Package, DollarSign, ChevronDown, ChevronUp, AlertTriangle, CalendarRange } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { Button, Card, EmptyState } from '@/components/ui';
 import Modal from '@/components/ui/Modal';
@@ -317,19 +317,47 @@ const ShiftsScreen = () => {
       </div>
       
       <div className="flex flex-col lg:grid lg:grid-cols-[minmax(0,1.7fr)_minmax(320px,0.9fr)] lg:items-start lg:gap-x-6">
-        <Card className="relative z-20 order-1 mb-4 overflow-visible p-4 lg:order-none lg:col-start-1 lg:row-start-1">
+        <Card className="relative z-20 order-1 mb-5 overflow-visible p-0 lg:order-none lg:col-start-1 lg:row-start-1 lg:mb-4">
           <button
             type="button"
             onClick={() => setMonthsOpen(prev => !prev)}
-            className="flex w-full items-center justify-between gap-3 rounded-xl text-left"
+            className="relative flex w-full items-start gap-3 overflow-hidden rounded-[15px] p-4 text-left lg:items-center"
           >
-            <div className="theme-text-primary text-base font-semibold capitalize">
-              {visibleMonthLabel}
+            <div className={`absolute inset-0 lg:hidden ${
+              settings.theme !== 'light'
+                ? 'bg-gradient-to-r from-purple-500/10 via-blue-500/5 to-transparent'
+                : 'bg-gradient-to-r from-purple-100/80 via-blue-50/70 to-transparent'
+            }`} />
+            <div className={`relative mt-0.5 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl lg:hidden ${
+              settings.theme !== 'light'
+                ? 'bg-purple-500/15 text-purple-300'
+                : 'bg-purple-100 text-purple-700'
+            }`}>
+              <CalendarRange className="h-5 w-5" />
+            </div>
+            <div className="relative min-w-0 flex-1">
+              <div className="mb-1 flex flex-wrap items-center gap-2 lg:mb-0">
+                <span className={`rounded-full px-2.5 py-1 text-xs font-medium lg:hidden ${
+                  settings.theme !== 'light'
+                    ? 'bg-slate-700/70 text-slate-200'
+                    : 'bg-slate-100 text-slate-700'
+                }`}>
+                  {selectedMonthKey === currentMonthKey
+                    ? t.currentMonthResults
+                    : t.selectedMonthResults}
+                </span>
+                <span className="theme-text-primary text-sm font-semibold capitalize lg:text-base">
+                  {visibleMonthLabel}
+                </span>
+              </div>
+              <p className="theme-text-secondary text-sm leading-relaxed lg:hidden">
+                {t.monthResultsDescription}
+              </p>
             </div>
             {monthsOpen ? (
-              <ChevronUp className="h-4.5 w-4.5 theme-text-muted" />
+              <ChevronUp className="relative mt-2 h-4.5 w-4.5 flex-shrink-0 theme-text-muted lg:mt-0" />
             ) : (
-              <ChevronDown className="h-4.5 w-4.5 theme-text-muted" />
+              <ChevronDown className="relative mt-2 h-4.5 w-4.5 flex-shrink-0 theme-text-muted lg:mt-0" />
             )}
           </button>
           {monthsOpen && (
@@ -361,7 +389,7 @@ const ShiftsScreen = () => {
         </Card>
 
         {visibleShifts.length > 0 && (
-          <div className="order-2 mb-4 lg:sticky lg:top-28 lg:order-none lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mb-0">
+          <div className="order-2 mb-5 lg:sticky lg:top-28 lg:order-none lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mb-0">
             <div className="grid grid-cols-3 gap-2 lg:grid-cols-1 lg:gap-3">
               <Card className="p-3 lg:p-3.5">
                 <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
