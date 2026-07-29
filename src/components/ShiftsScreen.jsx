@@ -1,5 +1,7 @@
 import React, { lazy, Suspense, useState, useMemo, memo } from 'react';
-import { Plus, Clock, Car, Banknote, CreditCard, Gift, Receipt, Trash2, Edit3, ClipboardList, Package, DollarSign, ChevronDown, ChevronUp, AlertTriangle, CalendarRange } from 'lucide-react';
+import { Plus, Clock, Car, Banknote, CreditCard, Gift, Receipt, Trash2, Edit3, ClipboardList, Package, DollarSign, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react';
+import { parseISO, startOfWeek, format } from 'date-fns';
+import { ru, enUS, he } from 'date-fns/locale';
 import { useApp } from '@/context/AppContext';
 import { Button, Card, EmptyState } from '@/components/ui';
 import Modal from '@/components/ui/Modal';
@@ -9,11 +11,55 @@ import { formatCurrency, formatTime } from '@/utils/formatters';
 
 const ShiftModal = lazy(() => import('@/components/ShiftModal'));
 
+const locales = { ru, en: enUS, he };
+const weekLabels = { ru: 'Неделя', en: 'Week of', he: 'שבוע של' };
+const shiftCountLabels = { ru: 'смен', en: 'shifts', he: 'משמרות' };
+const parseShiftDate = (date) => (
+  typeof date === 'string' ? parseISO(date) : new Date(date)
+);
+
+const groupShiftsByWeek = (shifts, language = 'ru') => {
+  const locale = locales[language] || ru;
+  const buckets = new Map();
+
+  shifts.forEach((shift) => {
+    const date = parseShiftDate(shift.date);
+    const weekStart = startOfWeek(date, { weekStartsOn: 1 });
+    const key = format(weekStart, 'yyyy-MM-dd');
+
+    if (!buckets.has(key)) {
+      buckets.set(key, { weekStart, shifts: [] });
+    }
+    buckets.get(key).shifts.push(shift);
+  });
+
+  return Array.from(buckets.values())
+    .sort((a, b) => b.weekStart - a.weekStart)
+    .map(({ weekStart, shifts: weekShifts }) => ({
+      weekStart,
+      label: format(weekStart, 'd MMM', { locale }),
+      shifts: weekShifts
+    }));
+};
+
 // Compact shift row
-const ShiftRow = memo(({ shift, onExpand, isExpanded, settings, t }) => {
+const ShiftRow = memo(({ shift, onExpand, isExpanded, settings, t, isLast = false }) => {
   const baseEarnings = calculateShiftBaseEarnings(shift, settings);
   const isDark = settings.theme !== 'light';
   const isHourly = settings.workType !== 'pieceWork';
+  const netTipsCard = calculateNetTipsCard(shift.tipsCard, settings.tipsCardPercent);
+  const totalExpenses = calculateTotalExpenses(shift.expenses);
+  const grossEarnings = baseEarnings + (shift.tipsCash || 0) + netTipsCard + (shift.bonus || 0);
+  const shiftDate = parseShiftDate(shift.date);
+  const dayNumber = shiftDate.getDate();
+  const dayOfWeek = format(shiftDate, 'EEEEEE', {
+    locale: locales[settings.language] || ru
+  }).toLowerCase();
+  const hoursValue = (shift.totalMinutes || 0) / 60;
+  const hoursLabel = hoursValue % 1 === 0
+    ? `${hoursValue}`
+    : hoursValue.toFixed(1).replace('.', settings.language === 'en' ? '.' : ',');
+  const tipsTotal = (shift.tipsCash || 0) + netTipsCard;
   
   const getDateLabel = () => {
     if (isToday(shift.date)) return t.today;
@@ -22,36 +68,110 @@ const ShiftRow = memo(({ shift, onExpand, isExpanded, settings, t }) => {
   };
   
   return (
-    <div 
-      onClick={onExpand}
-      className={`flex items-center justify-between rounded-lg p-2.5 cursor-pointer transition-all ${
-        isDark 
-          ? 'bg-white/[0.03] hover:bg-white/[0.05]' 
-          : 'bg-white/80 hover:bg-slate-50'
-      } ${isExpanded ? 'ring-1 ring-white/10' : ''}`}
-    >
-      <div className="flex items-center gap-3">
-        <div className="min-w-[72px] text-sm font-medium theme-text-primary">
-          {getDateLabel()}
+    <>
+      <button
+        type="button"
+        onClick={onExpand}
+        className={`flex w-full items-center gap-3 px-3 py-3 text-left transition-colors lg:hidden ${
+          !isLast ? (isDark ? 'border-b border-white/[0.04]' : 'border-b border-slate-200/70') : ''
+        } ${
+          isExpanded
+            ? (isDark ? 'bg-white/[0.03]' : 'bg-slate-50')
+            : (isDark ? 'hover:bg-white/[0.02]' : 'hover:bg-slate-50/70')
+        }`}
+      >
+        <div className="flex w-10 shrink-0 flex-col items-center leading-none">
+          <div className="theme-text-primary text-lg font-bold tabular-nums">
+            {dayNumber}
+          </div>
+          <div className="theme-text-muted mt-1 text-[10px] uppercase tracking-wide">
+            {dayOfWeek}
+          </div>
         </div>
-        <div className="flex items-center gap-1 theme-text-muted">
-          <Clock className="h-3.5 w-3.5" />
-          <span className="text-sm font-semibold theme-text-primary">{formatTime(shift.totalMinutes)}</span>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex items-baseline gap-1.5 text-sm font-medium theme-text-primary">
+            {shift.timeMode === 'range' && shift.startTime && shift.endTime ? (
+              <>
+                <span className="tabular-nums">{shift.startTime}</span>
+                <span className="theme-text-muted text-xs">—</span>
+                <span className="tabular-nums">{shift.endTime}</span>
+              </>
+            ) : (
+              <span className="tabular-nums">{formatTime(shift.totalMinutes)}</span>
+            )}
+            {isToday(shift.date) && (
+              <span className="ml-1 rounded bg-[var(--accent-soft)] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--accent-primary)]">
+                {t.today}
+              </span>
+            )}
+          </div>
+          <div className="theme-text-muted mt-1 flex flex-wrap gap-x-2.5 gap-y-0.5 text-[11px]">
+            <span>
+              <span className="font-medium tabular-nums">{hoursLabel}</span> {t.hoursShort || 'h'}
+            </span>
+            {tipsTotal > 0 && (
+              <span>
+                {(t.tips || 'tips').toLowerCase()}{' '}
+                <span className="font-medium tabular-nums">
+                  {formatCurrency(tipsTotal, settings.currency)}
+                </span>
+              </span>
+            )}
+            {shift.mileage > 0 && (
+              <span>
+                <span className="font-medium tabular-nums">{shift.mileage}</span> {t.km || 'km'}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="shrink-0 text-right">
+          <div className="theme-text-primary text-sm font-bold tabular-nums">
+            {formatCurrency(grossEarnings, settings.currency)}
+          </div>
+          {totalExpenses > 0 && (
+            <div className="theme-danger-text mt-0.5 text-[11px] font-medium tabular-nums">
+              −{formatCurrency(totalExpenses, settings.currency)}
+            </div>
+          )}
+        </div>
+
+        <ChevronDown className={`h-4 w-4 shrink-0 theme-text-muted transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+      </button>
+
+      <div
+        onClick={onExpand}
+        className={`hidden items-center justify-between rounded-lg p-2.5 cursor-pointer transition-all lg:flex ${
+          isDark
+            ? 'bg-white/[0.03] hover:bg-white/[0.05]'
+            : 'bg-white/80 hover:bg-slate-50'
+        } ${isExpanded ? 'ring-1 ring-white/10' : ''}`}
+      >
+        <div className="flex items-center gap-3">
+          <div className="min-w-[72px] text-sm font-medium theme-text-primary">
+            {getDateLabel()}
+          </div>
+          <div className="flex items-center gap-1 theme-text-muted">
+            <Clock className="h-3.5 w-3.5" />
+            <span className="text-sm font-semibold theme-text-primary">{formatTime(shift.totalMinutes)}</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-2.5">
+          <div className={`text-sm font-bold ${isHourly ? 'theme-income-text' : 'theme-info-text'}`}>
+            {formatCurrency(baseEarnings, settings.currency)}
+          </div>
+          {isExpanded ? (
+            <ChevronUp className="h-4.5 w-4.5 theme-text-muted" />
+          ) : (
+            <ChevronDown className="h-4.5 w-4.5 theme-text-muted" />
+          )}
         </div>
       </div>
-      <div className="flex items-center gap-2.5">
-        <div className={`text-sm font-bold ${isHourly ? 'theme-income-text' : 'theme-info-text'}`}>
-          {formatCurrency(baseEarnings, settings.currency)}
-        </div>
-        {isExpanded ? (
-          <ChevronUp className="h-4.5 w-4.5 theme-text-muted" />
-        ) : (
-          <ChevronDown className="h-4.5 w-4.5 theme-text-muted" />
-        )}
-      </div>
-    </div>
+    </>
   );
 });
+ShiftRow.displayName = 'ShiftRow';
 
 // Expanded shift details
 const ShiftDetails = ({ shift, onEdit, onDelete, settings, t }) => {
@@ -149,8 +269,14 @@ const ShiftDetails = ({ shift, onEdit, onDelete, settings, t }) => {
   const summaryStats = stats.filter(stat => !breakdownLabels.has(stat.label));
   
   return (
-    <div className={`mt-2 rounded-lg p-3 animate-fade-in ${isDark ? 'bg-white/[0.03]' : 'bg-slate-100/80'}`}>
-      <div className={`mb-2.5 rounded-lg border p-2.5 ${isDark ? 'border-white/[0.05] bg-[#232428]' : 'border-slate-200 bg-white/80'}`}>
+    <div className={`px-3 pb-3 pt-1 animate-fade-in lg:mt-2 lg:rounded-lg lg:p-3 ${
+      isDark ? 'bg-white/[0.03]' : 'bg-slate-50 lg:bg-slate-100/80'
+    }`}>
+      <div className={`mb-2.5 rounded-xl border p-3 lg:rounded-lg lg:p-2.5 ${
+        isDark
+          ? 'border-white/[0.06] bg-slate-800/50 lg:border-white/[0.05] lg:bg-[#232428]'
+          : 'border-slate-200 bg-white lg:bg-white/80'
+      }`}>
         <div className="mb-2 flex items-center justify-between">
           <span className="theme-text-primary text-sm font-bold">{t.netIncome}</span>
           <span className="theme-income-text text-xl font-bold">{formatCurrency(netIncome, settings.currency)}</span>
@@ -305,63 +431,132 @@ const ShiftsScreen = () => {
   }, [shifts, visibleMonthDate]);
 
   const visibleStats = useMemo(() => calculateStatistics(visibleShifts, settings), [visibleShifts, settings]);
+  const weekGroups = useMemo(
+    () => groupShiftsByWeek(visibleShifts, settings.language),
+    [visibleShifts, settings.language]
+  );
+  const visibleMonthShortLabel = useMemo(
+    () => formatDate(visibleMonthDate, settings.language, 'LLLL').toUpperCase(),
+    [visibleMonthDate, settings.language]
+  );
+  const isDark = settings.theme !== 'light';
   
   return (
     <div className="pb-24">
       {/* Header */}
-      <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-        <h1 className="text-2xl font-bold theme-text-primary">{t.shifts}</h1>
-        <Button onClick={() => setShowModal(true)} icon={Plus}>
+      <div className="mb-4 flex items-end justify-between">
+        <h1 className="text-3xl font-bold tracking-tight theme-text-primary lg:text-2xl lg:tracking-normal">
+          {t.shifts}
+        </h1>
+        <Button
+          onClick={() => setShowModal(true)}
+          icon={Plus}
+          size="sm"
+          className="lg:px-4 lg:py-2.5 lg:text-base"
+        >
           {t.addShift}
         </Button>
       </div>
       
       <div className="flex flex-col lg:grid lg:grid-cols-[minmax(0,1.7fr)_minmax(320px,0.9fr)] lg:items-start lg:gap-x-6">
-        <Card className="relative z-20 order-1 mb-5 overflow-visible p-0 lg:order-none lg:col-start-1 lg:row-start-1 lg:mb-4">
+        {/* Mobile monthly summary */}
+        <div className={`relative z-20 order-1 mb-4 rounded-2xl border px-4 py-4 lg:hidden ${
+          isDark
+            ? 'border-white/[0.05] bg-slate-800/55'
+            : 'border-slate-200 bg-white'
+        }`}>
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0 truncate text-[11px] font-semibold uppercase tracking-[0.14em] theme-text-muted">
+              {visibleMonthShortLabel} · {visibleStats.shiftsCount}{' '}
+              {shiftCountLabels[settings.language] || (t.shiftsCount || '').toLowerCase()}
+            </div>
+            <button
+              type="button"
+              onClick={() => setMonthsOpen(prev => !prev)}
+              className="flex shrink-0 items-center gap-1 text-sm theme-text-secondary"
+            >
+              <span className="capitalize">{visibleMonthLabel}</span>
+              <ChevronDown className={`h-4 w-4 transition-transform ${monthsOpen ? 'rotate-180' : ''}`} />
+            </button>
+          </div>
+
+          <div className="mt-3 text-[32px] font-bold leading-none tabular-nums theme-text-primary">
+            {formatCurrency(visibleStats.totalEarnings, settings.currency)}
+          </div>
+
+          <div className="mt-2 flex items-center gap-3 text-xs theme-text-muted">
+            <span>
+              <span className="font-medium tabular-nums theme-text-secondary">
+                {formatTime(visibleStats.totalMinutes)}
+              </span>{' '}
+              {t.hoursShort || 'h'}
+            </span>
+            {visibleStats.totalMileage > 0 && (
+              <>
+                <span className="opacity-40">·</span>
+                <span>
+                  <span className="font-medium tabular-nums theme-text-secondary">
+                    {visibleStats.totalMileage}
+                  </span>{' '}
+                  {t.km || 'km'}
+                </span>
+              </>
+            )}
+          </div>
+
+          {monthsOpen && (
+            <div className={`absolute left-3 right-3 top-[calc(100%+4px)] space-y-1 rounded-2xl border p-2 shadow-[0_18px_40px_rgba(0,0,0,0.28)] animate-fade-in ${
+              isDark
+                ? 'border-white/[0.08] bg-slate-800'
+                : 'border-slate-200 bg-white'
+            }`}>
+              {monthOptions.map((option) => {
+                const isActive = selectedMonthKey === option.value;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => {
+                      setSelectedMonthKey(option.value);
+                      setExpandedId(null);
+                      setMonthsOpen(false);
+                    }}
+                    className={`w-full rounded-xl px-3 py-2.5 text-left text-sm font-medium capitalize transition-all ${
+                      isActive
+                        ? 'theme-bg-input theme-text-primary'
+                        : 'theme-text-secondary hover:bg-white/[0.04]'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Existing desktop month selector */}
+        <Card className="relative z-20 hidden overflow-visible p-0 lg:col-start-1 lg:row-start-1 lg:mb-4 lg:block">
           <button
             type="button"
             onClick={() => setMonthsOpen(prev => !prev)}
-            className="relative flex w-full items-start gap-3 overflow-hidden rounded-[15px] p-4 text-left lg:items-center"
+            className="relative flex w-full items-center gap-3 overflow-hidden rounded-[15px] p-4 text-left"
           >
-            <div className={`absolute inset-0 lg:hidden ${
-              settings.theme !== 'light'
-                ? 'bg-gradient-to-r from-purple-500/10 via-blue-500/5 to-transparent'
-                : 'bg-gradient-to-r from-purple-100/80 via-blue-50/70 to-transparent'
-            }`} />
-            <div className={`relative mt-0.5 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl lg:hidden ${
-              settings.theme !== 'light'
-                ? 'bg-purple-500/15 text-purple-300'
-                : 'bg-purple-100 text-purple-700'
-            }`}>
-              <CalendarRange className="h-5 w-5" />
-            </div>
             <div className="relative min-w-0 flex-1">
-              <div className="mb-1 flex flex-wrap items-center gap-2 lg:mb-0">
-                <span className={`rounded-full px-2.5 py-1 text-xs font-medium lg:hidden ${
-                  settings.theme !== 'light'
-                    ? 'bg-slate-700/70 text-slate-200'
-                    : 'bg-slate-100 text-slate-700'
-                }`}>
-                  {selectedMonthKey === currentMonthKey
-                    ? t.currentMonthResults
-                    : t.selectedMonthResults}
-                </span>
-                <span className="theme-text-primary text-sm font-semibold capitalize lg:text-base">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-base font-semibold capitalize theme-text-primary">
                   {visibleMonthLabel}
                 </span>
               </div>
-              <p className="theme-text-secondary text-sm leading-relaxed lg:hidden">
-                {t.monthResultsDescription}
-              </p>
             </div>
             {monthsOpen ? (
-              <ChevronUp className="relative mt-2 h-4.5 w-4.5 flex-shrink-0 theme-text-muted lg:mt-0" />
+              <ChevronUp className="relative h-4.5 w-4.5 flex-shrink-0 theme-text-muted" />
             ) : (
-              <ChevronDown className="relative mt-2 h-4.5 w-4.5 flex-shrink-0 theme-text-muted lg:mt-0" />
+              <ChevronDown className="relative h-4.5 w-4.5 flex-shrink-0 theme-text-muted" />
             )}
           </button>
           {monthsOpen && (
-            <div className="absolute left-4 right-4 top-[calc(100%-0.25rem)] space-y-2 rounded-2xl border theme-border theme-surface-strong p-2.5 shadow-[0_18px_40px_rgba(0,0,0,0.28)] animate-fade-in">
+            <div className="absolute left-4 right-4 top-[calc(100%-0.25rem)] space-y-2 rounded-2xl border p-2.5 shadow-[0_18px_40px_rgba(0,0,0,0.28)] animate-fade-in theme-border theme-surface-strong">
               {monthOptions.map((option) => {
                 const isActive = selectedMonthKey === option.value;
 
@@ -389,29 +584,29 @@ const ShiftsScreen = () => {
         </Card>
 
         {visibleShifts.length > 0 && (
-          <div className="order-2 mb-5 lg:sticky lg:top-28 lg:order-none lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mb-0">
-            <div className="grid grid-cols-3 gap-2 lg:grid-cols-1 lg:gap-3">
-              <Card className="p-3 lg:p-3.5">
+          <div className="hidden lg:sticky lg:top-28 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:block">
+            <div className="grid grid-cols-1 gap-3">
+              <Card className="p-3.5">
                 <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
                   {t.shiftsCount}
                 </div>
-                <div className="theme-text-primary text-lg font-bold lg:text-xl">
+                <div className="theme-text-primary text-xl font-bold">
                   {visibleStats.shiftsCount}
                 </div>
               </Card>
-              <Card className="p-3 lg:p-3.5">
+              <Card className="p-3.5">
                 <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
                   {t.totalHours}
                 </div>
-                <div className="theme-text-primary text-lg font-bold lg:text-xl">
+                <div className="theme-text-primary text-xl font-bold">
                   {formatTime(visibleStats.totalMinutes)}
                 </div>
               </Card>
-              <Card className="p-3 lg:p-3.5">
+              <Card className="p-3.5">
                 <div className="mb-1 theme-text-muted text-[11px] uppercase tracking-[0.14em]">
                   {settings.workType !== 'pieceWork' ? t.totalEarnings : t.earnedAmount}
                 </div>
-                <div className="theme-income-text text-lg font-bold lg:text-xl">
+                <div className="theme-income-text text-xl font-bold">
                   {formatCurrency(visibleStats.totalEarnings, settings.currency)}
                 </div>
               </Card>
@@ -434,43 +629,106 @@ const ShiftsScreen = () => {
               }
             />
           ) : (
-            <Card className="p-2.5 lg:p-3.5">
-              <div className="mb-2.5 hidden items-center justify-between lg:flex">
-                <div>
-                  <div className="theme-text-muted text-[11px] uppercase tracking-[0.16em]">
-                    {t.shifts}
-                  </div>
-                  <div className="theme-text-primary mt-1 text-base font-semibold capitalize">
-                    {visibleMonthLabel}
-                  </div>
-                </div>
-                <div className="theme-text-muted text-sm">
-                  {visibleStats.shiftsCount} {t.shiftsCount}
-                </div>
+            <>
+              <div className="space-y-4 lg:hidden">
+                {weekGroups.map((group) => {
+                  const weekTotal = group.shifts.reduce((sum, shift) => (
+                    sum
+                    + calculateShiftNetIncome(shift, settings)
+                    + calculateTotalExpenses(shift.expenses)
+                  ), 0);
+                  const weekMinutes = group.shifts.reduce(
+                    (sum, shift) => sum + (shift.totalMinutes || 0),
+                    0
+                  );
+
+                  return (
+                    <div key={group.weekStart.toISOString()}>
+                      <div className="mb-1.5 flex items-baseline justify-between px-1">
+                        <div className="text-[13px] font-semibold theme-text-secondary">
+                          {weekLabels[settings.language] || weekLabels.ru} {group.label}
+                        </div>
+                        <div className="text-[11px] theme-text-muted">
+                          <span className="font-medium tabular-nums theme-text-secondary">
+                            {formatTime(weekMinutes)}
+                          </span>
+                          <span className="mx-1.5 opacity-40">·</span>
+                          <span className="font-medium tabular-nums theme-text-secondary">
+                            {formatCurrency(weekTotal, settings.currency)}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className={`overflow-hidden rounded-2xl border ${
+                        isDark
+                          ? 'border-white/[0.05] bg-slate-800/30'
+                          : 'border-slate-200 bg-white'
+                      }`}>
+                        {group.shifts.map((shift, index) => (
+                          <React.Fragment key={shift.id}>
+                            <ShiftRow
+                              shift={shift}
+                              settings={settings}
+                              t={t}
+                              isExpanded={expandedId === shift.id}
+                              isLast={index === group.shifts.length - 1 && expandedId !== shift.id}
+                              onExpand={() => setExpandedId(expandedId === shift.id ? null : shift.id)}
+                            />
+                            {expandedId === shift.id && (
+                              <ShiftDetails
+                                shift={shift}
+                                settings={settings}
+                                t={t}
+                                onEdit={handleEdit}
+                                onDelete={() => handleDeleteRequest(shift)}
+                              />
+                            )}
+                          </React.Fragment>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-              <div className="space-y-2">
-                {visibleShifts.map((shift) => (
-                  <div key={shift.id}>
-                    <ShiftRow
-                      shift={shift}
-                      settings={settings}
-                      t={t}
-                      isExpanded={expandedId === shift.id}
-                      onExpand={() => setExpandedId(expandedId === shift.id ? null : shift.id)}
-                    />
-                    {expandedId === shift.id && (
-                      <ShiftDetails
+
+              <Card className="hidden p-2.5 lg:block lg:p-3.5">
+                <div className="mb-2.5 flex items-center justify-between">
+                  <div>
+                    <div className="theme-text-muted text-[11px] uppercase tracking-[0.16em]">
+                      {t.shifts}
+                    </div>
+                    <div className="theme-text-primary mt-1 text-base font-semibold capitalize">
+                      {visibleMonthLabel}
+                    </div>
+                  </div>
+                  <div className="theme-text-muted text-sm">
+                    {visibleStats.shiftsCount} {t.shiftsCount}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  {visibleShifts.map((shift) => (
+                    <div key={shift.id}>
+                      <ShiftRow
                         shift={shift}
                         settings={settings}
                         t={t}
-                        onEdit={handleEdit}
-                        onDelete={() => handleDeleteRequest(shift)}
+                        isExpanded={expandedId === shift.id}
+                        onExpand={() => setExpandedId(expandedId === shift.id ? null : shift.id)}
                       />
-                    )}
-                  </div>
-                ))}
-              </div>
-            </Card>
+                      {expandedId === shift.id && (
+                        <ShiftDetails
+                          shift={shift}
+                          settings={settings}
+                          t={t}
+                          onEdit={handleEdit}
+                          onDelete={() => handleDeleteRequest(shift)}
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </>
           )}
         </div>
       </div>

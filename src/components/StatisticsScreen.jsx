@@ -27,6 +27,164 @@ const StatCard = ({ icon: Icon, label, value, color = 'theme-text-primary', subV
   </Card>
 );
 
+const MobileSectionLabel = ({ children }) => (
+  <div className="theme-text-muted text-[11px] font-semibold uppercase tracking-[0.14em]">
+    {children}
+  </div>
+);
+
+const MobilePeriodPill = ({ options, value, onChange, isDark }) => (
+  <div className={`flex rounded-xl border p-1 ${
+    isDark ? 'border-white/[0.04] bg-slate-900/50' : 'border-slate-200 bg-slate-100'
+  }`}>
+    {options.map((option) => {
+      const active = value === option.id;
+
+      return (
+        <button
+          key={option.id}
+          type="button"
+          aria-pressed={active}
+          onClick={() => onChange(option.id)}
+          className={`min-h-9 flex-1 rounded-lg px-2 py-2 text-[12px] font-semibold transition-all ${
+            active
+              ? isDark
+                ? 'bg-slate-700 text-white shadow-sm'
+                : 'bg-white text-slate-900 shadow-sm'
+              : 'theme-text-muted hover:theme-text-secondary'
+          }`}
+        >
+          {option.label}
+        </button>
+      );
+    })}
+  </div>
+);
+
+const MobileMiniStat = ({
+  label,
+  value,
+  suffix,
+  color = 'theme-text-primary',
+  subValue,
+  isDark
+}) => (
+  <div className={`min-w-0 rounded-xl border p-3 ${
+    isDark ? 'border-white/[0.05] bg-slate-800/40' : 'border-slate-200 bg-white'
+  }`}>
+    <div className="theme-text-muted mb-1 truncate text-[11px]">{label}</div>
+    <div className="flex min-w-0 items-baseline gap-1">
+      <span className={`min-w-0 truncate font-bold leading-tight tabular-nums ${
+        subValue ? 'text-sm' : 'text-base'
+      } ${color}`}>
+        {value}
+      </span>
+      {suffix && <span className="theme-text-muted shrink-0 text-[11px]">{suffix}</span>}
+    </div>
+    {subValue && (
+      <div className="theme-text-muted mt-1 truncate text-[10px]">{subValue}</div>
+    )}
+  </div>
+);
+
+const MobileBarChart = ({ data, max, isDark, currency }) => {
+  if (!data.length) return null;
+
+  return (
+    <div className="mt-4" role="img" aria-label={`${data.length} ${data.length === 1 ? 'day' : 'days'} of earnings`}>
+      <div className="flex h-24 items-end gap-1.5">
+        {data.map((item) => {
+          const height = max > 0 ? (item.amount / max) * 100 : 0;
+          const empty = item.amount === 0;
+
+          return (
+            <div key={item.date} className="flex h-full flex-1 flex-col items-center justify-end">
+              <div
+                className={`w-full rounded-sm transition-all ${
+                  empty
+                    ? isDark ? 'bg-white/[0.05]' : 'bg-slate-200'
+                    : 'theme-accent-bg'
+                }`}
+                style={{
+                  height: `${Math.max(height, 3)}%`,
+                  minHeight: 2,
+                  backgroundColor: empty ? undefined : 'var(--accent-primary)'
+                }}
+                title={empty ? '' : formatCurrency(item.amount, currency)}
+              />
+            </div>
+          );
+        })}
+      </div>
+      <div className="mt-1.5 flex gap-1.5">
+        {data.map((item) => (
+          <div key={item.date} className="theme-text-muted flex-1 text-center text-[9px]">
+            {item.label}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const MobileExpenseBreakdown = ({ expensesByType, totalExpenses, currency, t, isDark }) => {
+  if (Object.keys(expensesByType).length === 0 || totalExpenses <= 0) return null;
+
+  const sortedExpenses = Object.entries(expensesByType).sort(([, a], [, b]) => b - a);
+  const categoryColors = [
+    'bg-[var(--accent-primary)]',
+    'bg-[#a8977c]',
+    'bg-[#8aa0b6]',
+    'bg-slate-500',
+    'bg-slate-400',
+    'bg-slate-300'
+  ];
+
+  return (
+    <div className={`rounded-2xl border p-4 ${
+      isDark ? 'border-white/[0.05] bg-slate-800/40' : 'border-slate-200 bg-white'
+    }`}>
+      <div className="mb-3 flex items-baseline justify-between gap-3">
+        <span className="theme-text-primary text-sm font-semibold">
+          {t.expenseDetails || t.expenses}
+        </span>
+        <span className="theme-danger-text shrink-0 text-sm font-bold tabular-nums">
+          −{formatCurrency(totalExpenses, currency)}
+        </span>
+      </div>
+
+      <div className={`mb-3 flex h-2 overflow-hidden rounded-full ${
+        isDark ? 'bg-white/[0.05]' : 'bg-slate-100'
+      }`}>
+        {sortedExpenses.map(([type, amount], index) => (
+          <div
+            key={type}
+            className={categoryColors[index] || 'bg-slate-400'}
+            style={{ width: `${(amount / totalExpenses) * 100}%` }}
+          />
+        ))}
+      </div>
+
+      <div className="space-y-1.5">
+        {sortedExpenses.map(([type, amount], index) => (
+          <div key={type} className="flex items-center gap-3 text-sm">
+            <span className={`h-2 w-2 shrink-0 rounded-sm ${
+              categoryColors[index] || 'bg-slate-400'
+            }`} />
+            <span className="theme-text-secondary min-w-0 flex-1 truncate">{t[type] || type}</span>
+            <span className="theme-text-muted w-8 text-right text-xs tabular-nums">
+              {Math.round((amount / totalExpenses) * 100)}%
+            </span>
+            <span className="theme-text-primary w-20 text-right text-sm font-semibold tabular-nums">
+              {formatCurrency(amount, currency)}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const ExpenseBreakdown = ({ expensesByType, currency, t, isDark }) => {
   if (Object.keys(expensesByType).length === 0) return null;
   
@@ -137,14 +295,287 @@ const StatisticsScreen = () => {
     return formatCurrency(stats.totalTipsCard, currency);
   };
 
+  const formatMobileTipsCardValue = () => {
+    if (settings.tipsCardPercent > 0 && stats.totalTipsCardGross > 0) {
+      const gross = formatCurrency(stats.totalTipsCardGross, currency);
+      const [, ...netParts] = formatCurrency(stats.totalTipsCard, currency).split(' ');
+      return `${gross.replace(' ', '')}→${netParts.join('')}`;
+    }
+    return formatCurrency(stats.totalTipsCard, currency);
+  };
+
   const activeRangeLabel = useMemo(() => {
     const from = formatDate(activeDateRange.startDate, settings.language);
     const to = formatDate(activeDateRange.endDate, settings.language);
     return from === to ? from : `${from} - ${to}`;
   }, [activeDateRange, settings.language]);
 
+  const mobileChartData = useMemo(() => {
+    if (filteredShifts.length === 0 || period === 'today') return [];
+
+    const earningsByDate = new Map();
+    filteredShifts.forEach((shift) => {
+      const baseEarnings = calculateShiftBaseEarnings(shift, settings);
+      earningsByDate.set(shift.date, (earningsByDate.get(shift.date) || 0) + baseEarnings);
+    });
+
+    const maxBars = period === 'thisWeek' ? 7 : 14;
+    return Array.from(earningsByDate.entries())
+      .sort(([firstDate], [secondDate]) => firstDate.localeCompare(secondDate))
+      .slice(-maxBars)
+      .map(([date, amount]) => ({
+        date,
+        amount,
+        label: date.slice(8, 10)
+      }));
+  }, [filteredShifts, period, settings]);
+
+  const mobileChartMax = Math.max(0, ...mobileChartData.map(({ amount }) => amount));
+
   return (
     <div className="pb-24">
+      <div className="lg:hidden">
+        <div className="mb-4">
+          <h1 className="theme-text-primary text-3xl font-bold tracking-tight">{t.statistics}</h1>
+        </div>
+
+        <div className="mb-4 space-y-2">
+          <MobilePeriodPill
+            options={periodButtons}
+            value={period}
+            onChange={setPeriod}
+            isDark={isDark}
+          />
+
+          <div className="flex min-h-7 items-center justify-between gap-3">
+            <span className="theme-text-muted min-w-0 truncate text-xs">{activeRangeLabel}</span>
+            {filteredShifts.length > 0 && (
+              <ExportButton
+                shifts={filteredShifts}
+                settings={settings}
+                t={t}
+                isDark={isDark}
+                dateFrom={customFrom}
+                dateTo={customTo}
+                compact
+              />
+            )}
+          </div>
+
+          {period === 'custom' && (
+            <div className="mt-2 flex gap-2">
+              <input
+                type="date"
+                aria-label={t.from}
+                value={customFrom}
+                onChange={(event) => setCustomFrom(event.target.value)}
+                className="theme-bg-input theme-text-primary min-w-0 flex-1 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]"
+              />
+              <input
+                type="date"
+                aria-label={t.to}
+                value={customTo}
+                onChange={(event) => setCustomTo(event.target.value)}
+                className="theme-bg-input theme-text-primary min-w-0 flex-1 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]"
+              />
+            </div>
+          )}
+        </div>
+
+        {filteredShifts.length === 0 ? (
+          <EmptyState icon={BarChart3} title={t.noData} />
+        ) : (
+          <div className="space-y-4" key={`mobile-${period}-${customFrom}-${customTo}`}>
+            <div className={`rounded-2xl border px-4 py-4 ${
+              isDark ? 'border-white/[0.05] bg-slate-800/55' : 'border-slate-200 bg-white'
+            }`}>
+              <MobileSectionLabel>
+                {sf.totalEarnings !== false
+                  ? `${isHourly ? t.totalEarnings : t.earnedAmount} · ${stats.shiftsCount} ${(t.shiftsCount || '').toLowerCase()}`
+                  : `${t.netIncome} · ${stats.shiftsCount} ${(t.shiftsCount || '').toLowerCase()}`}
+              </MobileSectionLabel>
+              <div className="mt-2 flex items-baseline gap-3">
+                <div className="theme-text-primary text-[38px] font-bold leading-none tracking-tight tabular-nums">
+                  {formatCurrency(
+                    sf.totalEarnings !== false ? stats.totalEarnings : stats.netIncome,
+                    currency
+                  )}
+                </div>
+              </div>
+              {sf.totalEarnings !== false && (
+                <div className="theme-text-muted mt-1.5 text-xs">
+                  {t.netIncome}:{' '}
+                  <span className="theme-text-secondary font-semibold tabular-nums">
+                    {formatCurrency(stats.netIncome, currency)}
+                  </span>
+                </div>
+              )}
+
+              {sf.totalEarnings !== false && mobileChartData.length > 1 && (
+                <MobileBarChart
+                  data={mobileChartData}
+                  max={mobileChartMax}
+                  isDark={isDark}
+                  currency={currency}
+                />
+              )}
+            </div>
+
+            <div className="grid grid-cols-3 gap-2">
+              {sf.totalHours !== false && (
+                <MobileMiniStat
+                  label={t.totalHours}
+                  value={formatTime(stats.totalMinutes)}
+                  isDark={isDark}
+                />
+              )}
+              {sf.avgPerHour !== false && (
+                <MobileMiniStat
+                  label={t.avgPerHour}
+                  value={formatCurrency(stats.avgPerHour, currency)}
+                  color="theme-warm-text"
+                  isDark={isDark}
+                />
+              )}
+              {sf.avgIncomePerShift !== false && (
+                <MobileMiniStat
+                  label={t.avgIncomePerShift}
+                  value={formatCurrency(stats.avgIncomePerShift, currency)}
+                  color="theme-warm-text"
+                  isDark={isDark}
+                />
+              )}
+            </div>
+
+            {(() => {
+              const cells = [];
+
+              if (!isHourly && stats.totalOrders > 0) {
+                cells.push(
+                  <MobileMiniStat
+                    key="orders"
+                    label={t.orders}
+                    value={stats.totalOrders}
+                    color="theme-info-text"
+                    isDark={isDark}
+                  />
+                );
+              }
+              if (sf.tipsCash !== false && enabledFields.tipsCash && stats.totalTipsCash > 0) {
+                cells.push(
+                  <MobileMiniStat
+                    key="tips-cash"
+                    label={t.totalTipsCash}
+                    value={formatCurrency(stats.totalTipsCash, currency)}
+                    color="theme-income-soft-text"
+                    isDark={isDark}
+                  />
+                );
+              }
+              if (sf.tipsCard !== false && enabledFields.tipsCard && stats.totalTipsCard > 0) {
+                cells.push(
+                  <MobileMiniStat
+                    key="tips-card"
+                    label={t.totalTipsCard}
+                    value={formatMobileTipsCardValue()}
+                    color="theme-info-text"
+                    subValue={settings.tipsCardPercent > 0
+                      ? `${t.deduction}: ${settings.tipsCardPercent}%`
+                      : undefined}
+                    isDark={isDark}
+                  />
+                );
+              }
+              if (sf.mileage !== false && enabledFields.mileage && stats.totalMileage > 0) {
+                cells.push(
+                  <MobileMiniStat
+                    key="mileage"
+                    label={t.totalMileageStats}
+                    value={stats.totalMileage}
+                    suffix={t.km}
+                    isDark={isDark}
+                  />
+                );
+              }
+              if (sf.expenses !== false && enabledFields.expenses && stats.totalExpenses > 0) {
+                cells.push(
+                  <MobileMiniStat
+                    key="expenses"
+                    label={t.totalExpenses}
+                    value={formatCurrency(stats.totalExpenses, currency)}
+                    color="theme-danger-text"
+                    isDark={isDark}
+                  />
+                );
+              }
+              if (enabledFields.bonus && stats.totalBonus > 0) {
+                cells.push(
+                  <MobileMiniStat
+                    key="bonus"
+                    label={t.totalBonus}
+                    value={formatCurrency(stats.totalBonus, currency)}
+                    color="theme-warm-text"
+                    isDark={isDark}
+                  />
+                );
+              }
+              if (sf.avgHoursPerShift !== false) {
+                cells.push(
+                  <MobileMiniStat
+                    key="average-hours"
+                    label={t.avgHoursPerShift}
+                    value={formatTime(stats.avgMinutesPerShift)}
+                    isDark={isDark}
+                  />
+                );
+              }
+
+              if (cells.length === 0) return null;
+              return <div className="grid grid-cols-3 gap-2">{cells}</div>;
+            })()}
+
+            {sf.expenseDetails !== false && enabledFields.expenses && stats.totalExpenses > 0 && (
+              <MobileExpenseBreakdown
+                expensesByType={stats.expensesByType}
+                totalExpenses={stats.totalExpenses}
+                currency={currency}
+                t={t}
+                isDark={isDark}
+              />
+            )}
+
+            {enabledFields.bonus && stats.bonusComments && stats.bonusComments.length > 0 && (
+              <CommentsSection
+                title={t.bonusComments || 'Комментарии к бонусам'}
+                comments={stats.bonusComments}
+                icon="gift"
+                color="theme-warm-text"
+                isDark={isDark}
+                t={t}
+                currency={currency}
+                language={settings.language}
+              />
+            )}
+
+            {enabledFields.expenses && stats.expenseComments && stats.expenseComments.length > 0 && (
+              <CommentsSection
+                title={t.expenseComments || 'Комментарии к затратам'}
+                comments={stats.expenseComments}
+                icon="receipt"
+                color="theme-danger-text"
+                isDark={isDark}
+                t={t}
+                currency={currency}
+                language={settings.language}
+              />
+            )}
+
+            <ShiftsList shifts={filteredShifts} settings={settings} t={t} isDark={isDark} />
+          </div>
+        )}
+      </div>
+
+      <div className="hidden lg:block">
       <div className="mb-4">
         <h1 className="text-2xl font-bold theme-text-primary">{t.statistics}</h1>
       </div>
@@ -389,6 +820,7 @@ const StatisticsScreen = () => {
         </div>
       )}
       </div>
+      </div>
     </div>
   );
 };
@@ -408,7 +840,7 @@ const EXPORT_COLUMNS = [
   { id: 'orders', label: 'orders' },
 ];
 
-const ExportButton = ({ shifts, settings, t, isDark, dateFrom, dateTo }) => {
+const ExportButton = ({ shifts, settings, t, isDark, dateFrom, dateTo, compact = false }) => {
   const [showModal, setShowModal] = useState(false);
   const { enabledFields, workType } = settings;
   const isHourly = workType !== 'pieceWork';
@@ -537,16 +969,27 @@ const ExportButton = ({ shifts, settings, t, isDark, dateFrom, dateTo }) => {
   
   return (
     <>
-      <Card className="p-3.5">
+      {compact ? (
         <button
+          type="button"
           onClick={() => setShowModal(true)}
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-[var(--accent-text)] font-semibold transition-all"
-            style={{ backgroundColor: 'var(--accent-secondary)', boxShadow: '0 14px 26px var(--accent-shadow)' }}
+          className="theme-text-secondary hover:theme-text-primary flex min-h-9 shrink-0 items-center gap-1.5 rounded-lg px-1 text-xs font-medium transition-colors"
         >
-          <Download className="w-5 h-5" />
+          <Download className="h-3.5 w-3.5" />
           {t.exportToExcel || 'Выгрузить в Excel'}
         </button>
-      </Card>
+      ) : (
+        <Card className="p-3.5">
+          <button
+            onClick={() => setShowModal(true)}
+            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-[var(--accent-text)] font-semibold transition-all"
+            style={{ backgroundColor: 'var(--accent-secondary)', boxShadow: '0 14px 26px var(--accent-shadow)' }}
+          >
+            <Download className="w-5 h-5" />
+            {t.exportToExcel || 'Выгрузить в Excel'}
+          </button>
+        </Card>
+      )}
       
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
