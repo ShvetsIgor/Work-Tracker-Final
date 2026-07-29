@@ -14,12 +14,12 @@ const Navigation = ({ activeTab, setActiveTab }) => {
 
   return (
     <>
-      <aside className="fixed left-0 top-16 bottom-0 z-40 hidden w-64 lg:block">
+      <aside className="fixed left-6 top-6 bottom-6 z-40 hidden w-64 lg:block">
         <div
-          className={`h-full border-r p-4 transition-colors duration-300 ${
+          className={`h-full rounded-[20px] border p-4 backdrop-blur-2xl transition-colors duration-300 ${
             isDark
-              ? 'border-white/[0.05]'
-              : 'bg-white/95 border-slate-200/80'
+              ? 'border-white/[0.05] shadow-[0_20px_40px_rgba(0,0,0,0.22)]'
+              : 'bg-white/[0.88] border-white/80 shadow-[0_20px_36px_rgba(148,163,184,0.18)]'
           }`}
           style={isDark ? { background: 'var(--nav-bg)' } : undefined}
         >

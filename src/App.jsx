@@ -137,7 +137,7 @@ const App = () => {
         }}
       />
 
-      <main className="relative mx-auto max-w-7xl px-4 py-5 pb-32 lg:pl-[17rem] lg:pr-8 lg:py-6">
+      <main className="relative mx-auto max-w-7xl px-4 py-5 pb-32 lg:px-8 lg:pl-[20rem] lg:pr-8 lg:py-6">
         {activeTab === 'shifts' && <ShiftsScreen />}
         {activeTab === 'statistics' && (
           <Suspense fallback={secondaryScreenFallback}>

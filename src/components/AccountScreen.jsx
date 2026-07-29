@@ -58,7 +58,7 @@ const AccountScreen = ({ initialSection = 'profile' }) => {
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[280px,minmax(0,1fr)]">
-        <Card className="h-fit p-3 lg:sticky lg:top-20">
+        <Card className="h-fit p-3 lg:sticky lg:top-28">
           <div className="grid gap-2">
             <button
               type="button"
